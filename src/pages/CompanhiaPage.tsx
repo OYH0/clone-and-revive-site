@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Building2, TrendingUp, DollarSign, Users, Calendar, PieChart, BarChart3 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -6,10 +7,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart as RechartsPieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import { useDespesas } from '@/hooks/useDespesas';
 import { useReceitas } from '@/hooks/useReceitas';
+import AnalyseCostsModal from '@/components/AnalyseCostsModal';
+import ProjectionsModal from '@/components/ProjectionsModal';
+import ComparativeModal from '@/components/ComparativeModal';
 
 const CompanhiaPage = () => {
   const { data: despesas } = useDespesas();
   const { data: receitas } = useReceitas();
+  const [activeModal, setActiveModal] = useState<string | null>(null);
 
   // Filtrar dados da Companhia do Churrasco
   const companhiaDespesas = despesas?.filter(d => d.empresa === 'Churrasco') || [];
@@ -75,13 +80,25 @@ const CompanhiaPage = () => {
               <Button className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-2xl h-12">
                 Relatório Mensal
               </Button>
-              <Button variant="outline" className="rounded-2xl h-12">
+              <Button 
+                variant="outline" 
+                className="rounded-2xl h-12"
+                onClick={() => setActiveModal('costs')}
+              >
                 Análise de Custos
               </Button>
-              <Button variant="outline" className="rounded-2xl h-12">
+              <Button 
+                variant="outline" 
+                className="rounded-2xl h-12"
+                onClick={() => setActiveModal('projections')}
+              >
                 Projeções
               </Button>
-              <Button variant="outline" className="rounded-2xl h-12">
+              <Button 
+                variant="outline" 
+                className="rounded-2xl h-12"
+                onClick={() => setActiveModal('comparative')}
+              >
                 Comparativo
               </Button>
             </div>
@@ -311,6 +328,28 @@ const CompanhiaPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Modals */}
+      <AnalyseCostsModal
+        isOpen={activeModal === 'costs'}
+        onClose={() => setActiveModal(null)}
+        despesas={companhiaDespesas}
+        empresa="Companhia do Churrasco"
+      />
+
+      <ProjectionsModal
+        isOpen={activeModal === 'projections'}
+        onClose={() => setActiveModal(null)}
+        despesas={companhiaDespesas}
+        receitas={companhiaReceitas}
+        empresa="Companhia do Churrasco"
+      />
+
+      <ComparativeModal
+        isOpen={activeModal === 'comparative'}
+        onClose={() => setActiveModal(null)}
+        empresa="Companhia do Churrasco"
+      />
     </div>
   );
 };

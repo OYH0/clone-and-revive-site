@@ -1,0 +1,179 @@
+
+import React from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts';
+import { TrendingDown, TrendingUp, AlertTriangle } from 'lucide-react';
+
+interface AnalyseCostsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  despesas: any[];
+  empresa: string;
+}
+
+const AnalyseCostsModal: React.FC<AnalyseCostsModalProps> = ({ isOpen, onClose, despesas, empresa }) => {
+  // Análise por categoria
+  const custosPorCategoria = [
+    { name: 'Insumos', value: despesas.filter(d => d.categoria === 'INSUMOS').reduce((sum, d) => sum + d.valor, 0), color: '#3b82f6' },
+    { name: 'Fixas', value: despesas.filter(d => d.categoria === 'FIXAS').reduce((sum, d) => sum + d.valor, 0), color: '#8b5cf6' },
+    { name: 'Atrasados', value: despesas.filter(d => d.categoria === 'ATRASADOS').reduce((sum, d) => sum + d.valor, 0), color: '#ef4444' },
+    { name: 'Variáveis', value: despesas.filter(d => d.categoria === 'VARIAVEIS').reduce((sum, d) => sum + d.valor, 0), color: '#f59e0b' }
+  ].filter(item => item.value > 0);
+
+  // Evolução dos custos (últimos 6 meses)
+  const evolucaoCustos = React.useMemo(() => {
+    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
+    return months.map((month, index) => {
+      const monthDespesas = despesas.filter(d => {
+        const date = new Date(d.data);
+        return date.getMonth() === index;
+      }).reduce((sum, d) => sum + d.valor, 0);
+      
+      return { month, valor: monthDespesas };
+    });
+  }, [despesas]);
+
+  const totalCustos = despesas.reduce((sum, d) => sum + d.valor, 0);
+  const mediaMaxima = Math.max(...evolucaoCustos.map(e => e.valor));
+  const mediaMinima = Math.min(...evolucaoCustos.map(e => e.valor));
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold">Análise de Custos - {empresa}</DialogTitle>
+          <DialogDescription>
+            Análise detalhada dos custos e categorias de despesas
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-6">
+          {/* Resumo dos Custos */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm">Total de Custos</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-600">
+                  R$ {totalCustos.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm">Maior Custo Mensal</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-red-500" />
+                  <div className="text-xl font-bold">
+                    R$ {mediaMaxima.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm">Menor Custo Mensal</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-2">
+                  <TrendingDown className="h-4 w-4 text-green-500" />
+                  <div className="text-xl font-bold">
+                    R$ {mediaMinima.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Gráficos */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Distribuição por Categoria */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Distribuição por Categoria</CardTitle>
+                <CardDescription>Percentual de gastos por categoria</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={custosPorCategoria}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={40}
+                        outerRadius={100}
+                        dataKey="value"
+                      >
+                        {custosPorCategoria.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Evolução Mensal */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Evolução dos Custos</CardTitle>
+                <CardDescription>Custos mensais ao longo do tempo</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={evolucaoCustos}>
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
+                      <Bar dataKey="valor" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Análise Detalhada */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-yellow-500" />
+                Recomendações de Otimização
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="p-3 bg-yellow-50 rounded-lg border-l-4 border-yellow-400">
+                <p className="text-sm">
+                  <strong>Categoria com maior gasto:</strong> {custosPorCategoria.length > 0 ? custosPorCategoria.reduce((max, cat) => cat.value > max.value ? cat : max).name : 'N/A'}
+                </p>
+              </div>
+              <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                <p className="text-sm">
+                  <strong>Variação mensal:</strong> Diferença de R$ {(mediaMaxima - mediaMinima).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} entre o maior e menor mês
+                </p>
+              </div>
+              <div className="p-3 bg-green-50 rounded-lg border-l-4 border-green-400">
+                <p className="text-sm">
+                  <strong>Oportunidade:</strong> Considere revisar contratos da categoria com maior gasto para possíveis reduções
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default AnalyseCostsModal;

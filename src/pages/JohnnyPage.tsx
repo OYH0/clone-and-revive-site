@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Building2, TrendingUp, DollarSign, Users, Calendar, PieChart, BarChart3 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import { Button } from '@/components/ui/button';
@@ -6,10 +7,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart as RechartsPieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import { useDespesas } from '@/hooks/useDespesas';
 import { useReceitas } from '@/hooks/useReceitas';
+import AnalyseCostsModal from '@/components/AnalyseCostsModal';
+import ProjectionsModal from '@/components/ProjectionsModal';
+import ComparativeModal from '@/components/ComparativeModal';
 
 const JohnnyPage = () => {
   const { data: despesas } = useDespesas();
   const { data: receitas } = useReceitas();
+  const [activeModal, setActiveModal] = useState<string | null>(null);
 
   // Filtrar dados do Johnny Rockets
   const johnnyDespesas = despesas?.filter(d => d.empresa === 'Johnny') || [];
@@ -75,13 +80,25 @@ const JohnnyPage = () => {
               <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-2xl h-12">
                 Relatório Mensal
               </Button>
-              <Button variant="outline" className="rounded-2xl h-12">
+              <Button 
+                variant="outline" 
+                className="rounded-2xl h-12"
+                onClick={() => setActiveModal('costs')}
+              >
                 Análise de Custos
               </Button>
-              <Button variant="outline" className="rounded-2xl h-12">
+              <Button 
+                variant="outline" 
+                className="rounded-2xl h-12"
+                onClick={() => setActiveModal('projections')}
+              >
                 Projeções
               </Button>
-              <Button variant="outline" className="rounded-2xl h-12">
+              <Button 
+                variant="outline" 
+                className="rounded-2xl h-12"
+                onClick={() => setActiveModal('comparative')}
+              >
                 Comparativo
               </Button>
             </div>
@@ -311,6 +328,28 @@ const JohnnyPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Modals */}
+      <AnalyseCostsModal
+        isOpen={activeModal === 'costs'}
+        onClose={() => setActiveModal(null)}
+        despesas={johnnyDespesas}
+        empresa="Johnny Rockets"
+      />
+
+      <ProjectionsModal
+        isOpen={activeModal === 'projections'}
+        onClose={() => setActiveModal(null)}
+        despesas={johnnyDespesas}
+        receitas={johnnyReceitas}
+        empresa="Johnny Rockets"
+      />
+
+      <ComparativeModal
+        isOpen={activeModal === 'comparative'}
+        onClose={() => setActiveModal(null)}
+        empresa="Johnny Rockets"
+      />
     </div>
   );
 };
