@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Edit, Trash2, CheckCircle, Paperclip } from 'lucide-react';
+import { Edit, Trash2, CheckCircle, Paperclip, Eye } from 'lucide-react';
 import { Transaction } from '@/types/transaction';
 import { getTransactionStatus } from '@/utils/transactionUtils';
 
@@ -10,6 +10,7 @@ interface ActionsCellProps {
   onDelete: (transaction: Transaction) => void;
   onMarkAsPaid: (transaction: Transaction) => void;
   onAttachReceipt: (transaction: Transaction) => void;
+  onViewReceipt?: (transaction: Transaction) => void;
 }
 
 const ActionsCell: React.FC<ActionsCellProps> = ({
@@ -17,7 +18,8 @@ const ActionsCell: React.FC<ActionsCellProps> = ({
   onEdit,
   onDelete,
   onMarkAsPaid,
-  onAttachReceipt
+  onAttachReceipt,
+  onViewReceipt
 }) => {
   const status = getTransactionStatus(transaction);
   const isPaid = status === 'PAGO';
@@ -39,6 +41,16 @@ const ActionsCell: React.FC<ActionsCellProps> = ({
           title="Marcar como Pago"
         >
           <CheckCircle size={16} />
+        </button>
+      )}
+      
+      {transaction.comprovante && onViewReceipt && (
+        <button
+          onClick={() => onViewReceipt(transaction)}
+          className="text-blue-500 hover:text-blue-700 p-1 rounded hover:bg-blue-50"
+          title="Visualizar Comprovante"
+        >
+          <Eye size={16} />
         </button>
       )}
       

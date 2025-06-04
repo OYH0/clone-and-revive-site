@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { Transaction } from '@/types/transaction';
 import EditTransactionModal from './EditTransactionModal';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
+import ViewReceiptModal from './ViewReceiptModal';
 import DescriptionCell from './table/DescriptionCell';
 import StatusCell from './table/StatusCell';
 import CategoryCell from './table/CategoryCell';
@@ -24,6 +24,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
 }) => {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
+  const [viewingReceipt, setViewingReceipt] = useState<Transaction | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -33,6 +34,10 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
 
   const handleDelete = (transaction: Transaction) => {
     setDeletingTransaction(transaction);
+  };
+
+  const handleViewReceipt = (transaction: Transaction) => {
+    setViewingReceipt(transaction);
   };
 
   const handleMarkAsPaid = async (transaction: Transaction) => {
@@ -180,6 +185,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
                     onDelete={handleDelete}
                     onMarkAsPaid={handleMarkAsPaid}
                     onAttachReceipt={handleAttachReceipt}
+                    onViewReceipt={handleViewReceipt}
                   />
                 </td>
               </tr>
@@ -201,6 +207,13 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
         transaction={deletingTransaction}
         onTransactionDeleted={onTransactionUpdated}
         type={type}
+      />
+
+      <ViewReceiptModal
+        isOpen={!!viewingReceipt}
+        onClose={() => setViewingReceipt(null)}
+        receiptPath={viewingReceipt?.comprovante || ''}
+        transactionDescription={viewingReceipt?.description || ''}
       />
     </>
   );
