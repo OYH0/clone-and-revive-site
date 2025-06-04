@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Settings, User, Bell, Database, Shield, Palette, Download, Upload } from 'lucide-react';
+import { Settings, User, Bell, Database, Shield, Palette, Download, Upload, Save } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,45 +11,105 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSettings } from '@/hooks/useSettings';
+import { useDarkMode } from '@/hooks/useDarkMode';
+import SecurityModal from '@/components/SecurityModal';
+import { exportDataToPDF, exportDataToJSON, importDataFromJSON } from '@/utils/dataExport';
 
 const ConfiguracoesPage = () => {
-  const [settings, setSettings] = useState({
-    notifications: true,
-    emailAlerts: false,
-    darkMode: false,
-    autoBackup: true,
-    currency: 'BRL',
-    language: 'pt-BR',
-    backupFrequency: 'daily'
-  });
-
   const { user } = useAuth();
   const { toast } = useToast();
+  const { settings, updateSettings } = useSettings();
+  
+  // Use dark mode effect
+  useDarkMode(settings.darkMode);
+  
+  const [securityModal, setSecurityModal] = useState<{
+    isOpen: boolean;
+    type: 'password' | '2fa' | 'delete';
+  }>({ isOpen: false, type: 'password' });
 
   const handleSaveSettings = () => {
-    // Aqui seria implementada a lógica para salvar as configurações
     toast({
       title: "Configurações salvas",
       description: "Suas configurações foram atualizadas com sucesso!",
     });
   };
 
+  const handleExportPDF = () => {
+    try {
+      exportDataToPDF();
+      toast({
+        title: "PDF exportado",
+        description: "Relatório em PDF foi baixado com sucesso!",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro na exportação",
+        description: "Não foi possível exportar o PDF.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleExportData = () => {
-    toast({
-      title: "Export iniciado",
-      description: "Seus dados estão sendo preparados para download...",
-    });
+    try {
+      exportDataToJSON();
+      toast({
+        title: "Dados exportados",
+        description: "Backup dos dados foi baixado com sucesso!",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro na exportação",
+        description: "Não foi possível exportar os dados.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleImportData = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      
+      try {
+        const data = await importDataFromJSON(file);
+        
+        // Restore data to localStorage
+        if (data.despesas) localStorage.setItem('despesas', JSON.stringify(data.despesas));
+        if (data.receitas) localStorage.setItem('receitas', JSON.stringify(data.receitas));
+        if (data.configuracoes) localStorage.setItem('app-settings', JSON.stringify(data.configuracoes));
+        
+        toast({
+          title: "Dados importados",
+          description: "Backup foi restaurado com sucesso! Recarregue a página para ver as mudanças.",
+        });
+      } catch (error) {
+        toast({
+          title: "Erro na importação",
+          description: "Não foi possível importar os dados. Verifique se o arquivo é válido.",
+          variant: "destructive",
+        });
+      }
+    };
+    
+    input.click();
+  };
+
+  const handleProfileUpdate = () => {
     toast({
-      title: "Import em desenvolvimento",
-      description: "Funcionalidade de importação será implementada em breve.",
+      title: "Perfil atualizado",
+      description: "Suas informações de perfil foram atualizadas!",
     });
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-purple-50 to-indigo-100">
+    <div className={`flex min-h-screen ${settings.darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-gray-50 via-purple-50 to-indigo-100'}`}>
       <Sidebar />
       
       <div className="flex-1 p-8">
@@ -61,22 +121,26 @@ const ConfiguracoesPage = () => {
                 <Settings className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent">
+                <h1 className={`text-4xl font-bold bg-gradient-to-r ${settings.darkMode ? 'from-white to-gray-300' : 'from-gray-900 via-gray-800 to-gray-700'} bg-clip-text text-transparent`}>
                   Configurações
                 </h1>
-                <p className="text-gray-600 text-lg">Gerencie as configurações do sistema</p>
+                <p className={`${settings.darkMode ? 'text-gray-300' : 'text-gray-600'} text-lg`}>
+                  Gerencie as configurações do sistema
+                </p>
               </div>
             </div>
           </div>
 
           <div className="space-y-6">
             {/* Perfil do Usuário */}
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+            <Card className={`${settings.darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white/80 backdrop-blur-sm border-white/20'} shadow-xl rounded-2xl`}>
               <CardHeader>
                 <div className="flex items-center gap-3">
-                  <User className="h-5 w-5 text-gray-600" />
+                  <User className={`h-5 w-5 ${settings.darkMode ? 'text-gray-300' : 'text-gray-600'}`} />
                   <div>
-                    <CardTitle className="text-xl text-gray-800">Perfil do Usuário</CardTitle>
+                    <CardTitle className={`text-xl ${settings.darkMode ? 'text-white' : 'text-gray-800'}`}>
+                      Perfil do Usuário
+                    </CardTitle>
                     <CardDescription>Informações da sua conta</CardDescription>
                   </div>
                 </div>
@@ -89,13 +153,17 @@ const ConfiguracoesPage = () => {
                       id="email" 
                       value={user?.email || ''} 
                       disabled 
-                      className="rounded-xl bg-gray-50"
+                      className={`rounded-xl ${settings.darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}
                     />
                   </div>
                   <div>
                     <Label htmlFor="nome">Nome</Label>
                     <Input 
                       id="nome" 
+                      value={settings.userProfile.nome}
+                      onChange={(e) => updateSettings({
+                        userProfile: { ...settings.userProfile, nome: e.target.value }
+                      })}
                       placeholder="Seu nome completo" 
                       className="rounded-xl"
                     />
@@ -103,7 +171,12 @@ const ConfiguracoesPage = () => {
                 </div>
                 <div>
                   <Label htmlFor="empresa">Empresa Principal</Label>
-                  <Select>
+                  <Select 
+                    value={settings.userProfile.empresaPrincipal}
+                    onValueChange={(value) => updateSettings({
+                      userProfile: { ...settings.userProfile, empresaPrincipal: value }
+                    })}
+                  >
                     <SelectTrigger className="rounded-xl">
                       <SelectValue placeholder="Selecione sua empresa principal" />
                     </SelectTrigger>
@@ -114,19 +187,24 @@ const ConfiguracoesPage = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-2xl">
+                <Button 
+                  onClick={handleProfileUpdate}
+                  className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-2xl"
+                >
                   Atualizar Perfil
                 </Button>
               </CardContent>
             </Card>
 
             {/* Notificações */}
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+            <Card className={`${settings.darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white/80 backdrop-blur-sm border-white/20'} shadow-xl rounded-2xl`}>
               <CardHeader>
                 <div className="flex items-center gap-3">
-                  <Bell className="h-5 w-5 text-gray-600" />
+                  <Bell className={`h-5 w-5 ${settings.darkMode ? 'text-gray-300' : 'text-gray-600'}`} />
                   <div>
-                    <CardTitle className="text-xl text-gray-800">Notificações</CardTitle>
+                    <CardTitle className={`text-xl ${settings.darkMode ? 'text-white' : 'text-gray-800'}`}>
+                      Notificações
+                    </CardTitle>
                     <CardDescription>Configure suas preferências de notificação</CardDescription>
                   </div>
                 </div>
@@ -135,11 +213,13 @@ const ConfiguracoesPage = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <Label className="text-base font-medium">Notificações Push</Label>
-                    <p className="text-sm text-gray-500">Receba notificações no navegador</p>
+                    <p className={`text-sm ${settings.darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                      Receba notificações no navegador
+                    </p>
                   </div>
                   <Switch 
                     checked={settings.notifications}
-                    onCheckedChange={(checked) => setSettings({...settings, notifications: checked})}
+                    onCheckedChange={(checked) => updateSettings({ notifications: checked })}
                   />
                 </div>
                 
@@ -148,11 +228,13 @@ const ConfiguracoesPage = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <Label className="text-base font-medium">Alertas por Email</Label>
-                    <p className="text-sm text-gray-500">Receba alertas importantes por email</p>
+                    <p className={`text-sm ${settings.darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                      Receba alertas importantes por email
+                    </p>
                   </div>
                   <Switch 
                     checked={settings.emailAlerts}
-                    onCheckedChange={(checked) => setSettings({...settings, emailAlerts: checked})}
+                    onCheckedChange={(checked) => updateSettings({ emailAlerts: checked })}
                   />
                 </div>
                 
@@ -161,20 +243,27 @@ const ConfiguracoesPage = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <Label className="text-base font-medium">Relatórios Automáticos</Label>
-                    <p className="text-sm text-gray-500">Receba relatórios mensais por email</p>
+                    <p className={`text-sm ${settings.darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                      Receba relatórios mensais por email
+                    </p>
                   </div>
-                  <Switch />
+                  <Switch 
+                    checked={settings.monthlyReports}
+                    onCheckedChange={(checked) => updateSettings({ monthlyReports: checked })}
+                  />
                 </div>
               </CardContent>
             </Card>
 
             {/* Aparência */}
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+            <Card className={`${settings.darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white/80 backdrop-blur-sm border-white/20'} shadow-xl rounded-2xl`}>
               <CardHeader>
                 <div className="flex items-center gap-3">
-                  <Palette className="h-5 w-5 text-gray-600" />
+                  <Palette className={`h-5 w-5 ${settings.darkMode ? 'text-gray-300' : 'text-gray-600'}`} />
                   <div>
-                    <CardTitle className="text-xl text-gray-800">Aparência</CardTitle>
+                    <CardTitle className={`text-xl ${settings.darkMode ? 'text-white' : 'text-gray-800'}`}>
+                      Aparência
+                    </CardTitle>
                     <CardDescription>Personalize a interface do sistema</CardDescription>
                   </div>
                 </div>
@@ -183,11 +272,13 @@ const ConfiguracoesPage = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <Label className="text-base font-medium">Modo Escuro</Label>
-                    <p className="text-sm text-gray-500">Usar tema escuro na interface</p>
+                    <p className={`text-sm ${settings.darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                      Usar tema escuro na interface
+                    </p>
                   </div>
                   <Switch 
                     checked={settings.darkMode}
-                    onCheckedChange={(checked) => setSettings({...settings, darkMode: checked})}
+                    onCheckedChange={(checked) => updateSettings({ darkMode: checked })}
                   />
                 </div>
                 
@@ -196,7 +287,10 @@ const ConfiguracoesPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label>Idioma</Label>
-                    <Select value={settings.language} onValueChange={(value) => setSettings({...settings, language: value})}>
+                    <Select 
+                      value={settings.language} 
+                      onValueChange={(value: 'pt-BR' | 'en-US' | 'es-ES') => updateSettings({ language: value })}
+                    >
                       <SelectTrigger className="rounded-xl">
                         <SelectValue />
                       </SelectTrigger>
@@ -210,7 +304,10 @@ const ConfiguracoesPage = () => {
                   
                   <div>
                     <Label>Moeda</Label>
-                    <Select value={settings.currency} onValueChange={(value) => setSettings({...settings, currency: value})}>
+                    <Select 
+                      value={settings.currency} 
+                      onValueChange={(value: 'BRL' | 'USD' | 'EUR') => updateSettings({ currency: value })}
+                    >
                       <SelectTrigger className="rounded-xl">
                         <SelectValue />
                       </SelectTrigger>
@@ -226,12 +323,14 @@ const ConfiguracoesPage = () => {
             </Card>
 
             {/* Backup e Dados */}
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+            <Card className={`${settings.darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white/80 backdrop-blur-sm border-white/20'} shadow-xl rounded-2xl`}>
               <CardHeader>
                 <div className="flex items-center gap-3">
-                  <Database className="h-5 w-5 text-gray-600" />
+                  <Database className={`h-5 w-5 ${settings.darkMode ? 'text-gray-300' : 'text-gray-600'}`} />
                   <div>
-                    <CardTitle className="text-xl text-gray-800">Backup e Dados</CardTitle>
+                    <CardTitle className={`text-xl ${settings.darkMode ? 'text-white' : 'text-gray-800'}`}>
+                      Backup e Dados
+                    </CardTitle>
                     <CardDescription>Gerencie seus dados e backups</CardDescription>
                   </div>
                 </div>
@@ -240,11 +339,13 @@ const ConfiguracoesPage = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <Label className="text-base font-medium">Backup Automático</Label>
-                    <p className="text-sm text-gray-500">Fazer backup automático dos dados</p>
+                    <p className={`text-sm ${settings.darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                      Fazer backup automático dos dados
+                    </p>
                   </div>
                   <Switch 
                     checked={settings.autoBackup}
-                    onCheckedChange={(checked) => setSettings({...settings, autoBackup: checked})}
+                    onCheckedChange={(checked) => updateSettings({ autoBackup: checked })}
                   />
                 </div>
                 
@@ -252,7 +353,10 @@ const ConfiguracoesPage = () => {
                 
                 <div>
                   <Label>Frequência do Backup</Label>
-                  <Select value={settings.backupFrequency} onValueChange={(value) => setSettings({...settings, backupFrequency: value})}>
+                  <Select 
+                    value={settings.backupFrequency} 
+                    onValueChange={(value: 'daily' | 'weekly' | 'monthly') => updateSettings({ backupFrequency: value })}
+                  >
                     <SelectTrigger className="rounded-xl">
                       <SelectValue />
                     </SelectTrigger>
@@ -266,11 +370,19 @@ const ConfiguracoesPage = () => {
                 
                 <Separator />
                 
-                <div className="flex gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Button 
+                    onClick={handleExportPDF}
+                    variant="outline" 
+                    className="rounded-2xl"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Exportar PDF
+                  </Button>
                   <Button 
                     onClick={handleExportData}
                     variant="outline" 
-                    className="flex-1 rounded-2xl"
+                    className="rounded-2xl"
                   >
                     <Download className="w-4 h-4 mr-2" />
                     Exportar Dados
@@ -278,7 +390,7 @@ const ConfiguracoesPage = () => {
                   <Button 
                     onClick={handleImportData}
                     variant="outline" 
-                    className="flex-1 rounded-2xl"
+                    className="rounded-2xl"
                   >
                     <Upload className="w-4 h-4 mr-2" />
                     Importar Dados
@@ -288,30 +400,35 @@ const ConfiguracoesPage = () => {
             </Card>
 
             {/* Segurança */}
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+            <Card className={`${settings.darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white/80 backdrop-blur-sm border-white/20'} shadow-xl rounded-2xl`}>
               <CardHeader>
                 <div className="flex items-center gap-3">
-                  <Shield className="h-5 w-5 text-gray-600" />
+                  <Shield className={`h-5 w-5 ${settings.darkMode ? 'text-gray-300' : 'text-gray-600'}`} />
                   <div>
-                    <CardTitle className="text-xl text-gray-800">Segurança</CardTitle>
+                    <CardTitle className={`text-xl ${settings.darkMode ? 'text-white' : 'text-gray-800'}`}>
+                      Segurança
+                    </CardTitle>
                     <CardDescription>Configure as opções de segurança</CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Button 
+                  onClick={() => setSecurityModal({ isOpen: true, type: 'password' })}
                   variant="outline" 
                   className="w-full rounded-2xl"
                 >
                   Alterar Senha
                 </Button>
                 <Button 
+                  onClick={() => setSecurityModal({ isOpen: true, type: '2fa' })}
                   variant="outline" 
                   className="w-full rounded-2xl"
                 >
                   Configurar Autenticação em Duas Etapas
                 </Button>
                 <Button 
+                  onClick={() => setSecurityModal({ isOpen: true, type: 'delete' })}
                   variant="destructive" 
                   className="w-full rounded-2xl"
                 >
@@ -326,12 +443,19 @@ const ConfiguracoesPage = () => {
                 onClick={handleSaveSettings}
                 className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-lg rounded-2xl px-8"
               >
+                <Save className="w-4 h-4 mr-2" />
                 Salvar Todas as Configurações
               </Button>
             </div>
           </div>
         </div>
       </div>
+
+      <SecurityModal 
+        isOpen={securityModal.isOpen}
+        onClose={() => setSecurityModal({ ...securityModal, isOpen: false })}
+        type={securityModal.type}
+      />
     </div>
   );
 };
