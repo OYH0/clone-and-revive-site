@@ -46,7 +46,7 @@ const DespesasFilter: React.FC<DespesasFilterProps> = ({ onFilterChange, onClear
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2 bg-white/50 hover:bg-white/80 border-gray-200">
+        <Button variant="outline" className="flex items-center gap-2 bg-white/50 hover:bg-white/80 border-gray-200 rounded-full">
           <Filter className="h-4 w-4" />
           Filtrar
           {hasActiveFilters && (
@@ -63,7 +63,7 @@ const DespesasFilter: React.FC<DespesasFilterProps> = ({ onFilterChange, onClear
                 variant="ghost"
                 size="sm"
                 onClick={handleClearFilters}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-gray-700 rounded-full"
               >
                 <X className="h-4 w-4" />
                 Limpar
@@ -122,7 +122,7 @@ const DespesasFilter: React.FC<DespesasFilterProps> = ({ onFilterChange, onClear
                 <label className="text-sm font-medium text-gray-700">Data Início</label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full justify-start text-left font-normal">
+                    <Button variant="outline" className="w-full justify-start text-left font-normal rounded-full">
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {filters.dataInicio ? format(filters.dataInicio, 'dd/MM/yyyy', { locale: ptBR }) : 'Selecionar'}
                     </Button>
@@ -133,6 +133,7 @@ const DespesasFilter: React.FC<DespesasFilterProps> = ({ onFilterChange, onClear
                       selected={filters.dataInicio}
                       onSelect={(date) => handleFilterChange('dataInicio', date)}
                       initialFocus
+                      className="p-3 pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
@@ -142,7 +143,7 @@ const DespesasFilter: React.FC<DespesasFilterProps> = ({ onFilterChange, onClear
                 <label className="text-sm font-medium text-gray-700">Data Fim</label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full justify-start text-left font-normal">
+                    <Button variant="outline" className="w-full justify-start text-left font-normal rounded-full">
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {filters.dataFim ? format(filters.dataFim, 'dd/MM/yyyy', { locale: ptBR }) : 'Selecionar'}
                     </Button>
@@ -153,6 +154,7 @@ const DespesasFilter: React.FC<DespesasFilterProps> = ({ onFilterChange, onClear
                       selected={filters.dataFim}
                       onSelect={(date) => handleFilterChange('dataFim', date)}
                       initialFocus
+                      className="p-3 pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
