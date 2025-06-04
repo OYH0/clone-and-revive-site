@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { Transaction } from '@/types/transaction';
 
 interface DeleteConfirmationModalProps {
@@ -29,16 +30,18 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleDelete = async () => {
-    if (!transaction) return;
+    if (!transaction || !user) return;
 
     setIsLoading(true);
     try {
       const { error } = await supabase
         .from('despesas')
         .delete()
-        .eq('id', transaction.id);
+        .eq('id', transaction.id)
+        .eq('user_id', user.id);
 
       if (error) throw error;
 

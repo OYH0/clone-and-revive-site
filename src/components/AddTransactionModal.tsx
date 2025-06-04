@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AddTransactionModalProps {
   isOpen: boolean;
@@ -29,12 +30,22 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const categories = ['INSUMOS', 'FIXAS', 'VARIÁVEIS', 'ATRASADOS'];
   const companies = ['Churrasco', 'Johnny'];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Você precisa estar logado para adicionar transações.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     if (!formData.data || !formData.valor || !formData.empresa) {
       toast({
@@ -63,7 +74,8 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         valor: parseFloat(formData.valor),
         empresa: formData.empresa,
         descricao: formData.descricao || 'Sem descrição',
-        categoria: formData.categoria
+        categoria: formData.categoria,
+        user_id: user.id
       };
 
       // Adicionar data de vencimento apenas se for fornecida

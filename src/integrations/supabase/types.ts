@@ -17,6 +17,7 @@ export type Database = {
           descricao: string | null
           empresa: string | null
           id: number
+          user_id: string
           valor: number | null
         }
         Insert: {
@@ -26,6 +27,7 @@ export type Database = {
           descricao?: string | null
           empresa?: string | null
           id?: number
+          user_id: string
           valor?: number | null
         }
         Update: {
@@ -35,6 +37,7 @@ export type Database = {
           descricao?: string | null
           empresa?: string | null
           id?: number
+          user_id?: string
           valor?: number | null
         }
         Relationships: []
@@ -49,6 +52,7 @@ export type Database = {
           empresa: string | null
           id: number
           updated_at: string | null
+          user_id: string
           valor: number | null
         }
         Insert: {
@@ -60,6 +64,7 @@ export type Database = {
           empresa?: string | null
           id?: number
           updated_at?: string | null
+          user_id: string
           valor?: number | null
         }
         Update: {
@@ -71,6 +76,7 @@ export type Database = {
           empresa?: string | null
           id?: number
           updated_at?: string | null
+          user_id?: string
           valor?: number | null
         }
         Relationships: []

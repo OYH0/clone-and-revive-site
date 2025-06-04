@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { Transaction } from '@/types/transaction';
 
 interface EditTransactionModalProps {
@@ -33,6 +34,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (transaction) {
@@ -49,7 +51,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!transaction) return;
+    if (!transaction || !user) return;
 
     setIsLoading(true);
     try {
@@ -61,7 +63,8 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
           empresa: formData.empresa,
           descricao: formData.descricao,
           categoria: formData.categoria,
-          data_vencimento: formData.data_vencimento || null
+          data_vencimento: formData.data_vencimento || null,
+          user_id: user.id
         })
         .eq('id', transaction.id);
 

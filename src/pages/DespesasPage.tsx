@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import Sidebar from '@/components/Sidebar';
 import TransactionTable from '@/components/TransactionTable';
@@ -8,6 +7,7 @@ import DespesasExport from '@/components/DespesasExport';
 import { Button } from '@/components/ui/button';
 import { Plus, TrendingDown, DollarSign, CheckCircle, AlertTriangle, Clock, FileText } from 'lucide-react';
 import { useDespesas } from '@/hooks/useDespesas';
+import { useAuth } from '@/contexts/AuthContext';
 import { Transaction } from '@/types/transaction';
 
 interface FilterOptions {
@@ -24,6 +24,27 @@ const DespesasPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({});
   const { data: despesas = [], isLoading, refetch } = useDespesas();
+  const { user } = useAuth();
+
+  // Verificar se o usuário está autenticado
+  if (!user) {
+    return (
+      <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
+        <Sidebar />
+        <div className="flex-1 p-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center py-16">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Acesso Restrito</h2>
+              <p className="text-gray-600 mb-8">Você precisa estar logado para acessar as despesas.</p>
+              <Button onClick={() => window.location.href = '/auth'}>
+                Fazer Login
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Converter Despesa para Transaction
   const allTransactions: Transaction[] = despesas.map(despesa => ({
@@ -36,6 +57,7 @@ const DespesasPage = () => {
     data_vencimento: despesa.data_vencimento
   }));
 
+  // Aplicar filtros
   const getTransactionStatus = (transaction: Transaction) => {
     const today = new Date();
     const transactionDate = new Date(transaction.date);
@@ -56,7 +78,6 @@ const DespesasPage = () => {
     return 'PAGO';
   };
 
-  // Aplicar filtros
   const filteredTransactions = useMemo(() => {
     return allTransactions.filter(transaction => {
       const status = getTransactionStatus(transaction);

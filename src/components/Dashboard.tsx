@@ -7,13 +7,35 @@ import MonthlyEvolutionChart from './MonthlyEvolutionChart';
 import RecentTransactions from './RecentTransactions';
 import { useDespesas } from '@/hooks/useDespesas';
 import { useReceitas } from '@/hooks/useReceitas';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
 const Dashboard = () => {
   const { data: despesas, isLoading: isLoadingDespesas } = useDespesas();
   const { data: receitas, isLoading: isLoadingReceitas } = useReceitas();
+  const { user } = useAuth();
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'year'>('month');
+
+  // Verificar se o usuário está autenticado
+  if (!user) {
+    return (
+      <div className="flex min-h-screen bg-gray-100">
+        <Sidebar />
+        <div className="flex-1 p-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center py-16">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Acesso Restrito</h2>
+              <p className="text-gray-600 mb-8">Você precisa estar logado para acessar o dashboard.</p>
+              <Button onClick={() => window.location.href = '/auth'}>
+                Fazer Login
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const isLoading = isLoadingDespesas || isLoadingReceitas;
 
