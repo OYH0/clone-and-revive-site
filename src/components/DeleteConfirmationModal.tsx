@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,9 +10,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
+import { useDeleteDespesa } from '@/hooks/useDespesas';
+import { useDeleteReceita } from '@/hooks/useReceitas';
 import { Transaction } from '@/types/transaction';
 
 interface DeleteConfirmationModalProps {
@@ -20,49 +19,37 @@ interface DeleteConfirmationModalProps {
   onClose: () => void;
   transaction: Transaction | null;
   onTransactionDeleted: () => void;
+  type: 'despesa' | 'receita';
 }
 
 const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
   isOpen,
   onClose,
   transaction,
-  onTransactionDeleted
+  onTransactionDeleted,
+  type
 }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-  const { user } = useAuth();
+  const deleteDespesa = useDeleteDespesa();
+  const deleteReceita = useDeleteReceita();
 
   const handleDelete = async () => {
-    if (!transaction || !user) return;
+    if (!transaction) return;
 
-    setIsLoading(true);
     try {
-      const { error } = await supabase
-        .from('despesas')
-        .delete()
-        .eq('id', transaction.id)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Sucesso",
-        description: "Despesa excluída com sucesso!",
-      });
-
+      if (type === 'despesa') {
+        await deleteDespesa.mutateAsync(transaction.id);
+      } else {
+        await deleteReceita.mutateAsync(transaction.id);
+      }
+      
       onTransactionDeleted();
       onClose();
     } catch (error) {
-      console.error('Erro ao excluir despesa:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao excluir despesa. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+      console.error(`Erro ao excluir ${type}:`, error);
     }
   };
+
+  const isLoading = deleteDespesa.isPending || deleteReceita.isPending;
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
@@ -70,7 +57,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
         <AlertDialogHeader>
           <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
           <AlertDialogDescription>
-            Tem certeza que deseja excluir esta despesa? Esta ação não pode ser desfeita.
+            Tem certeza que deseja excluir esta {type}? Esta ação não pode ser desfeita.
             <br />
             <br />
             <strong>Empresa:</strong> {transaction?.company}

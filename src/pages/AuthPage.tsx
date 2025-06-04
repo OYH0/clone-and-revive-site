@@ -10,13 +10,15 @@ import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Mail, Lock, TrendingUp } from 'lucide-react';
 
 const AuthPage = () => {
-  const { user, signIn, signUp } = useAuth();
+  const { user, signIn, signUp, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -26,6 +28,14 @@ const AuthPage = () => {
       });
     }
   }, [user, toast]);
+
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   if (user) {
     return <Navigate to="/" replace />;
@@ -43,6 +53,24 @@ const AuthPage = () => {
       return;
     }
 
+    if (isSignUp && password !== confirmPassword) {
+      toast({
+        title: "Erro",
+        description: "As senhas não coincidem.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (isSignUp && password.length < 6) {
+      toast({
+        title: "Erro",
+        description: "A senha deve ter pelo menos 6 caracteres.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -52,16 +80,32 @@ const AuthPage = () => {
 
       if (error) {
         console.error('Auth error:', error);
+        
+        let errorMessage = "Erro ao fazer login/cadastro.";
+        if (error.message.includes('Invalid login credentials')) {
+          errorMessage = "Email ou senha incorretos.";
+        } else if (error.message.includes('User already registered')) {
+          errorMessage = "Usuário já cadastrado. Tente fazer login.";
+        } else if (error.message.includes('Email not confirmed')) {
+          errorMessage = "Email não confirmado. Verifique sua caixa de entrada.";
+        } else if (error.message.includes('signup_disabled')) {
+          errorMessage = "Cadastro desabilitado. Entre em contato com o administrador.";
+        }
+        
         toast({
           title: "Erro de autenticação",
-          description: error.message || "Erro ao fazer login/cadastro.",
+          description: errorMessage,
           variant: "destructive"
         });
       } else if (isSignUp) {
         toast({
           title: "Cadastro realizado!",
-          description: "Verifique seu email para confirmar a conta.",
+          description: "Verifique seu email para confirmar a conta antes de fazer login.",
         });
+        setIsSignUp(false);
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
       }
     } catch (error) {
       console.error('Unexpected error:', error);
@@ -104,6 +148,10 @@ const AuthPage = () => {
               <div className="w-2 h-2 bg-white rounded-full"></div>
               <span>Controle de despesas e receitas</span>
             </div>
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 bg-white rounded-full"></div>
+              <span>Segurança de dados garantida</span>
+            </div>
           </div>
         </div>
         {/* Decorative elements */}
@@ -112,9 +160,9 @@ const AuthPage = () => {
       </div>
 
       {/* Right side - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-gray-50">
+      <div className="flex-1 flex items-center justify-center p-8 bg-gradient-to-br from-gray-50 to-blue-50">
         <div className="w-full max-w-md">
-          <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-sm">
+          <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
             <CardHeader className="space-y-1 text-center pb-8">
               <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-fit">
                 <TrendingUp size={24} className="text-blue-600" />
@@ -173,7 +221,39 @@ const AuthPage = () => {
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
+                  {isSignUp && (
+                    <p className="text-xs text-gray-500">
+                      Mínimo de 6 caracteres
+                    </p>
+                  )}
                 </div>
+
+                {isSignUp && (
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
+                      Confirmar Senha
+                    </Label>
+                    <div className="relative">
+                      <Lock size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <Input
+                        id="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="pl-10 pr-10 h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                  </div>
+                )}
                 
                 <Button 
                   type="submit" 
@@ -183,7 +263,7 @@ const AuthPage = () => {
                   {loading ? (
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                      Carregando...
+                      {isSignUp ? 'Criando conta...' : 'Entrando...'}
                     </div>
                   ) : (
                     isSignUp ? 'Criar Conta' : 'Entrar'
@@ -202,7 +282,12 @@ const AuthPage = () => {
               
               <button
                 type="button"
-                onClick={() => setIsSignUp(!isSignUp)}
+                onClick={() => {
+                  setIsSignUp(!isSignUp);
+                  setEmail('');
+                  setPassword('');
+                  setConfirmPassword('');
+                }}
                 className="w-full text-center text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"
               >
                 {isSignUp 
