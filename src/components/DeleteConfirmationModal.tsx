@@ -53,37 +53,41 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
-      <AlertDialogContent className="max-w-md">
+      <AlertDialogContent className="max-w-md mx-4">
         <AlertDialogHeader>
           <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-          <AlertDialogDescription className="text-left space-y-2">
-            <div className="mb-4">
-              Tem certeza que deseja excluir esta {type}? Esta ação não pode ser desfeita.
-            </div>
-            <div className="space-y-1 text-sm">
-              <div>
-                <span className="font-medium">Empresa:</span> {transaction?.company}
-              </div>
-              <div>
-                <span className="font-medium">Descrição:</span> 
-                <div className="break-words max-w-full overflow-hidden">
-                  {transaction?.description}
-                </div>
-              </div>
-              <div>
-                <span className="font-medium">Valor:</span> R$ {transaction?.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-              </div>
-            </div>
+          <AlertDialogDescription className="text-left">
+            Tem certeza que deseja excluir esta {type}? Esta ação não pode ser desfeita.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-          <AlertDialogCancel onClick={onClose} disabled={isLoading}>
+        
+        <div className="space-y-3 py-4">
+          <div>
+            <span className="font-medium text-gray-700">Empresa:</span>
+            <div className="text-gray-900">{transaction?.company}</div>
+          </div>
+          <div>
+            <span className="font-medium text-gray-700">Descrição:</span>
+            <div className="text-gray-900 break-words max-w-full overflow-hidden text-sm">
+              {transaction?.description}
+            </div>
+          </div>
+          <div>
+            <span className="font-medium text-gray-700">Valor:</span>
+            <div className="text-gray-900">
+              R$ {transaction?.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </div>
+          </div>
+        </div>
+
+        <AlertDialogFooter className="flex flex-col sm:flex-row gap-2 pt-4">
+          <AlertDialogCancel onClick={onClose} disabled={isLoading} className="w-full sm:w-auto">
             Cancelar
           </AlertDialogCancel>
           <AlertDialogAction 
             onClick={handleDelete}
             disabled={isLoading}
-            className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            className="w-full sm:w-auto bg-red-600 hover:bg-red-700 focus:ring-red-600"
           >
             {isLoading ? 'Excluindo...' : 'Excluir'}
           </AlertDialogAction>
