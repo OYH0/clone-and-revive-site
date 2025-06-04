@@ -1,0 +1,199 @@
+
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+
+interface AddTransactionModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onTransactionAdded: () => void;
+}
+
+const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
+  isOpen,
+  onClose,
+  onTransactionAdded
+}) => {
+  const [formData, setFormData] = useState({
+    data: '',
+    valor: '',
+    empresa: '',
+    descricao: '',
+    categoria: 'INSUMOS'
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const categories = ['INSUMOS', 'FIXAS', 'VARIÁVEIS', 'ATRASADOS'];
+  const companies = ['Churrasco', 'Johnny'];
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.data || !formData.valor || !formData.empresa) {
+      toast({
+        title: "Erro",
+        description: "Por favor, preencha todos os campos obrigatórios.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      const { error } = await supabase
+        .from('despesas')
+        .insert([
+          {
+            data: formData.data,
+            valor: parseFloat(formData.valor),
+            empresa: formData.empresa,
+            descricao: formData.descricao || 'Sem descrição',
+            categoria: formData.categoria
+          }
+        ]);
+
+      if (error) {
+        console.error('Error inserting despesa:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao adicionar transação. Tente novamente.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Sucesso!",
+        description: "Transação adicionada com sucesso.",
+      });
+
+      // Reset form
+      setFormData({
+        data: '',
+        valor: '',
+        empresa: '',
+        descricao: '',
+        categoria: 'INSUMOS'
+      });
+
+      onTransactionAdded();
+      onClose();
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Erro",
+        description: "Erro inesperado. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Nova Transação</DialogTitle>
+        </DialogHeader>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="data">Data *</Label>
+            <Input
+              id="data"
+              type="date"
+              value={formData.data}
+              onChange={(e) => handleInputChange('data', e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="valor">Valor *</Label>
+            <Input
+              id="valor"
+              type="number"
+              step="0.01"
+              placeholder="0.00"
+              value={formData.valor}
+              onChange={(e) => handleInputChange('valor', e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="empresa">Empresa *</Label>
+            <select
+              id="empresa"
+              value={formData.empresa}
+              onChange={(e) => handleInputChange('empresa', e.target.value)}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              required
+            >
+              <option value="">Selecione uma empresa</option>
+              {companies.map(company => (
+                <option key={company} value={company}>{company}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="categoria">Categoria</Label>
+            <select
+              id="categoria"
+              value={formData.categoria}
+              onChange={(e) => handleInputChange('categoria', e.target.value)}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {categories.map(category => (
+                <option key={category} value={category}>{category}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="descricao">Descrição</Label>
+            <Textarea
+              id="descricao"
+              placeholder="Descrição da despesa..."
+              value={formData.descricao}
+              onChange={(e) => handleInputChange('descricao', e.target.value)}
+              rows={3}
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={isLoading}
+            >
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? 'Salvando...' : 'Salvar Transação'}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default AddTransactionModal;

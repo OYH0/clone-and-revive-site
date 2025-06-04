@@ -5,6 +5,8 @@ import CompanyCard from './CompanyCard';
 import TransactionTable from './TransactionTable';
 import ExpenseDistributionChart from './ExpenseDistributionChart';
 import MonthlyEvolutionChart from './MonthlyEvolutionChart';
+import AddTransactionModal from './AddTransactionModal';
+import { Toaster } from '@/components/ui/toaster';
 import { useDespesas } from '@/hooks/useDespesas';
 import { processCompanyData, processTransactionData, processCategoryDistribution } from '@/utils/dashboardData';
 
@@ -12,8 +14,9 @@ const Dashboard: React.FC = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [selectedCompany, setSelectedCompany] = useState('Todas Empresas');
   const [currentPeriod, setCurrentPeriod] = useState('Mês');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { data: despesas, isLoading, error } = useDespesas();
+  const { data: despesas, isLoading, error, refetch } = useDespesas();
 
   const periods = ['Hoje', 'Semana', 'Mês', 'Ano'];
 
@@ -21,6 +24,10 @@ const Dashboard: React.FC = () => {
   const companyData = despesas ? processCompanyData(despesas) : [];
   const transactions = despesas ? processTransactionData(despesas) : [];
   const categoryDistribution = despesas ? processCategoryDistribution(despesas) : [];
+
+  const handleTransactionAdded = () => {
+    refetch();
+  };
 
   if (isLoading) {
     return (
@@ -73,7 +80,10 @@ const Dashboard: React.FC = () => {
                   {period}
                 </button>
               ))}
-              <button className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 flex items-center gap-2">
+              <button 
+                onClick={() => setIsModalOpen(true)}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 flex items-center gap-2"
+              >
                 + Nova Transação
               </button>
             </div>
@@ -117,6 +127,14 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <AddTransactionModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onTransactionAdded={handleTransactionAdded}
+      />
+      
+      <Toaster />
     </div>
   );
 };
