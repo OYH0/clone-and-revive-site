@@ -11,30 +11,8 @@ const Sidebar: React.FC = () => {
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/' },
-    { 
-      id: 'companhia', 
-      label: 'Companhia do Churrasco', 
-      icon: () => (
-        <img 
-          src="/lovable-uploads/7affde4e-c307-4d29-bfbf-e874f3f2bc19.png" 
-          alt="Companhia do Churrasco" 
-          className="w-4 h-4 object-contain"
-        />
-      ), 
-      path: '/companhia' 
-    },
-    { 
-      id: 'johnny', 
-      label: 'Johnny Rockets', 
-      icon: () => (
-        <img 
-          src="/lovable-uploads/864fe2e5-183c-4060-91e4-2aa79878e5fd.png" 
-          alt="Johnny Rockets" 
-          className="w-4 h-4 object-contain"
-        />
-      ), 
-      path: '/johnny' 
-    },
+    { id: 'companhia', label: 'Companhia do Churrasco', icon: Settings, path: '/companhia' },
+    { id: 'johnny', label: 'Johnny Rockets', icon: Settings, path: '/johnny' },
     { id: 'despesas', label: 'Despesas', icon: DollarSign, path: '/despesas' },
     { id: 'receitas', label: 'Receitas', icon: DollarSign, path: '/receitas' },
     { id: 'relatorios', label: 'Relatórios', icon: FileText, path: '/relatorios' },
