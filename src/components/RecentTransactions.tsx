@@ -6,6 +6,26 @@ import { useDespesas } from '@/hooks/useDespesas';
 const RecentTransactions: React.FC = () => {
   const { data: despesas } = useDespesas();
   
+  const getTransactionStatus = (despesa: any) => {
+    const today = new Date();
+    const transactionDate = new Date(despesa.data);
+    const dueDate = despesa.data_vencimento ? new Date(despesa.data_vencimento) : transactionDate;
+    
+    if (despesa.data_vencimento && dueDate < today) {
+      return 'ATRASADO';
+    }
+    
+    if (despesa.categoria === 'ATRASADOS') {
+      return 'ATRASADO';
+    }
+    
+    if (transactionDate > today) {
+      return 'PENDENTE';
+    }
+    
+    return 'PAGO';
+  };
+  
   // Use actual data from database if available, otherwise show empty or sample data
   const transactions = despesas?.slice(0, 5).map(despesa => ({
     id: despesa.id,
@@ -14,7 +34,7 @@ const RecentTransactions: React.FC = () => {
     description: despesa.descricao,
     category: despesa.categoria,
     value: despesa.valor,
-    status: 'PAGO'
+    status: getTransactionStatus(despesa)
   })) || [];
 
   const getCategoryColor = (category: string) => {
@@ -26,6 +46,19 @@ const RecentTransactions: React.FC = () => {
       case 'VARIAVEIS':
         return 'bg-orange-500 text-white';
       case 'ATRASADOS':
+        return 'bg-red-500 text-white';
+      default:
+        return 'bg-gray-500 text-white';
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'PAGO':
+        return 'bg-green-500 text-white';
+      case 'PENDENTE':
+        return 'bg-yellow-500 text-white';
+      case 'ATRASADO':
         return 'bg-red-500 text-white';
       default:
         return 'bg-gray-500 text-white';
@@ -75,10 +108,10 @@ const RecentTransactions: React.FC = () => {
                 </span>
               </td>
               <td className="py-3 text-gray-800 font-medium">
-                R$ {(transaction.value / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                R$ {transaction.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </td>
               <td className="py-3">
-                <span className="px-2 py-1 rounded-2xl text-xs bg-green-500 text-white">
+                <span className={`px-2 py-1 rounded-2xl text-xs ${getStatusColor(transaction.status)}`}>
                   {transaction.status}
                 </span>
               </td>

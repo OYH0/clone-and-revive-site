@@ -4,7 +4,7 @@ import Sidebar from '@/components/Sidebar';
 import TransactionTable from '@/components/TransactionTable';
 import AddTransactionModal from '@/components/AddTransactionModal';
 import { Button } from '@/components/ui/button';
-import { Plus, Download, Filter, TrendingDown, DollarSign, Calendar, FileText } from 'lucide-react';
+import { Plus, Download, Filter, TrendingDown, DollarSign, Calendar, FileText, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
 import { useDespesas } from '@/hooks/useDespesas';
 import { Transaction } from '@/types/transaction';
 
@@ -23,7 +23,34 @@ const DespesasPage = () => {
     data_vencimento: despesa.data_vencimento
   }));
 
+  const getTransactionStatus = (transaction: Transaction) => {
+    const today = new Date();
+    const transactionDate = new Date(transaction.date);
+    const dueDate = transaction.data_vencimento ? new Date(transaction.data_vencimento) : transactionDate;
+    
+    if (transaction.data_vencimento && dueDate < today) {
+      return 'ATRASADO';
+    }
+    
+    if (transaction.category === 'ATRASADOS') {
+      return 'ATRASADO';
+    }
+    
+    if (transactionDate > today) {
+      return 'PENDENTE';
+    }
+    
+    return 'PAGO';
+  };
+
   const totalDespesas = despesas.reduce((sum, despesa) => sum + (despesa.valor || 0), 0);
+  const despesasPagas = transactions.filter(t => getTransactionStatus(t) === 'PAGO');
+  const despesasPendentes = transactions.filter(t => getTransactionStatus(t) === 'PENDENTE');
+  const despesasAtrasadas = transactions.filter(t => getTransactionStatus(t) === 'ATRASADO');
+
+  const valorPago = despesasPagas.reduce((sum, t) => sum + t.valor, 0);
+  const valorPendente = despesasPendentes.reduce((sum, t) => sum + t.valor, 0);
+  const valorAtrasado = despesasAtrasadas.reduce((sum, t) => sum + t.valor, 0);
 
   const handleTransactionAdded = () => {
     refetch();
@@ -68,22 +95,72 @@ const DespesasPage = () => {
             </div>
           </div>
 
-          {/* Stats Card */}
-          <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-xl border border-white/20 mb-8">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-6">
-                <div className="p-4 bg-gradient-to-r from-red-100 to-red-200 rounded-2xl">
-                  <DollarSign className="h-8 w-8 text-red-600" />
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/20">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-r from-red-100 to-red-200 rounded-2xl">
+                  <DollarSign className="h-6 w-6 text-red-600" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-1">Total de Despesas</h3>
-                  <p className="text-4xl font-bold bg-gradient-to-r from-red-600 to-red-700 bg-clip-text text-transparent">
+                  <h3 className="text-sm font-semibold text-gray-700">Total de Despesas</h3>
+                  <p className="text-2xl font-bold bg-gradient-to-r from-red-600 to-red-700 bg-clip-text text-transparent">
                     R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </p>
-                  <p className="text-sm text-gray-500 mt-1">{despesas.length} registros encontrados</p>
+                  <p className="text-xs text-gray-500">{despesas.length} registros</p>
                 </div>
               </div>
-              
+            </div>
+
+            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/20">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-r from-green-100 to-green-200 rounded-2xl">
+                  <CheckCircle className="h-6 w-6 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700">Pagas</h3>
+                  <p className="text-2xl font-bold text-green-600">
+                    R$ {valorPago.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </p>
+                  <p className="text-xs text-gray-500">{despesasPagas.length} despesas</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/20">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-r from-yellow-100 to-yellow-200 rounded-2xl">
+                  <Clock className="h-6 w-6 text-yellow-600" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700">Pendentes</h3>
+                  <p className="text-2xl font-bold text-yellow-600">
+                    R$ {valorPendente.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </p>
+                  <p className="text-xs text-gray-500">{despesasPendentes.length} despesas</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/20">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-r from-red-100 to-red-200 rounded-2xl">
+                  <AlertTriangle className="h-6 w-6 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700">Atrasadas</h3>
+                  <p className="text-2xl font-bold text-red-600">
+                    R$ {valorAtrasado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </p>
+                  <p className="text-xs text-gray-500">{despesasAtrasadas.length} despesas</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/20 mb-8">
+            <div className="flex justify-between items-center">
               <div className="flex gap-3">
                 <Button variant="outline" className="flex items-center gap-2 bg-white/50 hover:bg-white/80 border-gray-200">
                   <Filter className="h-4 w-4" />
@@ -93,14 +170,15 @@ const DespesasPage = () => {
                   <Download className="h-4 w-4" />
                   Exportar
                 </Button>
-                <Button 
-                  onClick={() => setIsModalOpen(true)}
-                  className="flex items-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200"
-                >
-                  <Plus className="h-4 w-4" />
-                  Nova Despesa
-                </Button>
               </div>
+              
+              <Button 
+                onClick={() => setIsModalOpen(true)}
+                className="flex items-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200"
+              >
+                <Plus className="h-4 w-4" />
+                Nova Despesa
+              </Button>
             </div>
           </div>
 

@@ -7,4 +7,5 @@ export interface Transaction {
   description: string;
   category: string;
   data_vencimento?: string;
+  status?: string;
 }
