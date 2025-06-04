@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Sidebar from './Sidebar';
 import CompanyCard from './CompanyCard';
@@ -7,7 +6,6 @@ import MonthlyEvolutionChart from './MonthlyEvolutionChart';
 import RecentTransactions from './RecentTransactions';
 import { useDespesas } from '@/hooks/useDespesas';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
 const Dashboard = () => {
@@ -47,10 +45,6 @@ const Dashboard = () => {
               <Button variant="outline" size="sm" className="rounded-2xl">Semana</Button>
               <Button variant="outline" size="sm" className="bg-gray-700 text-white rounded-2xl">Mês</Button>
               <Button variant="outline" size="sm" className="rounded-2xl">Ano</Button>
-              <Button className="bg-red-500 hover:bg-red-600 text-white rounded-2xl">
-                <Plus className="h-4 w-4 mr-2" />
-                Nova Transação
-              </Button>
             </div>
           </div>
 
