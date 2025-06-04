@@ -12,32 +12,46 @@ const MonthlyEvolutionChart: React.FC = () => {
   ];
 
   return (
-    <div className="bg-slate-700 rounded-lg p-6">
-      <h3 className="text-lg font-semibold text-white mb-6">Evolução Mensal</h3>
-      
-      <div className="h-64">
+    <div className="flex items-center justify-between">
+      <div className="h-48 flex-1">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-            <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: 'white', fontSize: 12 }} />
-            <YAxis axisLine={false} tickLine={false} tick={{ fill: 'white', fontSize: 12 }} />
-            <Legend 
-              wrapperStyle={{ color: 'white' }}
-              iconType="circle"
+            <XAxis 
+              dataKey="month" 
+              axisLine={false} 
+              tickLine={false} 
+              tick={{ fill: 'white', fontSize: 12 }} 
+            />
+            <YAxis 
+              axisLine={false} 
+              tickLine={false} 
+              tick={{ fill: 'white', fontSize: 12 }} 
             />
             <Bar 
               dataKey="churrasco" 
               name="Companhia do Churrasco"
-              fill="#e74c3c" 
+              fill="#ef4444" 
               radius={[4, 4, 0, 0]}
             />
             <Bar 
               dataKey="johnny" 
               name="Johnny Rockets"
-              fill="#3498db" 
+              fill="#3b82f6" 
               radius={[4, 4, 0, 0]}
             />
           </BarChart>
         </ResponsiveContainer>
+      </div>
+      
+      <div className="ml-6 flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-red-500"></div>
+          <span className="text-white text-sm">Companhia do Churrasco</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+          <span className="text-white text-sm">Johnny Rockets</span>
+        </div>
       </div>
     </div>
   );

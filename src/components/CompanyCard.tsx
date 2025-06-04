@@ -1,60 +1,105 @@
 
 import React from 'react';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { LineChart, Line, ResponsiveContainer } from 'recharts';
 
 interface CompanyCardProps {
   name: string;
   totalDespesas: number;
-  totalReceitas: number;
-  color: string;
+  status: string;
+  statusColor: 'green' | 'yellow';
+  periodo: string;
+  insumos?: number;
+  variaveis?: number;
+  fixas?: number;
+  atrasados?: number;
+  chartData: Array<{ value: number }>;
+  chartColor: string;
 }
 
 const CompanyCard: React.FC<CompanyCardProps> = ({
   name,
   totalDespesas,
-  totalReceitas,
-  color
+  status,
+  statusColor,
+  periodo,
+  insumos,
+  variaveis,
+  fixas,
+  atrasados,
+  chartData,
+  chartColor
 }) => {
-  const saldo = totalReceitas - totalDespesas;
-  const isPositive = saldo >= 0;
+  const statusBgColor = statusColor === 'green' ? 'bg-green-500' : 'bg-yellow-500';
 
   return (
-    <div className="bg-white rounded-lg p-6 shadow-sm border">
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-800">{name}</h3>
-          <p className="text-sm text-gray-500">Resumo Financeiro</p>
+    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="border-l-4 border-red-500 p-6">
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800">{name}</h3>
+            <p className="text-sm text-gray-500">{periodo}</p>
+          </div>
+          <span className={`px-3 py-1 rounded-full text-xs font-medium text-white ${statusBgColor}`}>
+            {status}
+          </span>
         </div>
-        <div className={`w-4 h-4 rounded-full ${color}`}></div>
-      </div>
-      
-      <div className="space-y-4">
-        <div>
-          <p className="text-sm text-gray-500 mb-1">Total Despesas</p>
-          <p className="text-xl font-bold text-red-600">
+        
+        <div className="mb-6">
+          <p className="text-sm text-gray-500 mb-2">Total Despesas</p>
+          <p className="text-3xl font-bold text-gray-900">
             R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
         </div>
-        
-        <div>
-          <p className="text-sm text-gray-500 mb-1">Total Receitas</p>
-          <p className="text-xl font-bold text-green-600">
-            R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-          </p>
-        </div>
-        
-        <div className="pt-2 border-t">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-500">Saldo</p>
-            {isPositive ? (
-              <TrendingUp className="h-4 w-4 text-green-500" />
-            ) : (
-              <TrendingDown className="h-4 w-4 text-red-500" />
+
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div>
+            <p className="text-xs text-gray-500 mb-1">Por Categoria</p>
+            {insumos && (
+              <p className="text-sm">
+                <span className="text-gray-600">Insumos:</span>{' '}
+                <span className="font-medium">R$ {insumos.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              </p>
+            )}
+            {variaveis && (
+              <p className="text-sm">
+                <span className="text-gray-600">Variáveis:</span>{' '}
+                <span className="font-medium">R$ {variaveis.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              </p>
+            )}
+            {fixas && (
+              <p className="text-sm">
+                <span className="text-gray-600">Fixas:</span>{' '}
+                <span className="font-medium">R$ {fixas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              </p>
+            )}
+            {insumos && name.includes('Johnny') && (
+              <p className="text-sm">
+                <span className="text-gray-600">Insumos:</span>{' '}
+                <span className="font-medium">R$ {insumos.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              </p>
+            )}
+            {atrasados && (
+              <p className="text-sm">
+                <span className="text-gray-600">Atrasados:</span>{' '}
+                <span className="font-medium">R$ {atrasados.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              </p>
             )}
           </div>
-          <p className={`text-xl font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-            R$ {Math.abs(saldo).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-          </p>
+        </div>
+
+        <div className="h-16">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={chartData}>
+              <Line 
+                type="monotone" 
+                dataKey="value" 
+                stroke={chartColor} 
+                strokeWidth={2}
+                dot={{ fill: chartColor, strokeWidth: 2, r: 3 }}
+                activeDot={{ r: 4, fill: chartColor }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </div>
