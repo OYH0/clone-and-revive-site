@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import Sidebar from '@/components/Sidebar';
 import TransactionTable from '@/components/TransactionTable';
@@ -54,7 +55,8 @@ const DespesasPage = () => {
     company: despesa.empresa || 'Não informado',
     description: despesa.descricao || 'Sem descrição',
     category: despesa.categoria || 'Sem categoria',
-    data_vencimento: despesa.data_vencimento
+    data_vencimento: despesa.data_vencimento,
+    comprovante: despesa.comprovante
   }));
 
   // Aplicar filtros

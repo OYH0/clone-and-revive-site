@@ -8,4 +8,5 @@ export interface Transaction {
   category: string;
   data_vencimento?: string;
   status?: string;
+  comprovante?: string;
 }

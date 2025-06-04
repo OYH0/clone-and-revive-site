@@ -12,6 +12,7 @@ export type Database = {
       despesas: {
         Row: {
           categoria: string | null
+          comprovante: string | null
           data: string
           data_vencimento: string | null
           descricao: string | null
@@ -22,6 +23,7 @@ export type Database = {
         }
         Insert: {
           categoria?: string | null
+          comprovante?: string | null
           data: string
           data_vencimento?: string | null
           descricao?: string | null
@@ -32,6 +34,7 @@ export type Database = {
         }
         Update: {
           categoria?: string | null
+          comprovante?: string | null
           data?: string
           data_vencimento?: string | null
           descricao?: string | null

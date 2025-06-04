@@ -12,6 +12,7 @@ export interface Despesa {
   descricao: string;
   categoria: string;
   data_vencimento?: string;
+  comprovante?: string;
   user_id: string;
 }
 

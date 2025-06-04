@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Edit, Trash2, CheckCircle, Paperclip } from 'lucide-react';
 import { Transaction } from '@/types/transaction';
 import EditTransactionModal from './EditTransactionModal';
@@ -24,6 +24,29 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
   const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
+
+  // Create receipts bucket if it doesn't exist
+  useEffect(() => {
+    const createReceiptsBucket = async () => {
+      try {
+        const { data: buckets } = await supabase.storage.listBuckets();
+        const receiptsBucketExists = buckets?.some(bucket => bucket.name === 'receipts');
+        
+        if (!receiptsBucketExists) {
+          await supabase.storage.createBucket('receipts', {
+            public: false,
+            allowedMimeTypes: ['image/*', 'application/pdf'],
+            fileSizeLimit: 10485760 // 10MB
+          });
+          console.log('Receipts bucket created successfully');
+        }
+      } catch (error) {
+        console.error('Error creating receipts bucket:', error);
+      }
+    };
+
+    createReceiptsBucket();
+  }, []);
 
   const handleEdit = (transaction: Transaction) => {
     setEditingTransaction(transaction);
@@ -232,8 +255,8 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
                       
                       <button
                         onClick={() => handleAttachReceipt(transaction)}
-                        className="text-purple-500 hover:text-purple-700 p-1 rounded hover:bg-purple-50"
-                        title="Anexar Comprovante"
+                        className={`p-1 rounded ${transaction.comprovante ? 'text-green-500 hover:text-green-700 hover:bg-green-50' : 'text-purple-500 hover:text-purple-700 hover:bg-purple-50'}`}
+                        title={transaction.comprovante ? "Comprovante anexado" : "Anexar Comprovante"}
                       >
                         <Paperclip size={16} />
                       </button>
