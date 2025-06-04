@@ -10,7 +10,7 @@ import { Transaction } from '@/types/transaction';
 
 const DespesasPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { data: despesas = [], isLoading } = useDespesas();
+  const { data: despesas = [], isLoading, refetch } = useDespesas();
 
   // Converter Despesa para Transaction
   const transactions: Transaction[] = despesas.map(despesa => ({
@@ -24,6 +24,11 @@ const DespesasPage = () => {
   }));
 
   const totalDespesas = despesas.reduce((sum, despesa) => sum + (despesa.valor || 0), 0);
+
+  const handleTransactionAdded = () => {
+    refetch();
+    setIsModalOpen(false);
+  };
 
   if (isLoading) {
     return (
@@ -84,6 +89,7 @@ const DespesasPage = () => {
           <AddTransactionModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
+            onTransactionAdded={handleTransactionAdded}
           />
         </div>
       </div>

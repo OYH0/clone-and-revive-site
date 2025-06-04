@@ -1,14 +1,14 @@
 
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Settings, FileText, DollarSign, LogOut } from 'lucide-react';
+import { LayoutDashboard, Settings, FileText, DollarSign, LogOut, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/' },
@@ -25,7 +25,7 @@ const Sidebar: React.FC = () => {
   };
 
   return (
-    <div className="w-64 sidebar-blue text-white h-screen flex flex-col">
+    <div className="fixed left-0 top-0 w-64 sidebar-blue text-white h-screen flex flex-col z-50">
       <div className="p-6 border-b border-gray-600">
         <h1 className="text-xl font-bold">Gestão Financeira</h1>
       </div>
@@ -50,12 +50,24 @@ const Sidebar: React.FC = () => {
             </button>
           );
         })}
+        
+        <button
+          onClick={() => navigate('/admin')}
+          className={`w-full flex items-center gap-3 p-3 rounded-lg mb-2 text-left transition-colors ${
+            location.pathname === '/admin'
+              ? 'bg-red-500 text-white' 
+              : 'hover:bg-gray-600 text-gray-300'
+          }`}
+        >
+          <Shield size={18} />
+          <span className="text-sm">Admin</span>
+        </button>
       </nav>
       
       <div className="p-4 border-t border-gray-600">
         <div className="flex items-center gap-2 mb-4">
           <div className="w-8 h-8 bg-gray-500 rounded-full"></div>
-          <span className="text-sm">Admin</span>
+          <span className="text-sm">{user?.email || 'Admin'}</span>
         </div>
         <Button 
           onClick={handleLogout}
