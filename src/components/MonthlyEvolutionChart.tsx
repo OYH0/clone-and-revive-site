@@ -1,58 +1,108 @@
 
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { useDespesas } from '@/hooks/useDespesas';
 
 const MonthlyEvolutionChart: React.FC = () => {
-  const data = [
-    { month: 'Jan', churrasco: 120, johnny: 100 },
-    { month: 'Fev', churrasco: 140, johnny: 120 },
-    { month: 'Mar', churrasco: 130, johnny: 140 },
-    { month: 'Abr', churrasco: 160, johnny: 150 },
-    { month: 'Mai', churrasco: 180, johnny: 170 }
-  ];
+  const { data: despesas } = useDespesas();
+  
+  // Generate monthly data based on actual expenses
+  const monthlyData = React.useMemo(() => {
+    if (!despesas) return [];
+
+    const months = [
+      'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 
+      'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+    ];
+    
+    // Initialize data structure
+    const data = months.map((month, index) => ({
+      month,
+      index,
+      churrasco: 0,
+      johnny: 0
+    }));
+    
+    // Fill with actual data
+    despesas.forEach(despesa => {
+      const date = new Date(despesa.data);
+      const monthIndex = date.getMonth();
+      
+      if (despesa.empresa === 'Churrasco') {
+        data[monthIndex].churrasco += despesa.valor;
+      } else if (despesa.empresa === 'Johnny') {
+        data[monthIndex].johnny += despesa.valor;
+      }
+    });
+    
+    // Get current month to show only relevant months
+    const currentMonth = new Date().getMonth();
+    
+    // Return data for the last 6 months including current month
+    return data
+      .filter((_, i) => i <= currentMonth && i >= currentMonth - 5)
+      .sort((a, b) => a.index - b.index);
+  }, [despesas]);
+  
+  // Custom tooltip for the chart
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
+          <p className="font-medium text-gray-800">{label}</p>
+          {payload.map((entry: any, index: number) => (
+            <p key={index} className="text-sm" style={{ color: entry.color }}>
+              {entry.name}: R$ {(entry.value / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  if (!monthlyData.length) {
+    return (
+      <div className="flex items-center justify-center h-48 text-gray-500">
+        <p>Não há dados para mostrar</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex items-center justify-between">
-      <div className="h-48 flex-1">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-            <XAxis 
-              dataKey="month" 
-              axisLine={false} 
-              tickLine={false} 
-              tick={{ fill: '#4B5563', fontSize: 12 }} 
-            />
-            <YAxis 
-              axisLine={false} 
-              tickLine={false} 
-              tick={{ fill: '#4B5563', fontSize: 12 }} 
-            />
-            <Bar 
-              dataKey="churrasco" 
-              name="Companhia do Churrasco"
-              fill="#ef4444" 
-              radius={[4, 4, 0, 0]}
-            />
-            <Bar 
-              dataKey="johnny" 
-              name="Johnny Rockets"
-              fill="#3b82f6" 
-              radius={[4, 4, 0, 0]}
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-      
-      <div className="ml-6 flex flex-col gap-2">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-red-500"></div>
-          <span className="text-gray-700 text-sm">Companhia do Churrasco</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-          <span className="text-gray-700 text-sm">Johnny Rockets</span>
-        </div>
-      </div>
+    <div className="h-48 w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={monthlyData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+          <XAxis 
+            dataKey="month" 
+            axisLine={false} 
+            tickLine={false} 
+            tick={{ fill: '#4B5563', fontSize: 12 }} 
+          />
+          <YAxis 
+            axisLine={false} 
+            tickLine={false} 
+            tick={{ fill: '#4B5563', fontSize: 12 }} 
+            tickFormatter={(value) => `${(value / 100).toLocaleString('pt-BR', { notation: 'compact' })}`}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          <Legend 
+            formatter={(value) => <span className="text-sm">{value === 'churrasco' ? 'Companhia do Churrasco' : 'Johnny Rockets'}</span>}
+          />
+          <Bar 
+            name="churrasco"
+            dataKey="churrasco" 
+            fill="#ef4444" 
+            radius={[4, 4, 0, 0]}
+          />
+          <Bar 
+            name="johnny"
+            dataKey="johnny" 
+            fill="#3b82f6" 
+            radius={[4, 4, 0, 0]}
+          />
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   );
 };

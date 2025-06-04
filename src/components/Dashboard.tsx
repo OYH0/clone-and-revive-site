@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Sidebar from './Sidebar';
 import CompanyCard from './CompanyCard';
@@ -5,14 +6,20 @@ import ExpenseDistributionChart from './ExpenseDistributionChart';
 import MonthlyEvolutionChart from './MonthlyEvolutionChart';
 import RecentTransactions from './RecentTransactions';
 import { useDespesas } from '@/hooks/useDespesas';
+import { useReceitas } from '@/hooks/useReceitas';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
 const Dashboard = () => {
-  const { data: despesas, isLoading } = useDespesas();
+  const { data: despesas, isLoading: isLoadingDespesas } = useDespesas();
+  const { data: receitas, isLoading: isLoadingReceitas } = useReceitas();
+
+  const isLoading = isLoadingDespesas || isLoadingReceitas;
 
   // Calculate values only when data exists
   const totalDespesas = despesas?.reduce((sum, despesa) => sum + despesa.valor, 0) || 0;
+  const totalReceitas = receitas?.reduce((sum, receita) => sum + receita.valor, 0) || 0;
+  
   const churrascoDespesas = despesas?.filter(d => d.empresa === 'Churrasco').reduce((sum, despesa) => sum + despesa.valor, 0) || 0;
   const johnnyDespesas = despesas?.filter(d => d.empresa === 'Johnny').reduce((sum, despesa) => sum + despesa.valor, 0) || 0;
 
@@ -23,7 +30,7 @@ const Dashboard = () => {
   const johnnyInsumos = despesas?.filter(d => d.empresa === 'Johnny' && d.categoria === 'INSUMOS').reduce((sum, despesa) => sum + despesa.valor, 0) || 0;
   const johnnyAtrasados = despesas?.filter(d => d.empresa === 'Johnny' && d.categoria === 'ATRASADOS').reduce((sum, despesa) => sum + despesa.valor, 0) || 0;
 
-  // Generate chart data based on real data
+  // Generate period string
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth();
   const currentYear = currentDate.getFullYear();

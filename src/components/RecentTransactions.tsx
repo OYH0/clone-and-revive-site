@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Edit, Trash2 } from 'lucide-react';
 import { useDespesas } from '@/hooks/useDespesas';
 
 const RecentTransactions: React.FC = () => {
@@ -89,7 +88,6 @@ const RecentTransactions: React.FC = () => {
             <th className="pb-4 font-medium">Categoria</th>
             <th className="pb-4 font-medium">Valor</th>
             <th className="pb-4 font-medium">Status</th>
-            <th className="pb-4 font-medium">Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -114,16 +112,6 @@ const RecentTransactions: React.FC = () => {
                 <span className={`px-2 py-1 rounded-2xl text-xs ${getStatusColor(transaction.status)}`}>
                   {transaction.status}
                 </span>
-              </td>
-              <td className="py-3">
-                <div className="flex gap-2">
-                  <button className="text-blue-500 hover:text-blue-700 p-1">
-                    <Edit size={14} />
-                  </button>
-                  <button className="text-red-500 hover:text-red-700 p-1">
-                    <Trash2 size={14} />
-                  </button>
-                </div>
               </td>
             </tr>
           ))}

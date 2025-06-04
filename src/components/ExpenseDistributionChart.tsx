@@ -1,16 +1,54 @@
 
 import React from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { useDespesas } from '@/hooks/useDespesas';
 
 const ExpenseDistributionChart: React.FC = () => {
-  const data = [
-    { name: 'Insumos', value: 35, color: '#0ea5e9' },
-    { name: 'Fixas', value: 25, color: '#1e293b' },
-    { name: 'Variáveis', value: 25, color: '#f59e0b' },
-    { name: 'Atrasados', value: 15, color: '#ef4444' }
+  const { data: despesas } = useDespesas();
+  
+  // Define categories and colors
+  const categories = [
+    { name: 'INSUMOS', label: 'Insumos', color: '#0ea5e9' },
+    { name: 'FIXAS', label: 'Fixas', color: '#1e293b' },
+    { name: 'VARIAVEIS', label: 'Variáveis', color: '#f59e0b' },
+    { name: 'ATRASADOS', label: 'Atrasados', color: '#ef4444' }
   ];
 
-  const valueLabels = ['R$ 140k', 'R$ 120k', 'R$ 100k', 'R$ 80k', 'R$ 60k', 'R$ 40k', 'R$ 20k', 'R$ 0k'];
+  // Calculate values based on actual data
+  const data = categories.map(category => {
+    const value = despesas
+      ?.filter(d => d.categoria === category.name)
+      .reduce((sum, d) => sum + d.valor, 0) || 0;
+    
+    return {
+      name: category.label,
+      value,
+      color: category.color
+    };
+  }).filter(item => item.value > 0);
+
+  // If there's no data with values, show placeholder
+  if (!data.length) {
+    return (
+      <div className="flex items-center justify-center h-48 text-gray-500">
+        <p>Não há dados para mostrar</p>
+      </div>
+    );
+  }
+  
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-2 border border-gray-200 rounded-lg shadow-md">
+          <p className="font-medium">{payload[0].name}</p>
+          <p className="text-sm text-gray-600">
+            R$ {(payload[0].value / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="flex items-center justify-between">
@@ -29,6 +67,7 @@ const ExpenseDistributionChart: React.FC = () => {
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Pie>
+            <Tooltip content={<CustomTooltip />} />
           </PieChart>
         </ResponsiveContainer>
       </div>
@@ -46,9 +85,9 @@ const ExpenseDistributionChart: React.FC = () => {
       </div>
       
       <div className="flex flex-col gap-1 text-xs text-gray-500">
-        {valueLabels.map((label, index) => (
+        {data.map((item, index) => (
           <div key={index} className="text-right">
-            {label}
+            R$ {(item.value / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </div>
         ))}
       </div>
