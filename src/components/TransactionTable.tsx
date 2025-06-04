@@ -101,6 +101,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
         description: "Despesa marcada como paga!",
       });
 
+      // Force a refresh of the data to ensure UI updates
       onTransactionUpdated();
     } catch (error) {
       console.error('Erro ao marcar como paga:', error);
