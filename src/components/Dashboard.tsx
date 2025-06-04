@@ -57,8 +57,12 @@ const Dashboard = () => {
   // Extract categories for each company
   const churrascoInsumos = filteredDespesas.filter(d => d.empresa === 'Churrasco' && d.categoria === 'INSUMOS').reduce((sum, despesa) => sum + despesa.valor, 0);
   const churrascoVariaveis = filteredDespesas.filter(d => d.empresa === 'Churrasco' && d.categoria === 'VARIAVEIS').reduce((sum, despesa) => sum + despesa.valor, 0);
+  const churrascoFixas = filteredDespesas.filter(d => d.empresa === 'Churrasco' && d.categoria === 'FIXAS').reduce((sum, despesa) => sum + despesa.valor, 0);
+  const churrascoAtrasados = filteredDespesas.filter(d => d.empresa === 'Churrasco' && d.categoria === 'ATRASADOS').reduce((sum, despesa) => sum + despesa.valor, 0);
+  
   const johnnyFixas = filteredDespesas.filter(d => d.empresa === 'Johnny' && d.categoria === 'FIXAS').reduce((sum, despesa) => sum + despesa.valor, 0);
   const johnnyInsumos = filteredDespesas.filter(d => d.empresa === 'Johnny' && d.categoria === 'INSUMOS').reduce((sum, despesa) => sum + despesa.valor, 0);
+  const johnnyVariaveis = filteredDespesas.filter(d => d.empresa === 'Johnny' && d.categoria === 'VARIAVEIS').reduce((sum, despesa) => sum + despesa.valor, 0);
   const johnnyAtrasados = filteredDespesas.filter(d => d.empresa === 'Johnny' && d.categoria === 'ATRASADOS').reduce((sum, despesa) => sum + despesa.valor, 0);
 
   // Generate period string
@@ -144,8 +148,10 @@ const Dashboard = () => {
                   status={filteredDespesas && filteredDespesas.length > 0 ? "Atualizado" : "Sem dados"}
                   statusColor={filteredDespesas && filteredDespesas.length > 0 ? "green" : "yellow"}
                   periodo={period}
-                  insumos={churrascoInsumos}
-                  variaveis={churrascoVariaveis}
+                  insumos={churrascoInsumos > 0 ? churrascoInsumos : undefined}
+                  variaveis={churrascoVariaveis > 0 ? churrascoVariaveis : undefined}
+                  fixas={churrascoFixas > 0 ? churrascoFixas : undefined}
+                  atrasados={churrascoAtrasados > 0 ? churrascoAtrasados : undefined}
                   chartData={[
                     { value: churrascoDespesas > 0 ? churrascoDespesas * 0.8 : 0 }, 
                     { value: churrascoDespesas > 0 ? churrascoDespesas * 0.9 : 0 }, 
@@ -161,9 +167,10 @@ const Dashboard = () => {
                   status={filteredDespesas && filteredDespesas.length > 0 ? "Atualizado" : "Sem dados"}
                   statusColor={filteredDespesas && filteredDespesas.length > 0 ? "green" : "yellow"}
                   periodo={period}
-                  fixas={johnnyFixas}
-                  insumos={johnnyInsumos}
-                  atrasados={johnnyAtrasados}
+                  fixas={johnnyFixas > 0 ? johnnyFixas : undefined}
+                  insumos={johnnyInsumos > 0 ? johnnyInsumos : undefined}
+                  variaveis={johnnyVariaveis > 0 ? johnnyVariaveis : undefined}
+                  atrasados={johnnyAtrasados > 0 ? johnnyAtrasados : undefined}
                   chartData={[
                     { value: johnnyDespesas > 0 ? johnnyDespesas * 0.8 : 0 }, 
                     { value: johnnyDespesas > 0 ? johnnyDespesas * 0.85 : 0 }, 

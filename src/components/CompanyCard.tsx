@@ -54,31 +54,25 @@ const CompanyCard: React.FC<CompanyCardProps> = ({
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div>
             <p className="text-xs text-gray-500 mb-1">Por Categoria</p>
-            {insumos && (
+            {insumos !== undefined && (
               <p className="text-sm">
                 <span className="text-gray-600">Insumos:</span>{' '}
                 <span className="font-medium">R$ {insumos.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
               </p>
             )}
-            {variaveis && (
+            {variaveis !== undefined && (
               <p className="text-sm">
                 <span className="text-gray-600">Variáveis:</span>{' '}
                 <span className="font-medium">R$ {variaveis.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
               </p>
             )}
-            {fixas && (
+            {fixas !== undefined && (
               <p className="text-sm">
                 <span className="text-gray-600">Fixas:</span>{' '}
                 <span className="font-medium">R$ {fixas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
               </p>
             )}
-            {insumos && name.includes('Johnny') && (
-              <p className="text-sm">
-                <span className="text-gray-600">Insumos:</span>{' '}
-                <span className="font-medium">R$ {insumos.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-              </p>
-            )}
-            {atrasados && (
+            {atrasados !== undefined && (
               <p className="text-sm">
                 <span className="text-gray-600">Atrasados:</span>{' '}
                 <span className="font-medium">R$ {atrasados.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
