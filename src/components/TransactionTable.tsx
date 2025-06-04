@@ -28,12 +28,24 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
 
   // Create receipts bucket if it doesn't exist
   useEffect(() => {
-    const createReceiptsBucket = async () => {
+    const ensureReceiptsBucket = async () => {
       try {
-        const { data: buckets } = await supabase.storage.listBuckets();
+        console.log('Checking if receipts bucket exists...');
+        
+        // Check if bucket exists
+        const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+        
+        if (listError) {
+          console.error('Error listing buckets:', listError);
+          return;
+        }
+
         const receiptsBucketExists = buckets?.some(bucket => bucket.name === 'receipts');
         
         if (!receiptsBucketExists) {
+          console.log('Creating receipts bucket...');
+          
+          // Try to create bucket - this might fail due to RLS policies
           const { error: bucketError } = await supabase.storage.createBucket('receipts', {
             public: false,
             allowedMimeTypes: ['image/*', 'application/pdf'],
@@ -42,17 +54,22 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
           
           if (bucketError) {
             console.error('Error creating receipts bucket:', bucketError);
+            // If bucket creation fails, we'll handle it in the upload function
           } else {
             console.log('Receipts bucket created successfully');
           }
+        } else {
+          console.log('Receipts bucket already exists');
         }
       } catch (error) {
-        console.error('Error creating receipts bucket:', error);
+        console.error('Error in ensureReceiptsBucket:', error);
       }
     };
 
-    createReceiptsBucket();
-  }, []);
+    if (user) {
+      ensureReceiptsBucket();
+    }
+  }, [user]);
 
   const handleEdit = (transaction: Transaction) => {
     setEditingTransaction(transaction);
@@ -70,11 +87,10 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
       
       console.log('Marking transaction as paid:', transaction.id, 'Setting date to:', today);
       
-      // Update the transaction to mark as paid - set status as PAGO
       const updateData: any = {
         data: today,
         categoria: transaction.category === 'ATRASADOS' ? 'FIXAS' : transaction.category,
-        status: 'PAGO' // Explicitly set status to PAGO
+        status: 'PAGO'
       };
 
       const { error, data } = await supabase
@@ -96,7 +112,6 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
         description: "Despesa marcada como paga!",
       });
 
-      // Force a refresh of the data to ensure UI updates
       onTransactionUpdated();
     } catch (error) {
       console.error('Erro ao marcar como paga:', error);
@@ -122,13 +137,35 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
         
         console.log('Uploading file:', fileName);
         
-        const { error: uploadError } = await supabase.storage
+        // Try to upload to receipts bucket, if it fails try to create bucket first
+        let uploadResult = await supabase.storage
           .from('receipts')
           .upload(fileName, file);
 
-        if (uploadError) {
-          console.error('Upload error:', uploadError);
-          throw uploadError;
+        if (uploadResult.error && uploadResult.error.message.includes('Bucket not found')) {
+          console.log('Bucket not found, attempting to create it...');
+          
+          // Try creating bucket again
+          const { error: bucketError } = await supabase.storage.createBucket('receipts', {
+            public: true, // Making it public to avoid RLS issues
+            allowedMimeTypes: ['image/*', 'application/pdf'],
+            fileSizeLimit: 10485760
+          });
+
+          if (bucketError) {
+            console.error('Failed to create bucket:', bucketError);
+            throw new Error('Não foi possível criar o bucket para armazenar arquivos. Entre em contato com o administrador.');
+          }
+
+          // Try upload again
+          uploadResult = await supabase.storage
+            .from('receipts')
+            .upload(fileName, file);
+        }
+
+        if (uploadResult.error) {
+          console.error('Upload error:', uploadResult.error);
+          throw uploadResult.error;
         }
 
         console.log('File uploaded successfully, updating database...');
@@ -154,7 +191,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
         console.error('Erro ao anexar comprovante:', error);
         toast({
           title: "Erro",
-          description: "Erro ao anexar comprovante.",
+          description: error instanceof Error ? error.message : "Erro ao anexar comprovante.",
           variant: "destructive",
         });
       }
