@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,36 +23,7 @@ interface NextActionsProps {
 }
 
 const NextActions: React.FC<NextActionsProps> = ({ empresa }) => {
-  const [actions, setActions] = useState<Action[]>([
-    {
-      id: '1',
-      title: 'Reunião de resultados',
-      description: 'Revisar performance mensal',
-      dueDate: '2025-12-18',
-      priority: 'high',
-      completed: false,
-      icon: 'calendar'
-    },
-    {
-      id: '2',
-      title: 'Renegociar contratos',
-      description: 'Revisar termos com fornecedores',
-      dueDate: '2025-12-22',
-      priority: 'medium',
-      completed: false,
-      icon: 'edit'
-    },
-    {
-      id: '3',
-      title: 'Planejamento 2025',
-      description: 'Definir metas e orçamento',
-      dueDate: '2025-12-30',
-      priority: 'high',
-      completed: false,
-      icon: 'calendar'
-    }
-  ]);
-
+  const [actions, setActions] = useState<Action[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAction, setEditingAction] = useState<Action | null>(null);
   const [formData, setFormData] = useState({
@@ -168,76 +138,86 @@ const NextActions: React.FC<NextActionsProps> = ({ empresa }) => {
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        {activeActions.map((action) => (
-          <div 
-            key={action.id} 
-            className={`flex items-start gap-3 p-3 rounded-xl border-l-4 ${getPriorityColor(action.priority)}`}
-          >
-            {getIcon(action.icon)}
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <p className="text-sm font-medium">{action.title}</p>
-                {isOverdue(action.dueDate) && (
-                  <span className="px-2 py-1 text-xs bg-red-100 text-red-700 rounded-full">
-                    Atrasado
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-gray-600 mb-1">{action.description}</p>
-              <p className="text-xs text-gray-500">Até {formatDate(action.dueDate)}</p>
-            </div>
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleToggleComplete(action.id)}
-                className="h-6 w-6 p-0"
-              >
-                <CheckCircle className="h-4 w-4 text-green-600" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleEditAction(action)}
-                className="h-6 w-6 p-0"
-              >
-                <Edit className="h-3 w-3" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleDeleteAction(action.id)}
-                className="h-6 w-6 p-0"
-              >
-                <Trash2 className="h-3 w-3 text-red-500" />
-              </Button>
-            </div>
+        {activeActions.length === 0 && completedActions.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            <Calendar className="h-12 w-12 mx-auto mb-3 opacity-30" />
+            <p className="text-sm">Nenhuma ação adicionada ainda.</p>
+            <p className="text-xs mt-1">Clique em "Adicionar" para criar sua primeira ação.</p>
           </div>
-        ))}
-
-        {completedActions.length > 0 && (
-          <div className="pt-3 border-t border-gray-200">
-            <p className="text-sm font-medium text-gray-600 mb-2">Concluídas</p>
-            {completedActions.map((action) => (
+        ) : (
+          <>
+            {activeActions.map((action) => (
               <div 
                 key={action.id} 
-                className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg opacity-60"
+                className={`flex items-start gap-3 p-3 rounded-xl border-l-4 ${getPriorityColor(action.priority)}`}
               >
-                <CheckCircle className="h-4 w-4 text-green-600" />
+                {getIcon(action.icon)}
                 <div className="flex-1">
-                  <p className="text-sm line-through">{action.title}</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-sm font-medium">{action.title}</p>
+                    {isOverdue(action.dueDate) && (
+                      <span className="px-2 py-1 text-xs bg-red-100 text-red-700 rounded-full">
+                        Atrasado
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-600 mb-1">{action.description}</p>
+                  <p className="text-xs text-gray-500">Até {formatDate(action.dueDate)}</p>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleToggleComplete(action.id)}
-                  className="h-6 w-6 p-0"
-                >
-                  <Clock className="h-3 w-3" />
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleToggleComplete(action.id)}
+                    className="h-6 w-6 p-0"
+                  >
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEditAction(action)}
+                    className="h-6 w-6 p-0"
+                  >
+                    <Edit className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDeleteAction(action.id)}
+                    className="h-6 w-6 p-0"
+                  >
+                    <Trash2 className="h-3 w-3 text-red-500" />
+                  </Button>
+                </div>
               </div>
             ))}
-          </div>
+
+            {completedActions.length > 0 && (
+              <div className="pt-3 border-t border-gray-200">
+                <p className="text-sm font-medium text-gray-600 mb-2">Concluídas</p>
+                {completedActions.map((action) => (
+                  <div 
+                    key={action.id} 
+                    className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg opacity-60"
+                  >
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <div className="flex-1">
+                      <p className="text-sm line-through">{action.title}</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleToggleComplete(action.id)}
+                      className="h-6 w-6 p-0"
+                    >
+                      <Clock className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
