@@ -38,7 +38,7 @@ const RecentTransactions: React.FC = () => {
 
   if (transactions.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-300">
+      <div className="text-center py-8 text-gray-500">
         <p>Não há transações para exibir.</p>
         <p className="text-sm mt-2">Adicione transações para visualizá-las aqui.</p>
       </div>
@@ -49,7 +49,7 @@ const RecentTransactions: React.FC = () => {
     <div className="overflow-x-auto">
       <table className="w-full">
         <thead>
-          <tr className="text-left text-gray-300 text-sm">
+          <tr className="text-left text-gray-500 text-sm">
             <th className="pb-4 font-medium">Data</th>
             <th className="pb-4 font-medium">Empresa</th>
             <th className="pb-4 font-medium">Descrição</th>
@@ -61,33 +61,33 @@ const RecentTransactions: React.FC = () => {
         </thead>
         <tbody>
           {transactions.map((transaction) => (
-            <tr key={transaction.id} className="border-t border-slate-600">
-              <td className="py-3 text-white text-sm">{transaction.date}</td>
+            <tr key={transaction.id} className="border-t border-gray-200">
+              <td className="py-3 text-gray-800 text-sm">{transaction.date}</td>
               <td className="py-3">
-                <span className={`px-2 py-1 rounded text-xs ${getCompanyColor(transaction.company)}`}>
+                <span className={`px-2 py-1 rounded-2xl text-xs ${getCompanyColor(transaction.company)}`}>
                   {transaction.company}
                 </span>
               </td>
-              <td className="py-3 text-white text-sm">{transaction.description}</td>
+              <td className="py-3 text-gray-800 text-sm">{transaction.description}</td>
               <td className="py-3">
-                <span className={`px-2 py-1 rounded text-xs ${getCategoryColor(transaction.category)}`}>
+                <span className={`px-2 py-1 rounded-2xl text-xs ${getCategoryColor(transaction.category)}`}>
                   {transaction.category}
                 </span>
               </td>
-              <td className="py-3 text-white font-medium">
+              <td className="py-3 text-gray-800 font-medium">
                 R$ {(transaction.value / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </td>
               <td className="py-3">
-                <span className="px-2 py-1 rounded text-xs bg-green-500 text-white">
+                <span className="px-2 py-1 rounded-2xl text-xs bg-green-500 text-white">
                   {transaction.status}
                 </span>
               </td>
               <td className="py-3">
                 <div className="flex gap-2">
-                  <button className="text-blue-400 hover:text-blue-300 p-1">
+                  <button className="text-blue-500 hover:text-blue-700 p-1">
                     <Edit size={14} />
                   </button>
-                  <button className="text-red-400 hover:text-red-300 p-1">
+                  <button className="text-red-500 hover:text-red-700 p-1">
                     <Trash2 size={14} />
                   </button>
                 </div>

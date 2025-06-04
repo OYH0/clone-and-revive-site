@@ -40,12 +40,12 @@ const ExpenseDistributionChart: React.FC = () => {
               className="w-3 h-3 rounded-full" 
               style={{ backgroundColor: item.color }}
             ></div>
-            <span className="text-white text-sm">{item.name}</span>
+            <span className="text-gray-700 text-sm">{item.name}</span>
           </div>
         ))}
       </div>
       
-      <div className="flex flex-col gap-1 text-xs text-gray-400">
+      <div className="flex flex-col gap-1 text-xs text-gray-500">
         {valueLabels.map((label, index) => (
           <div key={index} className="text-right">
             {label}

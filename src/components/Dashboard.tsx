@@ -43,11 +43,11 @@ const Dashboard = () => {
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900">Dashboard Financeiro</h1>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm">Hoje</Button>
-              <Button variant="outline" size="sm">Semana</Button>
-              <Button variant="outline" size="sm" className="bg-gray-700 text-white">Mês</Button>
-              <Button variant="outline" size="sm">Ano</Button>
-              <Button className="bg-red-500 hover:bg-red-600 text-white">
+              <Button variant="outline" size="sm" className="rounded-2xl">Hoje</Button>
+              <Button variant="outline" size="sm" className="rounded-2xl">Semana</Button>
+              <Button variant="outline" size="sm" className="bg-gray-700 text-white rounded-2xl">Mês</Button>
+              <Button variant="outline" size="sm" className="rounded-2xl">Ano</Button>
+              <Button className="bg-red-500 hover:bg-red-600 text-white rounded-2xl">
                 <Plus className="h-4 w-4 mr-2" />
                 Nova Transação
               </Button>
@@ -100,10 +100,10 @@ const Dashboard = () => {
               </div>
 
               {/* Últimas Transações */}
-              <div className="bg-slate-700 rounded-lg p-6 mb-8">
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-8 shadow-sm">
                 <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-lg font-semibold text-white">Últimas Transações</h3>
-                  <select className="bg-slate-600 text-white border border-slate-500 rounded px-3 py-1 text-sm">
+                  <h3 className="text-lg font-semibold text-gray-800">Últimas Transações</h3>
+                  <select className="border border-gray-300 bg-white text-gray-700 rounded-2xl px-3 py-1 text-sm">
                     <option>Todas Empresas</option>
                     <option>Companhia do Churrasco</option>
                     <option>Johnny Rockets</option>
@@ -121,8 +121,8 @@ const Dashboard = () => {
 
               {/* Gráficos */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-slate-700 rounded-lg p-6">
-                  <h3 className="text-lg font-semibold text-white mb-6">Distribuição de Despesas</h3>
+                <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-6">Distribuição de Despesas</h3>
                   {despesas && despesas.length > 0 ? (
                     <ExpenseDistributionChart />
                   ) : (
@@ -132,8 +132,8 @@ const Dashboard = () => {
                   )}
                 </div>
                 
-                <div className="bg-slate-700 rounded-lg p-6">
-                  <h3 className="text-lg font-semibold text-white mb-6">Evolução Mensal</h3>
+                <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-6">Evolução Mensal</h3>
                   {despesas && despesas.length > 0 ? (
                     <MonthlyEvolutionChart />
                   ) : (

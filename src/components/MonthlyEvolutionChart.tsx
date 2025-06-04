@@ -20,12 +20,12 @@ const MonthlyEvolutionChart: React.FC = () => {
               dataKey="month" 
               axisLine={false} 
               tickLine={false} 
-              tick={{ fill: 'white', fontSize: 12 }} 
+              tick={{ fill: '#4B5563', fontSize: 12 }} 
             />
             <YAxis 
               axisLine={false} 
               tickLine={false} 
-              tick={{ fill: 'white', fontSize: 12 }} 
+              tick={{ fill: '#4B5563', fontSize: 12 }} 
             />
             <Bar 
               dataKey="churrasco" 
@@ -46,11 +46,11 @@ const MonthlyEvolutionChart: React.FC = () => {
       <div className="ml-6 flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-red-500"></div>
-          <span className="text-white text-sm">Companhia do Churrasco</span>
+          <span className="text-gray-700 text-sm">Companhia do Churrasco</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-          <span className="text-white text-sm">Johnny Rockets</span>
+          <span className="text-gray-700 text-sm">Johnny Rockets</span>
         </div>
       </div>
     </div>
