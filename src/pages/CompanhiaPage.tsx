@@ -1,15 +1,18 @@
 
 import React, { useState } from 'react';
-import { Building2, TrendingUp, DollarSign, Users, Calendar, PieChart, BarChart3 } from 'lucide-react';
+import { Building2, TrendingUp, DollarSign, Users, BarChart3 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart as RechartsPieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { useDespesas } from '@/hooks/useDespesas';
 import { useReceitas } from '@/hooks/useReceitas';
 import AnalyseCostsModal from '@/components/AnalyseCostsModal';
 import ProjectionsModal from '@/components/ProjectionsModal';
 import ComparativeModal from '@/components/ComparativeModal';
+import ExpenseDistribution from '@/components/ExpenseDistribution';
+import MonthlyGoals from '@/components/MonthlyGoals';
+import NextActions from '@/components/NextActions';
 
 const CompanhiaPage = () => {
   const { data: despesas } = useDespesas();
@@ -25,14 +28,6 @@ const CompanhiaPage = () => {
   const totalReceitas = companhiaReceitas.reduce((sum, r) => sum + r.valor, 0);
   const lucro = totalReceitas - totalDespesas;
   const margemLucro = totalReceitas > 0 ? (lucro / totalReceitas) * 100 : 0;
-
-  // Dados para gráficos - removendo divisão por 100
-  const despesasPorCategoria = [
-    { name: 'Insumos', value: companhiaDespesas.filter(d => d.categoria === 'INSUMOS').reduce((sum, d) => sum + d.valor, 0), color: '#ef4444' },
-    { name: 'Variáveis', value: companhiaDespesas.filter(d => d.categoria === 'VARIAVEIS').reduce((sum, d) => sum + d.valor, 0), color: '#f59e0b' },
-    { name: 'Fixas', value: companhiaDespesas.filter(d => d.categoria === 'FIXAS').reduce((sum, d) => sum + d.valor, 0), color: '#8b5cf6' },
-    { name: 'Atrasados', value: companhiaDespesas.filter(d => d.categoria === 'ATRASADOS').reduce((sum, d) => sum + d.valor, 0), color: '#6b7280' }
-  ].filter(item => item.value > 0);
 
   const evolucaoMensal = React.useMemo(() => {
     const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
@@ -200,26 +195,7 @@ const CompanhiaPage = () => {
                 <CardDescription>Categorias de gastos</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RechartsPieChart>
-                      <Pie
-                        data={despesasPorCategoria}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={60}
-                        outerRadius={120}
-                        dataKey="value"
-                      >
-                        {despesasPorCategoria.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
-                      <Legend />
-                    </RechartsPieChart>
-                  </ResponsiveContainer>
-                </div>
+                <ExpenseDistribution despesas={companhiaDespesas} empresa="Companhia do Churrasco" />
               </CardContent>
             </Card>
           </div>
@@ -255,76 +231,14 @@ const CompanhiaPage = () => {
             </Card>
 
             {/* Metas e Objetivos */}
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader>
-                <CardTitle className="text-xl text-gray-800">Metas do Mês</CardTitle>
-                <CardDescription>Objetivos e progresso</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm font-medium">Receita Meta</span>
-                    <span className="text-sm text-gray-600">85%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-red-500 h-2 rounded-full" style={{ width: '85%' }}></div>
-                  </div>
-                </div>
-                
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm font-medium">Controle Custos</span>
-                    <span className="text-sm text-gray-600">92%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-green-500 h-2 rounded-full" style={{ width: '92%' }}></div>
-                  </div>
-                </div>
-                
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm font-medium">Margem Lucro</span>
-                    <span className="text-sm text-gray-600">78%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-yellow-500 h-2 rounded-full" style={{ width: '78%' }}></div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <MonthlyGoals 
+              totalReceitas={totalReceitas} 
+              totalDespesas={totalDespesas} 
+              empresa="Companhia do Churrasco" 
+            />
 
             {/* Próximas Ações */}
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader>
-                <CardTitle className="text-xl text-gray-800">Próximas Ações</CardTitle>
-                <CardDescription>Tarefas pendentes</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                  <Calendar className="h-4 w-4 text-gray-600" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Revisar fornecedores</p>
-                    <p className="text-xs text-gray-500">Até 15/12</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                  <PieChart className="h-4 w-4 text-gray-600" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Análise trimestral</p>
-                    <p className="text-xs text-gray-500">Até 20/12</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                  <DollarSign className="h-4 w-4 text-gray-600" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Orçamento 2025</p>
-                    <p className="text-xs text-gray-500">Até 31/12</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <NextActions empresa="Companhia do Churrasco" />
           </div>
         </div>
       </div>
