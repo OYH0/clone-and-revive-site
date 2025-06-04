@@ -1,31 +1,12 @@
 
 import React from 'react';
+import { getTransactionStatus, getCategoryColor, getStatusColor } from '@/utils/transactionUtils';
 
 interface RecentTransactionsProps {
   despesas?: any[];
 }
 
 const RecentTransactions: React.FC<RecentTransactionsProps> = ({ despesas }) => {
-  
-  const getTransactionStatus = (despesa: any) => {
-    const today = new Date();
-    const transactionDate = new Date(despesa.data);
-    const dueDate = despesa.data_vencimento ? new Date(despesa.data_vencimento) : transactionDate;
-    
-    if (despesa.data_vencimento && dueDate < today) {
-      return 'ATRASADO';
-    }
-    
-    if (despesa.categoria === 'ATRASADOS') {
-      return 'ATRASADO';
-    }
-    
-    if (transactionDate > today) {
-      return 'PENDENTE';
-    }
-    
-    return 'PAGO';
-  };
   
   // Use filtered data from props
   const transactions = despesas?.slice(0, 5).map(despesa => ({
@@ -35,36 +16,12 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ despesas }) => 
     description: despesa.descricao,
     category: despesa.categoria,
     value: despesa.valor,
-    status: getTransactionStatus(despesa)
+    status: getTransactionStatus({
+      date: despesa.data,
+      category: despesa.categoria,
+      data_vencimento: despesa.data_vencimento
+    })
   })) || [];
-
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'INSUMOS':
-        return 'bg-blue-500 text-white';
-      case 'FIXAS':
-        return 'bg-teal-500 text-white';
-      case 'VARIAVEIS':
-        return 'bg-orange-500 text-white';
-      case 'ATRASADOS':
-        return 'bg-red-500 text-white';
-      default:
-        return 'bg-gray-500 text-white';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'PAGO':
-        return 'bg-green-500 text-white';
-      case 'PENDENTE':
-        return 'bg-yellow-500 text-white';
-      case 'ATRASADO':
-        return 'bg-red-500 text-white';
-      default:
-        return 'bg-gray-500 text-white';
-    }
-  };
 
   const getCompanyColor = (company: string) => {
     return company === 'Churrasco' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white';

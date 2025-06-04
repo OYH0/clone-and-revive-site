@@ -6,12 +6,12 @@ export const getTransactionStatus = (transaction: any) => {
   const transactionDate = new Date(transaction.date);
   transactionDate.setHours(0, 0, 0, 0);
   
-  // Se a data da transação é hoje ou anterior, está pago
-  if (transactionDate <= today) {
-    return 'PAGO';
+  // Se é categoria ATRASADOS (independente da data)
+  if (transaction.category === 'ATRASADOS') {
+    return 'ATRASADO';
   }
   
-  // Se tem data de vencimento
+  // Se tem data de vencimento, usar ela para determinar se está atrasado
   if (transaction.data_vencimento) {
     const dueDate = new Date(transaction.data_vencimento);
     dueDate.setHours(0, 0, 0, 0);
@@ -22,13 +22,13 @@ export const getTransactionStatus = (transaction: any) => {
     }
   }
   
-  // Se é categoria ATRASADOS (independente da data)
-  if (transaction.category === 'ATRASADOS') {
-    return 'ATRASADO';
+  // Se a data da transação é futura, está pendente
+  if (transactionDate > today) {
+    return 'PENDENTE';
   }
   
-  // Se a data da transação é futura, está pendente
-  return 'PENDENTE';
+  // Se a data da transação é hoje ou anterior, está pago
+  return 'PAGO';
 };
 
 export const getStatusColor = (status: string) => {

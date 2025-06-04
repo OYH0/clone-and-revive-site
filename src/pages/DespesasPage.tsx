@@ -10,6 +10,7 @@ import { Plus, TrendingDown, DollarSign, CheckCircle, AlertTriangle, Clock, File
 import { useDespesas } from '@/hooks/useDespesas';
 import { useAuth } from '@/contexts/AuthContext';
 import { Transaction } from '@/types/transaction';
+import { getTransactionStatus } from '@/utils/transactionUtils';
 
 interface FilterOptions {
   empresa?: string;
@@ -60,26 +61,6 @@ const DespesasPage = () => {
   }));
 
   // Aplicar filtros
-  const getTransactionStatus = (transaction: Transaction) => {
-    const today = new Date();
-    const transactionDate = new Date(transaction.date);
-    const dueDate = transaction.data_vencimento ? new Date(transaction.data_vencimento) : transactionDate;
-    
-    if (transaction.data_vencimento && dueDate < today) {
-      return 'ATRASADO';
-    }
-    
-    if (transaction.category === 'ATRASADOS') {
-      return 'ATRASADO';
-    }
-    
-    if (transactionDate > today) {
-      return 'PENDENTE';
-    }
-    
-    return 'PAGO';
-  };
-
   const filteredTransactions = useMemo(() => {
     return allTransactions.filter(transaction => {
       const status = getTransactionStatus(transaction);
