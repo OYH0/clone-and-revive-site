@@ -1,21 +1,25 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Edit, Trash2 } from 'lucide-react';
 import { Transaction } from '@/types/transaction';
+import EditTransactionModal from './EditTransactionModal';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
 
 interface TransactionTableProps {
   transactions: Transaction[];
+  onTransactionUpdated: () => void;
 }
 
-const TransactionTable: React.FC<TransactionTableProps> = ({ transactions }) => {
+const TransactionTable: React.FC<TransactionTableProps> = ({ transactions, onTransactionUpdated }) => {
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
+
   const handleEdit = (transaction: Transaction) => {
-    console.log('Editando transação:', transaction);
-    // TODO: Implementar modal de edição
+    setEditingTransaction(transaction);
   };
 
   const handleDelete = (transaction: Transaction) => {
-    console.log('Deletando transação:', transaction);
-    // TODO: Implementar confirmação e exclusão
+    setDeletingTransaction(transaction);
   };
 
   const getStatusColor = (status: string) => {
@@ -36,67 +40,83 @@ const TransactionTable: React.FC<TransactionTableProps> = ({ transactions }) => 
   };
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-gray-200">
-            <th className="text-left text-gray-700 py-3 px-4 font-medium">Data</th>
-            <th className="text-left text-gray-700 py-3 px-4 font-medium">Empresa</th>
-            <th className="text-left text-gray-700 py-3 px-4 font-medium">Descrição</th>
-            <th className="text-left text-gray-700 py-3 px-4 font-medium">Categoria</th>
-            <th className="text-left text-gray-700 py-3 px-4 font-medium">Valor</th>
-            <th className="text-left text-gray-700 py-3 px-4 font-medium">Status</th>
-            <th className="text-left text-gray-700 py-3 px-4 font-medium">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {transactions.map((transaction) => (
-            <tr key={transaction.id} className="border-b border-gray-100 hover:bg-gray-50">
-              <td className="py-3 px-4 text-gray-900">
-                {new Date(transaction.date).toLocaleDateString('pt-BR')}
-              </td>
-              <td className="py-3 px-4">
-                <span className="px-2 py-1 rounded text-xs bg-blue-500 text-white">
-                  {transaction.company}
-                </span>
-              </td>
-              <td className="py-3 px-4 text-gray-900">{transaction.description}</td>
-              <td className="py-3 px-4">
-                <span className={`px-2 py-1 rounded text-xs ${getCategoryColor(transaction.category)}`}>
-                  {transaction.category}
-                </span>
-              </td>
-              <td className="py-3 px-4 text-gray-900 font-medium">
-                R$ {transaction.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-              </td>
-              <td className="py-3 px-4">
-                <span className={`px-2 py-1 rounded text-xs ${getStatusColor('PAGO')}`}>
-                  PAGO
-                </span>
-              </td>
-              <td className="py-3 px-4">
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleEdit(transaction)}
-                    className="text-blue-500 hover:text-blue-700 p-1 rounded hover:bg-blue-50"
-                    title="Editar"
-                  >
-                    <Edit size={16} />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(transaction)}
-                    className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50"
-                    title="Excluir"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </td>
+    <>
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-gray-200">
+              <th className="text-left text-gray-700 py-3 px-4 font-medium">Data</th>
+              <th className="text-left text-gray-700 py-3 px-4 font-medium">Empresa</th>
+              <th className="text-left text-gray-700 py-3 px-4 font-medium">Descrição</th>
+              <th className="text-left text-gray-700 py-3 px-4 font-medium">Categoria</th>
+              <th className="text-left text-gray-700 py-3 px-4 font-medium">Valor</th>
+              <th className="text-left text-gray-700 py-3 px-4 font-medium">Status</th>
+              <th className="text-left text-gray-700 py-3 px-4 font-medium">Ações</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {transactions.map((transaction) => (
+              <tr key={transaction.id} className="border-b border-gray-100 hover:bg-gray-50">
+                <td className="py-3 px-4 text-gray-900">
+                  {new Date(transaction.date).toLocaleDateString('pt-BR')}
+                </td>
+                <td className="py-3 px-4">
+                  <span className="px-2 py-1 rounded text-xs bg-blue-500 text-white">
+                    {transaction.company}
+                  </span>
+                </td>
+                <td className="py-3 px-4 text-gray-900">{transaction.description}</td>
+                <td className="py-3 px-4">
+                  <span className={`px-2 py-1 rounded text-xs ${getCategoryColor(transaction.category)}`}>
+                    {transaction.category}
+                  </span>
+                </td>
+                <td className="py-3 px-4 text-gray-900 font-medium">
+                  R$ {transaction.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </td>
+                <td className="py-3 px-4">
+                  <span className={`px-2 py-1 rounded text-xs ${getStatusColor('PAGO')}`}>
+                    PAGO
+                  </span>
+                </td>
+                <td className="py-3 px-4">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEdit(transaction)}
+                      className="text-blue-500 hover:text-blue-700 p-1 rounded hover:bg-blue-50"
+                      title="Editar"
+                    >
+                      <Edit size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(transaction)}
+                      className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50"
+                      title="Excluir"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <EditTransactionModal
+        isOpen={!!editingTransaction}
+        onClose={() => setEditingTransaction(null)}
+        transaction={editingTransaction}
+        onTransactionUpdated={onTransactionUpdated}
+      />
+
+      <DeleteConfirmationModal
+        isOpen={!!deletingTransaction}
+        onClose={() => setDeletingTransaction(null)}
+        transaction={deletingTransaction}
+        onTransactionDeleted={onTransactionUpdated}
+      />
+    </>
   );
 };
 

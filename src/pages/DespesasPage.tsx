@@ -30,6 +30,10 @@ const DespesasPage = () => {
     setIsModalOpen(false);
   };
 
+  const handleTransactionUpdated = () => {
+    refetch();
+  };
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen bg-gray-50">
@@ -83,7 +87,10 @@ const DespesasPage = () => {
           </div>
 
           <div className="bg-white rounded-lg shadow-sm">
-            <TransactionTable transactions={transactions} />
+            <TransactionTable 
+              transactions={transactions} 
+              onTransactionUpdated={handleTransactionUpdated}
+            />
           </div>
 
           <AddTransactionModal
