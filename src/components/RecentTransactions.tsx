@@ -1,9 +1,11 @@
 
 import React from 'react';
-import { useDespesas } from '@/hooks/useDespesas';
 
-const RecentTransactions: React.FC = () => {
-  const { data: despesas } = useDespesas();
+interface RecentTransactionsProps {
+  despesas?: any[];
+}
+
+const RecentTransactions: React.FC<RecentTransactionsProps> = ({ despesas }) => {
   
   const getTransactionStatus = (despesa: any) => {
     const today = new Date();
@@ -25,7 +27,7 @@ const RecentTransactions: React.FC = () => {
     return 'PAGO';
   };
   
-  // Use actual data from database if available, otherwise show empty or sample data
+  // Use filtered data from props
   const transactions = despesas?.slice(0, 5).map(despesa => ({
     id: despesa.id,
     date: new Date(despesa.data).toLocaleDateString('pt-BR'),

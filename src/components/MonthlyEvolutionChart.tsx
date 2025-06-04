@@ -1,29 +1,95 @@
 
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { useDespesas } from '@/hooks/useDespesas';
 
-const MonthlyEvolutionChart: React.FC = () => {
-  const { data: despesas } = useDespesas();
+interface MonthlyEvolutionChartProps {
+  despesas?: any[];
+  selectedPeriod: 'today' | 'week' | 'month' | 'year';
+}
+
+const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas, selectedPeriod }) => {
   
-  // Generate monthly data based on actual expenses
-  const monthlyData = React.useMemo(() => {
+  // Generate data based on selected period
+  const chartData = React.useMemo(() => {
     if (!despesas) return [];
 
+    if (selectedPeriod === 'today') {
+      // Show hourly data for today
+      const hours = Array.from({ length: 24 }, (_, i) => i);
+      return hours.map(hour => {
+        const hourData = despesas.filter(d => {
+          const date = new Date(d.data);
+          return date.getHours() === hour;
+        });
+        
+        const churrasco = hourData.filter(d => d.empresa === 'Churrasco').reduce((sum, d) => sum + d.valor, 0);
+        const johnny = hourData.filter(d => d.empresa === 'Johnny').reduce((sum, d) => sum + d.valor, 0);
+        
+        return {
+          period: `${hour}h`,
+          churrasco,
+          johnny
+        };
+      }).filter(item => item.churrasco > 0 || item.johnny > 0);
+    }
+
+    if (selectedPeriod === 'week') {
+      // Show daily data for the week
+      const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+      return days.map((day, index) => {
+        const dayData = despesas.filter(d => {
+          const date = new Date(d.data);
+          return date.getDay() === index;
+        });
+        
+        const churrasco = dayData.filter(d => d.empresa === 'Churrasco').reduce((sum, d) => sum + d.valor, 0);
+        const johnny = dayData.filter(d => d.empresa === 'Johnny').reduce((sum, d) => sum + d.valor, 0);
+        
+        return {
+          period: day,
+          churrasco,
+          johnny
+        };
+      });
+    }
+
+    if (selectedPeriod === 'year') {
+      // Show monthly data for the year
+      const months = [
+        'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 
+        'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+      ];
+      
+      return months.map((month, index) => {
+        const monthData = despesas.filter(d => {
+          const date = new Date(d.data);
+          return date.getMonth() === index;
+        });
+        
+        const churrasco = monthData.filter(d => d.empresa === 'Churrasco').reduce((sum, d) => sum + d.valor, 0);
+        const johnny = monthData.filter(d => d.empresa === 'Johnny').reduce((sum, d) => sum + d.valor, 0);
+        
+        return {
+          period: month,
+          churrasco,
+          johnny
+        };
+      });
+    }
+
+    // Default: show last 6 months including current month
     const months = [
       'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 
       'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
     ];
     
-    // Initialize data structure
     const data = months.map((month, index) => ({
-      month,
+      period: month,
       index,
       churrasco: 0,
       johnny: 0
     }));
     
-    // Fill with actual data
     despesas.forEach(despesa => {
       const date = new Date(despesa.data);
       const monthIndex = date.getMonth();
@@ -35,14 +101,11 @@ const MonthlyEvolutionChart: React.FC = () => {
       }
     });
     
-    // Get current month to show only relevant months
     const currentMonth = new Date().getMonth();
-    
-    // Return data for the last 6 months including current month
     return data
       .filter((_, i) => i <= currentMonth && i >= currentMonth - 5)
       .sort((a, b) => a.index - b.index);
-  }, [despesas]);
+  }, [despesas, selectedPeriod]);
   
   // Custom tooltip for the chart
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -52,7 +115,7 @@ const MonthlyEvolutionChart: React.FC = () => {
           <p className="font-medium text-gray-800">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
-              {entry.name}: R$ {(entry.value / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              {entry.name}: R$ {entry.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </p>
           ))}
         </div>
@@ -61,7 +124,7 @@ const MonthlyEvolutionChart: React.FC = () => {
     return null;
   };
 
-  if (!monthlyData.length) {
+  if (!chartData.length) {
     return (
       <div className="flex items-center justify-center h-48 text-gray-500">
         <p>Não há dados para mostrar</p>
@@ -72,9 +135,9 @@ const MonthlyEvolutionChart: React.FC = () => {
   return (
     <div className="h-48 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={monthlyData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+        <BarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
           <XAxis 
-            dataKey="month" 
+            dataKey="period" 
             axisLine={false} 
             tickLine={false} 
             tick={{ fill: '#4B5563', fontSize: 12 }} 
@@ -83,7 +146,7 @@ const MonthlyEvolutionChart: React.FC = () => {
             axisLine={false} 
             tickLine={false} 
             tick={{ fill: '#4B5563', fontSize: 12 }} 
-            tickFormatter={(value) => `${(value / 100).toLocaleString('pt-BR', { notation: 'compact' })}`}
+            tickFormatter={(value) => `${value.toLocaleString('pt-BR', { notation: 'compact' })}`}
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend 

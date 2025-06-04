@@ -1,11 +1,12 @@
 
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { useDespesas } from '@/hooks/useDespesas';
 
-const ExpenseDistributionChart: React.FC = () => {
-  const { data: despesas } = useDespesas();
-  
+interface ExpenseDistributionChartProps {
+  despesas?: any[];
+}
+
+const ExpenseDistributionChart: React.FC<ExpenseDistributionChartProps> = ({ despesas }) => {
   // Define categories and colors
   const categories = [
     { name: 'INSUMOS', label: 'Insumos', color: '#0ea5e9' },
@@ -14,7 +15,7 @@ const ExpenseDistributionChart: React.FC = () => {
     { name: 'ATRASADOS', label: 'Atrasados', color: '#ef4444' }
   ];
 
-  // Calculate values based on actual data
+  // Calculate values based on filtered data
   const data = categories.map(category => {
     const value = despesas
       ?.filter(d => d.categoria === category.name)
@@ -42,7 +43,7 @@ const ExpenseDistributionChart: React.FC = () => {
         <div className="bg-white p-2 border border-gray-200 rounded-lg shadow-md">
           <p className="font-medium">{payload[0].name}</p>
           <p className="text-sm text-gray-600">
-            R$ {(payload[0].value / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            R$ {payload[0].value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
         </div>
       );
@@ -87,7 +88,7 @@ const ExpenseDistributionChart: React.FC = () => {
       <div className="flex flex-col gap-1 text-xs text-gray-500">
         {data.map((item, index) => (
           <div key={index} className="text-right">
-            R$ {(item.value / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            R$ {item.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </div>
         ))}
       </div>
