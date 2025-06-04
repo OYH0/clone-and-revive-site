@@ -5,66 +5,50 @@ import CompanyCard from './CompanyCard';
 import TransactionTable from './TransactionTable';
 import ExpenseDistributionChart from './ExpenseDistributionChart';
 import MonthlyEvolutionChart from './MonthlyEvolutionChart';
+import { useDespesas } from '@/hooks/useDespesas';
+import { processCompanyData, processTransactionData, processCategoryDistribution } from '@/utils/dashboardData';
 
 const Dashboard: React.FC = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [selectedCompany, setSelectedCompany] = useState('Todas Empresas');
   const [currentPeriod, setCurrentPeriod] = useState('Mês');
 
-  const companyData = [
-    {
-      name: 'Companhia do Churrasco',
-      period: 'Maio 2025',
-      totalExpenses: 'R$ 3.598,00',
-      status: 'Atualizado' as const,
-      categories: [
-        { name: 'Insumos', value: 'R$ 3.138,00' },
-        { name: 'Variáveis', value: 'R$ 460,00' }
-      ],
-      chartData: [
-        { value: 3200 }, { value: 3000 }, { value: 3300 }, 
-        { value: 3500 }, { value: 3400 }, { value: 3598 }
-      ],
-      chartColor: '#e74c3c'
-    },
-    {
-      name: 'Johnny Rockets',
-      period: 'Maio 2025',
-      totalExpenses: 'R$ 122.900,59',
-      status: 'Pendentes' as const,
-      categories: [
-        { name: 'Fixas', value: 'R$ 48.633,32' },
-        { name: 'Insumos', value: 'R$ 36.713,79' },
-        { name: 'Atrasados', value: 'R$ 36.808,58' }
-      ],
-      chartData: [
-        { value: 120000 }, { value: 119000 }, { value: 121000 }, 
-        { value: 122000 }, { value: 122500 }, { value: 122900 }
-      ],
-      chartColor: '#3498db'
-    }
-  ];
-
-  const transactions = [
-    {
-      date: '27/05/2025',
-      company: 'Churrasco',
-      description: 'COMPRAS',
-      category: 'INSUMOS',
-      value: 'R$ 2250,00',
-      status: 'PAGO' as const
-    },
-    {
-      date: '27/05/2025',
-      company: 'Johnny',
-      description: 'MANUTENÇÃO VEÍCULOS',
-      category: 'FIXAS',
-      value: 'R$ 5200,00',
-      status: 'PAGO' as const
-    }
-  ];
+  const { data: despesas, isLoading, error } = useDespesas();
 
   const periods = ['Hoje', 'Semana', 'Mês', 'Ano'];
+
+  // Processar dados quando disponíveis
+  const companyData = despesas ? processCompanyData(despesas) : [];
+  const transactions = despesas ? processTransactionData(despesas) : [];
+  const categoryDistribution = despesas ? processCategoryDistribution(despesas) : [];
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen bg-gray-50">
+        <Sidebar activeSection={activeSection} setActiveSection={setActiveSection} />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando dados...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-screen bg-gray-50">
+        <Sidebar activeSection={activeSection} setActiveSection={setActiveSection} />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-red-600 mb-2">Erro ao carregar dados</p>
+            <p className="text-gray-600">Verifique a conexão com o banco de dados</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -97,18 +81,24 @@ const Dashboard: React.FC = () => {
 
           {/* Company Cards */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            {companyData.map((company, index) => (
-              <CompanyCard
-                key={index}
-                name={company.name}
-                period={company.period}
-                totalExpenses={company.totalExpenses}
-                status={company.status}
-                categories={company.categories}
-                chartData={company.chartData}
-                chartColor={company.chartColor}
-              />
-            ))}
+            {companyData.length > 0 ? (
+              companyData.map((company, index) => (
+                <CompanyCard
+                  key={index}
+                  name={company.name}
+                  period={company.period}
+                  totalExpenses={company.totalExpenses}
+                  status={company.status}
+                  categories={company.categories}
+                  chartData={company.chartData}
+                  chartColor={company.chartColor}
+                />
+              ))
+            ) : (
+              <div className="col-span-2 text-center py-8 text-gray-500">
+                Nenhum dado de empresa encontrado
+              </div>
+            )}
           </div>
 
           {/* Transactions Table */}
@@ -122,7 +112,7 @@ const Dashboard: React.FC = () => {
 
           {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <ExpenseDistributionChart />
+            <ExpenseDistributionChart data={categoryDistribution} />
             <MonthlyEvolutionChart />
           </div>
         </div>

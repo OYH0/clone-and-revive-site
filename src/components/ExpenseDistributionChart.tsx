@@ -2,23 +2,30 @@
 import React from 'react';
 import { PieChart, Pie, Cell, Legend, ResponsiveContainer } from 'recharts';
 
-const ExpenseDistributionChart: React.FC = () => {
-  const data = [
+interface ExpenseDistributionProps {
+  data?: Array<{ name: string; value: number; color: string }>;
+}
+
+const ExpenseDistributionChart: React.FC<ExpenseDistributionProps> = ({ data }) => {
+  // Dados padrão caso não haja dados reais
+  const defaultData = [
     { name: 'Insumos', value: 35, color: '#3498db' },
     { name: 'Fixas', value: 25, color: '#2c3e50' },
     { name: 'Variáveis', value: 25, color: '#f39c12' },
     { name: 'Atrasados', value: 15, color: '#e74c3c' }
   ];
 
+  const chartData = data && data.length > 0 ? data : defaultData;
+
   const valueData = [
-    { label: 'R$ 140k', percentage: 'R$ 140k' },
-    { label: 'R$ 120k', percentage: 'R$ 120k' },
-    { label: 'R$ 100k', percentage: 'R$ 100k' },
-    { label: 'R$ 80k', percentage: 'R$ 80k' },
-    { label: 'R$ 60k', percentage: 'R$ 60k' },
-    { label: 'R$ 40k', percentage: 'R$ 40k' },
-    { label: 'R$ 20k', percentage: 'R$ 20k' },
-    { label: 'R$ 0k', percentage: 'R$ 0k' }
+    { label: 'R$ 140k' },
+    { label: 'R$ 120k' },
+    { label: 'R$ 100k' },
+    { label: 'R$ 80k' },
+    { label: 'R$ 60k' },
+    { label: 'R$ 40k' },
+    { label: 'R$ 20k' },
+    { label: 'R$ 0k' }
   ];
 
   return (
@@ -30,14 +37,14 @@ const ExpenseDistributionChart: React.FC = () => {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={data}
+                data={chartData}
                 cx="50%"
                 cy="50%"
                 innerRadius={60}
                 outerRadius={100}
                 dataKey="value"
               >
-                {data.map((entry, index) => (
+                {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
@@ -46,13 +53,13 @@ const ExpenseDistributionChart: React.FC = () => {
         </div>
         
         <div className="flex flex-col gap-3">
-          {data.map((item, index) => (
+          {chartData.map((item, index) => (
             <div key={index} className="flex items-center gap-3">
               <div 
                 className="w-4 h-4 rounded-full" 
                 style={{ backgroundColor: item.color }}
               ></div>
-              <span className="text-white text-sm">{item.name}</span>
+              <span className="text-white text-sm">{item.name} ({item.value}%)</span>
             </div>
           ))}
         </div>
