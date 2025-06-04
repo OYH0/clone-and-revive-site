@@ -1,8 +1,13 @@
+
 import React, { useState } from 'react';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, CheckCircle, Paperclip } from 'lucide-react';
 import { Transaction } from '@/types/transaction';
 import EditTransactionModal from './EditTransactionModal';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
+import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface TransactionTableProps {
   transactions: Transaction[];
@@ -17,6 +22,8 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
 }) => {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
+  const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleEdit = (transaction: Transaction) => {
     setEditingTransaction(transaction);
@@ -26,10 +33,91 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
     setDeletingTransaction(transaction);
   };
 
+  const handleMarkAsPaid = async (transaction: Transaction) => {
+    if (!user) return;
+
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const { error } = await supabase
+        .from('despesas')
+        .update({
+          data: today,
+          categoria: transaction.category === 'ATRASADOS' ? 'FIXAS' : transaction.category
+        })
+        .eq('id', transaction.id)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: "Despesa marcada como paga!",
+      });
+
+      onTransactionUpdated();
+    } catch (error) {
+      console.error('Erro ao marcar como paga:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao marcar despesa como paga.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleAttachReceipt = async (transaction: Transaction) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*,.pdf';
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file || !user) return;
+
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${transaction.id}_${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('receipts')
+          .upload(fileName, file);
+
+        if (uploadError) throw uploadError;
+
+        const { error: updateError } = await supabase
+          .from('despesas')
+          .update({ comprovante: fileName })
+          .eq('id', transaction.id)
+          .eq('user_id', user.id);
+
+        if (updateError) throw updateError;
+
+        toast({
+          title: "Sucesso",
+          description: "Comprovante anexado com sucesso!",
+        });
+
+        onTransactionUpdated();
+      } catch (error) {
+        console.error('Erro ao anexar comprovante:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao anexar comprovante.",
+          variant: "destructive",
+        });
+      }
+    };
+    input.click();
+  };
+
   const getTransactionStatus = (transaction: Transaction) => {
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
     const transactionDate = new Date(transaction.date);
+    transactionDate.setHours(0, 0, 0, 0);
+    
     const dueDate = transaction.data_vencimento ? new Date(transaction.data_vencimento) : transactionDate;
+    dueDate.setHours(0, 0, 0, 0);
     
     // Se tem data de vencimento e está atrasada
     if (transaction.data_vencimento && dueDate < today) {
@@ -41,13 +129,13 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
       return 'ATRASADO';
     }
     
-    // Se a data da transação é futura, está pendente
-    if (transactionDate > today) {
-      return 'PENDENTE';
+    // Se a data da transação é hoje ou anterior, está pago
+    if (transactionDate <= today) {
+      return 'PAGO';
     }
     
-    // Se não tem data de vencimento ou está dentro do prazo
-    return 'PAGO';
+    // Se a data da transação é futura, está pendente
+    return 'PENDENTE';
   };
 
   const getStatusColor = (status: string) => {
@@ -96,6 +184,8 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
           <tbody>
             {transactions.map((transaction) => {
               const status = getTransactionStatus(transaction);
+              const isPaid = status === 'PAGO';
+              
               return (
                 <tr key={transaction.id} className="border-b border-gray-100 hover:bg-gray-50">
                   <td className="py-3 px-4 text-gray-900">
@@ -129,6 +219,25 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
                       >
                         <Edit size={16} />
                       </button>
+                      
+                      {!isPaid && (
+                        <button
+                          onClick={() => handleMarkAsPaid(transaction)}
+                          className="text-green-500 hover:text-green-700 p-1 rounded hover:bg-green-50"
+                          title="Marcar como Pago"
+                        >
+                          <CheckCircle size={16} />
+                        </button>
+                      )}
+                      
+                      <button
+                        onClick={() => handleAttachReceipt(transaction)}
+                        className="text-purple-500 hover:text-purple-700 p-1 rounded hover:bg-purple-50"
+                        title="Anexar Comprovante"
+                      >
+                        <Paperclip size={16} />
+                      </button>
+                      
                       <button
                         onClick={() => handleDelete(transaction)}
                         className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50"
