@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Edit, Trash2, CheckCircle, Paperclip, Info } from 'lucide-react';
 import { Transaction } from '@/types/transaction';
@@ -33,12 +34,17 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
         const receiptsBucketExists = buckets?.some(bucket => bucket.name === 'receipts');
         
         if (!receiptsBucketExists) {
-          await supabase.storage.createBucket('receipts', {
+          const { error: bucketError } = await supabase.storage.createBucket('receipts', {
             public: false,
             allowedMimeTypes: ['image/*', 'application/pdf'],
             fileSizeLimit: 10485760 // 10MB
           });
-          console.log('Receipts bucket created successfully');
+          
+          if (bucketError) {
+            console.error('Error creating receipts bucket:', bucketError);
+          } else {
+            console.log('Receipts bucket created successfully');
+          }
         }
       } catch (error) {
         console.error('Error creating receipts bucket:', error);
@@ -70,7 +76,10 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
         .eq('id', transaction.id)
         .eq('user_id', user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating despesa:', error);
+        throw error;
+      }
 
       toast({
         title: "Sucesso",
@@ -100,11 +109,18 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
         const fileExt = file.name.split('.').pop();
         const fileName = `${transaction.id}_${Date.now()}.${fileExt}`;
         
+        console.log('Uploading file:', fileName);
+        
         const { error: uploadError } = await supabase.storage
           .from('receipts')
           .upload(fileName, file);
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          throw uploadError;
+        }
+
+        console.log('File uploaded successfully, updating database...');
 
         const { error: updateError } = await supabase
           .from('despesas')
@@ -112,7 +128,10 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
           .eq('id', transaction.id)
           .eq('user_id', user.id);
 
-        if (updateError) throw updateError;
+        if (updateError) {
+          console.error('Database update error:', updateError);
+          throw updateError;
+        }
 
         toast({
           title: "Sucesso",
@@ -189,7 +208,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
     }
   };
 
-  const truncateDescription = (description: string, maxLength: number = 50) => {
+  const truncateDescription = (description: string, maxLength: number = 30) => {
     if (description.length <= maxLength) {
       return { text: description, isTruncated: false };
     }
@@ -203,15 +222,15 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
     const { text, isTruncated } = truncateDescription(description);
     
     if (!isTruncated) {
-      return <span className="text-gray-900">{text}</span>;
+      return <span className="text-gray-900 break-words">{text}</span>;
     }
 
     return (
       <HoverCard>
         <HoverCardTrigger asChild>
           <div className="flex items-center gap-2 cursor-pointer">
-            <span className="text-gray-900">{text}</span>
-            <Info size={14} className="text-blue-500 hover:text-blue-700" />
+            <span className="text-gray-900 break-words">{text}</span>
+            <Info size={14} className="text-blue-500 hover:text-blue-700 flex-shrink-0" />
           </div>
         </HoverCardTrigger>
         <HoverCardContent className="w-80 p-4 bg-white border border-gray-200 shadow-lg rounded-xl">
@@ -227,16 +246,16 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
   return (
     <>
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full table-fixed">
           <thead>
             <tr className="border-b border-gray-200">
-              <th className="text-left text-gray-700 py-3 px-4 font-medium">Data</th>
-              <th className="text-left text-gray-700 py-3 px-4 font-medium">Empresa</th>
-              <th className="text-left text-gray-700 py-3 px-4 font-medium">Descrição</th>
-              <th className="text-left text-gray-700 py-3 px-4 font-medium">Categoria</th>
-              <th className="text-left text-gray-700 py-3 px-4 font-medium">Valor</th>
-              <th className="text-left text-gray-700 py-3 px-4 font-medium">Status</th>
-              <th className="text-left text-gray-700 py-3 px-4 font-medium">Ações</th>
+              <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Data</th>
+              <th className="text-left text-gray-700 py-3 px-4 font-medium w-32">Empresa</th>
+              <th className="text-left text-gray-700 py-3 px-4 font-medium w-40">Descrição</th>
+              <th className="text-left text-gray-700 py-3 px-4 font-medium w-28">Categoria</th>
+              <th className="text-left text-gray-700 py-3 px-4 font-medium w-32">Valor</th>
+              <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Status</th>
+              <th className="text-left text-gray-700 py-3 px-4 font-medium w-36">Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -254,8 +273,10 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
                       {transaction.company}
                     </span>
                   </td>
-                  <td className="py-3 px-4 max-w-xs">
-                    <DescriptionCell description={transaction.description} />
+                  <td className="py-3 px-4">
+                    <div className="max-w-full overflow-hidden">
+                      <DescriptionCell description={transaction.description} />
+                    </div>
                   </td>
                   <td className="py-3 px-4">
                     <span className={`px-2 py-1 rounded text-xs ${getCategoryColor(transaction.category)}`}>
