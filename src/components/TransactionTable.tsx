@@ -70,10 +70,11 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
       
       console.log('Marking transaction as paid:', transaction.id, 'Setting date to:', today);
       
-      // Update the transaction to mark as paid
+      // Update the transaction to mark as paid - set status as PAGO
       const updateData: any = {
         data: today,
-        categoria: transaction.category === 'ATRASADOS' ? 'FIXAS' : transaction.category
+        categoria: transaction.category === 'ATRASADOS' ? 'FIXAS' : transaction.category,
+        status: 'PAGO' // Explicitly set status to PAGO
       };
 
       const { error, data } = await supabase

@@ -1,4 +1,3 @@
-
 export const getTransactionStatus = (transaction: any) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -6,7 +5,7 @@ export const getTransactionStatus = (transaction: any) => {
   const transactionDate = new Date(transaction.date);
   transactionDate.setHours(0, 0, 0, 0);
   
-  // Se tem um campo específico de status pago, usar ele
+  // Se tem um campo específico de status pago, usar ele primeiro
   if (transaction.status === 'PAGO') {
     return 'PAGO';
   }
@@ -32,8 +31,8 @@ export const getTransactionStatus = (transaction: any) => {
     return 'PENDENTE';
   }
   
-  // Se a data da transação é hoje ou anterior, está pago
-  return 'PAGO';
+  // Se chegou até aqui, está pendente (não marca automaticamente como pago)
+  return 'PENDENTE';
 };
 
 export const getStatusColor = (status: string) => {
