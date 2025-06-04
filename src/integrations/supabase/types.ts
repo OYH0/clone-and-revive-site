@@ -39,6 +39,42 @@ export type Database = {
         }
         Relationships: []
       }
+      receitas: {
+        Row: {
+          categoria: string | null
+          created_at: string | null
+          data: string
+          data_recebimento: string | null
+          descricao: string | null
+          empresa: string | null
+          id: number
+          updated_at: string | null
+          valor: number | null
+        }
+        Insert: {
+          categoria?: string | null
+          created_at?: string | null
+          data: string
+          data_recebimento?: string | null
+          descricao?: string | null
+          empresa?: string | null
+          id?: number
+          updated_at?: string | null
+          valor?: number | null
+        }
+        Update: {
+          categoria?: string | null
+          created_at?: string | null
+          data?: string
+          data_recebimento?: string | null
+          descricao?: string | null
+          empresa?: string | null
+          id?: number
+          updated_at?: string | null
+          valor?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

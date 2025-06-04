@@ -1,131 +1,309 @@
 
-import React from 'react';
-import { BarChart3, FileText, Download, TrendingUp, PieChart } from 'lucide-react';
+import React, { useState } from 'react';
+import { FileText, Download, TrendingUp, DollarSign, Calendar, PieChart as PieChartIcon } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import ExpenseDistributionChart from '@/components/ExpenseDistributionChart';
-import MonthlyEvolutionChart from '@/components/MonthlyEvolutionChart';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Tooltip, Legend } from 'recharts';
+import { useDespesas } from '@/hooks/useDespesas';
+import { useReceitas } from '@/hooks/useReceitas';
 
 const RelatoriosPage = () => {
+  const [selectedPeriod, setSelectedPeriod] = useState('mes');
+  const [selectedType, setSelectedType] = useState('geral');
+  
+  const { data: despesas } = useDespesas();
+  const { data: receitas } = useReceitas();
+
+  // Dados para gráfico de evolução mensal
+  const monthlyData = React.useMemo(() => {
+    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const currentYear = new Date().getFullYear();
+    
+    return months.map((month, index) => {
+      const monthDespesas = despesas?.filter(d => {
+        const date = new Date(d.data);
+        return date.getMonth() === index && date.getFullYear() === currentYear;
+      }).reduce((sum, d) => sum + d.valor, 0) || 0;
+      
+      const monthReceitas = receitas?.filter(r => {
+        const date = new Date(r.data);
+        return date.getMonth() === index && date.getFullYear() === currentYear;
+      }).reduce((sum, r) => sum + r.valor, 0) || 0;
+      
+      return {
+        month,
+        despesas: monthDespesas / 100, // Converter de centavos
+        receitas: monthReceitas,
+        lucro: monthReceitas - (monthDespesas / 100)
+      };
+    });
+  }, [despesas, receitas]);
+
+  // Dados para gráfico de distribuição por categoria
+  const categoryData = React.useMemo(() => {
+    const categories = ['INSUMOS', 'FIXAS', 'VARIAVEIS', 'ATRASADOS'];
+    const colors = ['#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444'];
+    
+    return categories.map((category, index) => {
+      const value = despesas?.filter(d => d.categoria === category)
+        .reduce((sum, d) => sum + d.valor, 0) || 0;
+      
+      return {
+        name: category,
+        value: value / 100, // Converter de centavos
+        color: colors[index]
+      };
+    }).filter(item => item.value > 0);
+  }, [despesas]);
+
+  // Dados para gráfico de receitas por empresa
+  const receitasEmpresaData = React.useMemo(() => {
+    const empresas = ['Churrasco', 'Johnny', 'Outros'];
+    const colors = ['#ef4444', '#3b82f6', '#6b7280'];
+    
+    return empresas.map((empresa, index) => {
+      const value = receitas?.filter(r => r.empresa === empresa)
+        .reduce((sum, r) => sum + r.valor, 0) || 0;
+      
+      return {
+        name: empresa === 'Churrasco' ? 'Companhia do Churrasco' : empresa === 'Johnny' ? 'Johnny Rockets' : empresa,
+        value,
+        color: colors[index]
+      };
+    }).filter(item => item.value > 0);
+  }, [receitas]);
+
+  // Calcular estatísticas
+  const totalDespesas = despesas?.reduce((sum, d) => sum + d.valor, 0) / 100 || 0;
+  const totalReceitas = receitas?.reduce((sum, r) => sum + r.valor, 0) || 0;
+  const lucroTotal = totalReceitas - totalDespesas;
+  const margemLucro = totalReceitas > 0 ? (lucroTotal / totalReceitas) * 100 : 0;
+
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-purple-50 to-indigo-100">
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
       <Sidebar />
       
       <div className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}
           <div className="mb-8">
-            <div className="flex justify-between items-start">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl shadow-lg">
-                  <BarChart3 className="h-8 w-8 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent">
-                    Relatórios
-                  </h1>
-                  <p className="text-gray-600 text-lg">Análises e estatísticas financeiras</p>
-                </div>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl shadow-lg">
+                <FileText className="h-8 w-8 text-white" />
               </div>
+              <div>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent">
+                  Relatórios
+                </h1>
+                <p className="text-gray-600 text-lg">Análises e relatórios financeiros</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-4">
+              <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+                <SelectTrigger className="w-48 rounded-2xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="mes">Este Mês</SelectItem>
+                  <SelectItem value="trimestre">Trimestre</SelectItem>
+                  <SelectItem value="semestre">Semestre</SelectItem>
+                  <SelectItem value="ano">Ano</SelectItem>
+                </SelectContent>
+              </Select>
               
-              <Button variant="outline" className="bg-white/50 hover:bg-white/80 border-gray-200">
+              <Select value={selectedType} onValueChange={setSelectedType}>
+                <SelectTrigger className="w-48 rounded-2xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="geral">Relatório Geral</SelectItem>
+                  <SelectItem value="despesas">Apenas Despesas</SelectItem>
+                  <SelectItem value="receitas">Apenas Receitas</SelectItem>
+                  <SelectItem value="comparativo">Comparativo</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg rounded-2xl">
                 <Download className="w-4 h-4 mr-2" />
-                Exportar Relatório
+                Exportar PDF
               </Button>
             </div>
           </div>
 
-          {/* Charts Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl">
-              <CardHeader className="border-b border-gray-100">
-                <CardTitle className="flex items-center gap-3 text-gray-800">
-                  <div className="p-2 bg-gradient-to-r from-blue-100 to-blue-200 rounded-lg">
-                    <PieChart className="h-5 w-5 text-blue-600" />
-                  </div>
-                  Distribuição de Despesas
-                </CardTitle>
-                <CardDescription className="text-gray-600">
-                  Despesas por categoria
-                </CardDescription>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Total Receitas</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-green-100 to-green-200 rounded-xl">
+                  <TrendingUp className="h-4 w-4 text-green-600" />
+                </div>
               </CardHeader>
-              <CardContent className="p-6">
-                <ExpenseDistributionChart />
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">
+                  R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl">
-              <CardHeader className="border-b border-gray-100">
-                <CardTitle className="flex items-center gap-3 text-gray-800">
-                  <div className="p-2 bg-gradient-to-r from-green-100 to-green-200 rounded-lg">
-                    <TrendingUp className="h-5 w-5 text-green-600" />
-                  </div>
-                  Evolução Mensal
-                </CardTitle>
-                <CardDescription className="text-gray-600">
-                  Tendência de gastos ao longo do tempo
-                </CardDescription>
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Total Despesas</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-red-100 to-red-200 rounded-xl">
+                  <DollarSign className="h-4 w-4 text-red-600" />
+                </div>
               </CardHeader>
-              <CardContent className="p-6">
-                <MonthlyEvolutionChart />
+              <CardContent>
+                <div className="text-2xl font-bold text-red-600">
+                  R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Lucro Líquido</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-blue-100 to-blue-200 rounded-xl">
+                  <TrendingUp className="h-4 w-4 text-blue-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className={`text-2xl font-bold ${lucroTotal >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  R$ {lucroTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Margem de Lucro</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-purple-100 to-purple-200 rounded-xl">
+                  <PieChartIcon className="h-4 w-4 text-purple-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className={`text-2xl font-bold ${margemLucro >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {margemLucro.toFixed(1)}%
+                </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Report Actions */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-              <CardHeader className="text-center">
-                <div className="mx-auto mb-4 p-4 bg-gradient-to-r from-red-100 to-red-200 rounded-2xl w-fit">
-                  <FileText className="w-8 h-8 text-red-600" />
-                </div>
-                <CardTitle className="text-gray-800">Relatório de Despesas</CardTitle>
-                <CardDescription className="text-gray-600">
-                  Análise detalhada das despesas por período
-                </CardDescription>
+          {/* Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {/* Evolução Mensal */}
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader>
+                <CardTitle className="text-xl text-gray-800">Evolução Mensal</CardTitle>
+                <CardDescription>Receitas vs Despesas por mês</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white">
-                  <FileText className="w-4 h-4 mr-2" />
-                  Gerar Relatório
-                </Button>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={monthlyData}>
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
+                      <Legend />
+                      <Line type="monotone" dataKey="receitas" stroke="#10b981" strokeWidth={3} name="Receitas" />
+                      <Line type="monotone" dataKey="despesas" stroke="#ef4444" strokeWidth={3} name="Despesas" />
+                      <Line type="monotone" dataKey="lucro" stroke="#3b82f6" strokeWidth={3} name="Lucro" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-              <CardHeader className="text-center">
-                <div className="mx-auto mb-4 p-4 bg-gradient-to-r from-green-100 to-green-200 rounded-2xl w-fit">
-                  <TrendingUp className="w-8 h-8 text-green-600" />
-                </div>
-                <CardTitle className="text-gray-800">Relatório de Receitas</CardTitle>
-                <CardDescription className="text-gray-600">
-                  Análise detalhada das receitas por período
-                </CardDescription>
+            {/* Distribuição de Despesas */}
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader>
+                <CardTitle className="text-xl text-gray-800">Distribuição de Despesas</CardTitle>
+                <CardDescription>Por categoria</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white">
-                  <FileText className="w-4 h-4 mr-2" />
-                  Gerar Relatório
-                </Button>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={categoryData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={120}
+                        dataKey="value"
+                      >
+                        {categoryData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Mais gráficos */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Receitas por Empresa */}
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader>
+                <CardTitle className="text-xl text-gray-800">Receitas por Empresa</CardTitle>
+                <CardDescription>Distribuição das receitas</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={receitasEmpresaData}>
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
+                      <Bar dataKey="value" fill="#10b981" radius={[8, 8, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-              <CardHeader className="text-center">
-                <div className="mx-auto mb-4 p-4 bg-gradient-to-r from-purple-100 to-purple-200 rounded-2xl w-fit">
-                  <BarChart3 className="w-8 h-8 text-purple-600" />
-                </div>
-                <CardTitle className="text-gray-800">Fluxo de Caixa</CardTitle>
-                <CardDescription className="text-gray-600">
-                  Relatório consolidado de entradas e saídas
-                </CardDescription>
+            {/* Resumo do Período */}
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader>
+                <CardTitle className="text-xl text-gray-800">Resumo do Período</CardTitle>
+                <CardDescription>Principais indicadores</CardDescription>
               </CardHeader>
-              <CardContent>
-                <Button className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white">
-                  <FileText className="w-4 h-4 mr-2" />
-                  Gerar Relatório
-                </Button>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center p-4 bg-green-50 rounded-xl">
+                  <span className="text-green-700 font-medium">Maior Receita</span>
+                  <span className="text-green-800 font-bold">
+                    R$ {Math.max(...(receitas?.map(r => r.valor) || [0])).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between items-center p-4 bg-red-50 rounded-xl">
+                  <span className="text-red-700 font-medium">Maior Despesa</span>
+                  <span className="text-red-800 font-bold">
+                    R$ {(Math.max(...(despesas?.map(d => d.valor) || [0])) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between items-center p-4 bg-blue-50 rounded-xl">
+                  <span className="text-blue-700 font-medium">Média Mensal</span>
+                  <span className="text-blue-800 font-bold">
+                    R$ {(totalReceitas / 12).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between items-center p-4 bg-purple-50 rounded-xl">
+                  <span className="text-purple-700 font-medium">Total de Transações</span>
+                  <span className="text-purple-800 font-bold">
+                    {(despesas?.length || 0) + (receitas?.length || 0)}
+                  </span>
+                </div>
               </CardContent>
             </Card>
           </div>

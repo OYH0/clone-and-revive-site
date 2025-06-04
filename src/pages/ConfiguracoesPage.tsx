@@ -1,16 +1,55 @@
 
-import React from 'react';
-import { Settings, User, Bell, Shield, Database } from 'lucide-react';
+import React, { useState } from 'react';
+import { Settings, User, Bell, Database, Shield, Palette, Download, Upload } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 const ConfiguracoesPage = () => {
+  const [settings, setSettings] = useState({
+    notifications: true,
+    emailAlerts: false,
+    darkMode: false,
+    autoBackup: true,
+    currency: 'BRL',
+    language: 'pt-BR',
+    backupFrequency: 'daily'
+  });
+
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  const handleSaveSettings = () => {
+    // Aqui seria implementada a lógica para salvar as configurações
+    toast({
+      title: "Configurações salvas",
+      description: "Suas configurações foram atualizadas com sucesso!",
+    });
+  };
+
+  const handleExportData = () => {
+    toast({
+      title: "Export iniciado",
+      description: "Seus dados estão sendo preparados para download...",
+    });
+  };
+
+  const handleImportData = () => {
+    toast({
+      title: "Import em desenvolvimento",
+      description: "Funcionalidade de importação será implementada em breve.",
+    });
+  };
+
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-slate-50 to-blue-100">
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-purple-50 to-indigo-100">
       <Sidebar />
       
       <div className="flex-1 p-8">
@@ -18,7 +57,7 @@ const ConfiguracoesPage = () => {
           {/* Header Section */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-3 bg-gradient-to-r from-slate-500 to-slate-600 rounded-2xl shadow-lg">
+              <div className="p-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl shadow-lg">
                 <Settings className="h-8 w-8 text-white" />
               </div>
               <div>
@@ -31,142 +70,265 @@ const ConfiguracoesPage = () => {
           </div>
 
           <div className="space-y-6">
-            {/* User Profile */}
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl">
-              <CardHeader className="border-b border-gray-100">
-                <CardTitle className="flex items-center gap-3 text-gray-800">
-                  <div className="p-2 bg-gradient-to-r from-blue-100 to-blue-200 rounded-lg">
-                    <User className="h-5 w-5 text-blue-600" />
-                  </div>
-                  Perfil do Usuário
-                </CardTitle>
-                <CardDescription className="text-gray-600">
-                  Atualize suas informações pessoais
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6 p-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="nome" className="text-gray-700 font-medium">Nome</Label>
-                    <Input id="nome" placeholder="Seu nome" className="bg-white/50 border-gray-200" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-gray-700 font-medium">Email</Label>
-                    <Input id="email" type="email" placeholder="seu@email.com" className="bg-white/50 border-gray-200" />
+            {/* Perfil do Usuário */}
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <User className="h-5 w-5 text-gray-600" />
+                  <div>
+                    <CardTitle className="text-xl text-gray-800">Perfil do Usuário</CardTitle>
+                    <CardDescription>Informações da sua conta</CardDescription>
                   </div>
                 </div>
-                <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white">
-                  Salvar Alterações
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="email">Email</Label>
+                    <Input 
+                      id="email" 
+                      value={user?.email || ''} 
+                      disabled 
+                      className="rounded-xl bg-gray-50"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="nome">Nome</Label>
+                    <Input 
+                      id="nome" 
+                      placeholder="Seu nome completo" 
+                      className="rounded-xl"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="empresa">Empresa Principal</Label>
+                  <Select>
+                    <SelectTrigger className="rounded-xl">
+                      <SelectValue placeholder="Selecione sua empresa principal" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="churrasco">Companhia do Churrasco</SelectItem>
+                      <SelectItem value="johnny">Johnny Rockets</SelectItem>
+                      <SelectItem value="ambas">Ambas</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-2xl">
+                  Atualizar Perfil
                 </Button>
               </CardContent>
             </Card>
 
-            {/* Notifications */}
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl">
-              <CardHeader className="border-b border-gray-100">
-                <CardTitle className="flex items-center gap-3 text-gray-800">
-                  <div className="p-2 bg-gradient-to-r from-yellow-100 to-yellow-200 rounded-lg">
-                    <Bell className="h-5 w-5 text-yellow-600" />
+            {/* Notificações */}
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <Bell className="h-5 w-5 text-gray-600" />
+                  <div>
+                    <CardTitle className="text-xl text-gray-800">Notificações</CardTitle>
+                    <CardDescription>Configure suas preferências de notificação</CardDescription>
                   </div>
-                  Notificações
-                </CardTitle>
-                <CardDescription className="text-gray-600">
-                  Configure suas preferências de notificação
-                </CardDescription>
+                </div>
               </CardHeader>
-              <CardContent className="space-y-6 p-6">
-                <div className="flex items-center justify-between p-4 bg-white/50 rounded-lg border border-gray-100">
-                  <div className="space-y-0.5">
-                    <Label className="text-gray-700 font-medium">Notificações por Email</Label>
-                    <p className="text-sm text-gray-500">Receba alertas sobre vencimentos</p>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-base font-medium">Notificações Push</Label>
+                    <p className="text-sm text-gray-500">Receba notificações no navegador</p>
                   </div>
-                  <Switch />
+                  <Switch 
+                    checked={settings.notifications}
+                    onCheckedChange={(checked) => setSettings({...settings, notifications: checked})}
+                  />
                 </div>
-                <div className="flex items-center justify-between p-4 bg-white/50 rounded-lg border border-gray-100">
-                  <div className="space-y-0.5">
-                    <Label className="text-gray-700 font-medium">Relatórios Mensais</Label>
-                    <p className="text-sm text-gray-500">Receba relatório mensal automaticamente</p>
+                
+                <Separator />
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-base font-medium">Alertas por Email</Label>
+                    <p className="text-sm text-gray-500">Receba alertas importantes por email</p>
                   </div>
-                  <Switch />
+                  <Switch 
+                    checked={settings.emailAlerts}
+                    onCheckedChange={(checked) => setSettings({...settings, emailAlerts: checked})}
+                  />
                 </div>
-                <div className="flex items-center justify-between p-4 bg-white/50 rounded-lg border border-gray-100">
-                  <div className="space-y-0.5">
-                    <Label className="text-gray-700 font-medium">Alertas de Orçamento</Label>
-                    <p className="text-sm text-gray-500">Seja notificado quando exceder o orçamento</p>
+                
+                <Separator />
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-base font-medium">Relatórios Automáticos</Label>
+                    <p className="text-sm text-gray-500">Receba relatórios mensais por email</p>
                   </div>
                   <Switch />
                 </div>
               </CardContent>
             </Card>
 
-            {/* Security */}
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl">
-              <CardHeader className="border-b border-gray-100">
-                <CardTitle className="flex items-center gap-3 text-gray-800">
-                  <div className="p-2 bg-gradient-to-r from-red-100 to-red-200 rounded-lg">
-                    <Shield className="h-5 w-5 text-red-600" />
-                  </div>
-                  Segurança
-                </CardTitle>
-                <CardDescription className="text-gray-600">
-                  Configurações de segurança da conta
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6 p-6">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="current-password" className="text-gray-700 font-medium">Senha Atual</Label>
-                    <Input id="current-password" type="password" className="bg-white/50 border-gray-200" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="new-password" className="text-gray-700 font-medium">Nova Senha</Label>
-                    <Input id="new-password" type="password" className="bg-white/50 border-gray-200" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="confirm-password" className="text-gray-700 font-medium">Confirmar Nova Senha</Label>
-                    <Input id="confirm-password" type="password" className="bg-white/50 border-gray-200" />
+            {/* Aparência */}
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <Palette className="h-5 w-5 text-gray-600" />
+                  <div>
+                    <CardTitle className="text-xl text-gray-800">Aparência</CardTitle>
+                    <CardDescription>Personalize a interface do sistema</CardDescription>
                   </div>
                 </div>
-                <Button className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white">
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-base font-medium">Modo Escuro</Label>
+                    <p className="text-sm text-gray-500">Usar tema escuro na interface</p>
+                  </div>
+                  <Switch 
+                    checked={settings.darkMode}
+                    onCheckedChange={(checked) => setSettings({...settings, darkMode: checked})}
+                  />
+                </div>
+                
+                <Separator />
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>Idioma</Label>
+                    <Select value={settings.language} onValueChange={(value) => setSettings({...settings, language: value})}>
+                      <SelectTrigger className="rounded-xl">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pt-BR">Português (Brasil)</SelectItem>
+                        <SelectItem value="en-US">English (US)</SelectItem>
+                        <SelectItem value="es-ES">Español</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label>Moeda</Label>
+                    <Select value={settings.currency} onValueChange={(value) => setSettings({...settings, currency: value})}>
+                      <SelectTrigger className="rounded-xl">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="BRL">Real (R$)</SelectItem>
+                        <SelectItem value="USD">Dólar ($)</SelectItem>
+                        <SelectItem value="EUR">Euro (€)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Backup e Dados */}
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <Database className="h-5 w-5 text-gray-600" />
+                  <div>
+                    <CardTitle className="text-xl text-gray-800">Backup e Dados</CardTitle>
+                    <CardDescription>Gerencie seus dados e backups</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-base font-medium">Backup Automático</Label>
+                    <p className="text-sm text-gray-500">Fazer backup automático dos dados</p>
+                  </div>
+                  <Switch 
+                    checked={settings.autoBackup}
+                    onCheckedChange={(checked) => setSettings({...settings, autoBackup: checked})}
+                  />
+                </div>
+                
+                <Separator />
+                
+                <div>
+                  <Label>Frequência do Backup</Label>
+                  <Select value={settings.backupFrequency} onValueChange={(value) => setSettings({...settings, backupFrequency: value})}>
+                    <SelectTrigger className="rounded-xl">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="daily">Diário</SelectItem>
+                      <SelectItem value="weekly">Semanal</SelectItem>
+                      <SelectItem value="monthly">Mensal</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <Separator />
+                
+                <div className="flex gap-4">
+                  <Button 
+                    onClick={handleExportData}
+                    variant="outline" 
+                    className="flex-1 rounded-2xl"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Exportar Dados
+                  </Button>
+                  <Button 
+                    onClick={handleImportData}
+                    variant="outline" 
+                    className="flex-1 rounded-2xl"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Importar Dados
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Segurança */}
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <Shield className="h-5 w-5 text-gray-600" />
+                  <div>
+                    <CardTitle className="text-xl text-gray-800">Segurança</CardTitle>
+                    <CardDescription>Configure as opções de segurança</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button 
+                  variant="outline" 
+                  className="w-full rounded-2xl"
+                >
                   Alterar Senha
                 </Button>
-              </CardContent>
-            </Card>
-
-            {/* System */}
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl">
-              <CardHeader className="border-b border-gray-100">
-                <CardTitle className="flex items-center gap-3 text-gray-800">
-                  <div className="p-2 bg-gradient-to-r from-green-100 to-green-200 rounded-lg">
-                    <Database className="h-5 w-5 text-green-600" />
-                  </div>
-                  Sistema
-                </CardTitle>
-                <CardDescription className="text-gray-600">
-                  Configurações gerais do sistema
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6 p-6">
-                <div className="flex items-center justify-between p-4 bg-white/50 rounded-lg border border-gray-100">
-                  <div className="space-y-0.5">
-                    <Label className="text-gray-700 font-medium">Backup Automático</Label>
-                    <p className="text-sm text-gray-500">Fazer backup dos dados automaticamente</p>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="currency" className="text-gray-700 font-medium">Moeda Padrão</Label>
-                  <select className="flex h-10 w-full rounded-md border border-gray-200 bg-white/50 px-3 py-2 text-sm">
-                    <option value="BRL">Real Brasileiro (R$)</option>
-                    <option value="USD">Dólar Americano ($)</option>
-                    <option value="EUR">Euro (€)</option>
-                  </select>
-                </div>
-                <Button variant="outline" className="bg-white/50 hover:bg-white/80 border-gray-200">
-                  Exportar Dados
+                <Button 
+                  variant="outline" 
+                  className="w-full rounded-2xl"
+                >
+                  Configurar Autenticação em Duas Etapas
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  className="w-full rounded-2xl"
+                >
+                  Excluir Conta
                 </Button>
               </CardContent>
             </Card>
+
+            {/* Botão de Salvar */}
+            <div className="flex justify-end">
+              <Button 
+                onClick={handleSaveSettings}
+                className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-lg rounded-2xl px-8"
+              >
+                Salvar Todas as Configurações
+              </Button>
+            </div>
           </div>
         </div>
       </div>

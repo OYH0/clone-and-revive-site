@@ -1,11 +1,50 @@
 
-import React from 'react';
-import { Plus, TrendingUp, DollarSign, FileText, Calendar } from 'lucide-react';
+import React, { useState } from 'react';
+import { Plus, TrendingUp, DollarSign, Calendar, Filter } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import AddReceitaModal from '@/components/AddReceitaModal';
+import ReceitaTable from '@/components/ReceitaTable';
+import { useReceitas } from '@/hooks/useReceitas';
 
 const ReceitasPage = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterEmpresa, setFilterEmpresa] = useState('all');
+  const [filterCategoria, setFilterCategoria] = useState('all');
+  
+  const { data: receitas, isLoading } = useReceitas();
+
+  // Calcular estatísticas
+  const totalReceitas = receitas?.reduce((sum, receita) => sum + receita.valor, 0) || 0;
+  const receitasRecebidas = receitas?.filter(r => r.data_recebimento).length || 0;
+  const receitasPendentes = receitas?.filter(r => !r.data_recebimento).length || 0;
+  const valorRecebido = receitas?.filter(r => r.data_recebimento).reduce((sum, receita) => sum + receita.valor, 0) || 0;
+
+  // Filtrar receitas
+  const filteredReceitas = receitas?.filter(receita => {
+    const matchesSearch = receita.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         receita.empresa.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesEmpresa = filterEmpresa === 'all' || receita.empresa === filterEmpresa;
+    const matchesCategoria = filterCategoria === 'all' || receita.categoria === filterCategoria;
+    
+    return matchesSearch && matchesEmpresa && matchesCategoria;
+  }) || [];
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-green-50 to-emerald-100">
+        <Sidebar />
+        <div className="flex-1 p-8 flex items-center justify-center">
+          <p className="text-lg text-gray-600">Carregando receitas...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-green-50 to-emerald-100">
       <Sidebar />
@@ -26,87 +65,144 @@ const ReceitasPage = () => {
               </div>
             </div>
             
-            <Button className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200">
+            <Button 
+              onClick={() => setIsModalOpen(true)}
+              className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200 rounded-2xl"
+            >
               <Plus className="w-4 h-4 mr-2" />
               Nova Receita
             </Button>
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                 <CardTitle className="text-sm font-medium text-gray-600">Total de Receitas</CardTitle>
-                <div className="p-2 bg-gradient-to-r from-green-100 to-green-200 rounded-lg">
+                <div className="p-2 bg-gradient-to-r from-green-100 to-green-200 rounded-xl">
                   <TrendingUp className="h-4 w-4 text-green-600" />
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
-                  R$ 0,00
+                  R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">+0% em relação ao mês anterior</p>
+                <p className="text-xs text-gray-500 mt-1">{receitas?.length || 0} receitas cadastradas</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl">
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">Receitas Pendentes</CardTitle>
-                <div className="p-2 bg-gradient-to-r from-yellow-100 to-yellow-200 rounded-lg">
-                  <Calendar className="h-4 w-4 text-yellow-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-gray-800">0</div>
-                <p className="text-xs text-gray-500 mt-1">Aguardando recebimento</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">Receitas Recebidas</CardTitle>
-                <div className="p-2 bg-gradient-to-r from-blue-100 to-blue-200 rounded-lg">
+                <CardTitle className="text-sm font-medium text-gray-600">Valor Recebido</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-blue-100 to-blue-200 rounded-xl">
                   <DollarSign className="h-4 w-4 text-blue-600" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-800">0</div>
-                <p className="text-xs text-gray-500 mt-1">Já recebidas este mês</p>
+                <div className="text-3xl font-bold text-gray-800">
+                  R$ {valorRecebido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">{receitasRecebidas} receitas recebidas</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Receitas Pendentes</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-yellow-100 to-yellow-200 rounded-xl">
+                  <Calendar className="h-4 w-4 text-yellow-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-gray-800">{receitasPendentes}</div>
+                <p className="text-xs text-gray-500 mt-1">Aguardando recebimento</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Taxa de Recebimento</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-purple-100 to-purple-200 rounded-xl">
+                  <TrendingUp className="h-4 w-4 text-purple-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-gray-800">
+                  {receitas?.length ? Math.round((receitasRecebidas / receitas.length) * 100) : 0}%
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Receitas já recebidas</p>
               </CardContent>
             </Card>
           </div>
 
-          {/* Main Content Card */}
-          <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl">
-            <CardHeader className="border-b border-gray-100">
+          {/* Filters */}
+          <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl mb-6">
+            <CardHeader>
               <div className="flex items-center gap-3">
-                <FileText className="h-5 w-5 text-gray-600" />
+                <Filter className="h-5 w-5 text-gray-600" />
+                <CardTitle className="text-xl text-gray-800">Filtros</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Input
+                    placeholder="Buscar por descrição ou empresa..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="rounded-xl"
+                  />
+                </div>
+                <div>
+                  <Select value={filterEmpresa} onValueChange={setFilterEmpresa}>
+                    <SelectTrigger className="rounded-xl">
+                      <SelectValue placeholder="Todas as empresas" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas as empresas</SelectItem>
+                      <SelectItem value="Churrasco">Companhia do Churrasco</SelectItem>
+                      <SelectItem value="Johnny">Johnny Rockets</SelectItem>
+                      <SelectItem value="Outros">Outros</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Select value={filterCategoria} onValueChange={setFilterCategoria}>
+                    <SelectTrigger className="rounded-xl">
+                      <SelectValue placeholder="Todas as categorias" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas as categorias</SelectItem>
+                      <SelectItem value="VENDAS">Vendas</SelectItem>
+                      <SelectItem value="SERVICOS">Serviços</SelectItem>
+                      <SelectItem value="OUTROS">Outros</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Main Content Card */}
+          <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+            <CardHeader className="border-b border-gray-100">
+              <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-xl text-gray-800">Lista de Receitas</CardTitle>
                   <CardDescription className="text-gray-600">
-                    Todas as receitas registradas no sistema
+                    {filteredReceitas.length} receita(s) encontrada(s)
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-12">
-              <div className="text-center text-gray-500">
-                <div className="mb-6">
-                  <div className="mx-auto w-20 h-20 bg-gradient-to-r from-green-100 to-green-200 rounded-full flex items-center justify-center mb-4">
-                    <TrendingUp className="w-10 h-10 text-green-600" />
-                  </div>
-                </div>
-                <h3 className="text-lg font-semibold text-gray-700 mb-2">Nenhuma receita cadastrada ainda</h3>
-                <p className="text-gray-500 mb-6">Comece adicionando sua primeira receita para começar a acompanhar suas entradas financeiras.</p>
-                <Button className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Cadastrar primeira receita
-                </Button>
-              </div>
+            <CardContent className="p-6">
+              <ReceitaTable receitas={filteredReceitas} />
             </CardContent>
           </Card>
         </div>
       </div>
+
+      <AddReceitaModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   );
 };
