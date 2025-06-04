@@ -18,7 +18,7 @@ const Sidebar: React.FC = () => {
       label: 'Johnny Rockets', 
       icon: () => (
         <img 
-          src="/lovable-uploads/5936f90a-7288-4156-bcc6-370856e5b384.png" 
+          src="/lovable-uploads/864fe2e5-183c-4060-91e4-2aa79878e5fd.png" 
           alt="Johnny Rockets" 
           className="w-4 h-4 object-contain"
         />
