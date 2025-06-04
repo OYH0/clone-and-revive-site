@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Edit, Trash2, CheckCircle, Paperclip } from 'lucide-react';
+import { Edit, Trash2, CheckCircle, Paperclip, Info } from 'lucide-react';
 import { Transaction } from '@/types/transaction';
 import EditTransactionModal from './EditTransactionModal';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
@@ -8,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 
 interface TransactionTableProps {
   transactions: Transaction[];
@@ -189,6 +189,41 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
     }
   };
 
+  const truncateDescription = (description: string, maxLength: number = 50) => {
+    if (description.length <= maxLength) {
+      return { text: description, isTruncated: false };
+    }
+    return { 
+      text: description.substring(0, maxLength) + '...', 
+      isTruncated: true 
+    };
+  };
+
+  const DescriptionCell = ({ description }: { description: string }) => {
+    const { text, isTruncated } = truncateDescription(description);
+    
+    if (!isTruncated) {
+      return <span className="text-gray-900">{text}</span>;
+    }
+
+    return (
+      <HoverCard>
+        <HoverCardTrigger asChild>
+          <div className="flex items-center gap-2 cursor-pointer">
+            <span className="text-gray-900">{text}</span>
+            <Info size={14} className="text-blue-500 hover:text-blue-700" />
+          </div>
+        </HoverCardTrigger>
+        <HoverCardContent className="w-80 p-4 bg-white border border-gray-200 shadow-lg rounded-xl">
+          <div className="space-y-2">
+            <h4 className="text-sm font-semibold text-gray-800">Descrição Completa</h4>
+            <p className="text-sm text-gray-600 leading-relaxed">{description}</p>
+          </div>
+        </HoverCardContent>
+      </HoverCard>
+    );
+  };
+
   return (
     <>
       <div className="overflow-x-auto">
@@ -219,7 +254,9 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
                       {transaction.company}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-gray-900">{transaction.description}</td>
+                  <td className="py-3 px-4 max-w-xs">
+                    <DescriptionCell description={transaction.description} />
+                  </td>
                   <td className="py-3 px-4">
                     <span className={`px-2 py-1 rounded text-xs ${getCategoryColor(transaction.category)}`}>
                       {transaction.category}
