@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Transaction } from '@/types/transaction';
 import EditTransactionModal from './EditTransactionModal';
@@ -71,16 +70,11 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
       
       console.log('Marking transaction as paid:', transaction.id, 'Setting date to:', today);
       
-      // Update the transaction date to today and remove from ATRASADOS category if needed
+      // Update the transaction to mark as paid
       const updateData: any = {
-        data: today
+        data: today,
+        categoria: transaction.category === 'ATRASADOS' ? 'FIXAS' : transaction.category
       };
-      
-      // If transaction is in ATRASADOS category, move it to FIXAS
-      if (transaction.category === 'ATRASADOS') {
-        updateData.categoria = 'FIXAS';
-        console.log('Moving from ATRASADOS to FIXAS');
-      }
 
       const { error, data } = await supabase
         .from('despesas')

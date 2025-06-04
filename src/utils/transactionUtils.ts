@@ -6,6 +6,11 @@ export const getTransactionStatus = (transaction: any) => {
   const transactionDate = new Date(transaction.date);
   transactionDate.setHours(0, 0, 0, 0);
   
+  // Se tem um campo específico de status pago, usar ele
+  if (transaction.status === 'PAGO') {
+    return 'PAGO';
+  }
+  
   // Se é categoria ATRASADOS (independente da data)
   if (transaction.category === 'ATRASADOS') {
     return 'ATRASADO';

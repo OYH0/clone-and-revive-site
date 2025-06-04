@@ -58,7 +58,8 @@ const DespesasPage = () => {
     description: despesa.descricao || 'Sem descrição',
     category: despesa.categoria || 'Sem categoria',
     data_vencimento: despesa.data_vencimento,
-    comprovante: despesa.comprovante
+    comprovante: despesa.comprovante,
+    status: 'PAGO' // Default status que será calculado pela função getTransactionStatus
   }));
 
   // Aplicar filtros
