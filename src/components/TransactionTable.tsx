@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Edit, Trash2 } from 'lucide-react';
 import { Transaction } from '@/types/transaction';
@@ -8,9 +7,14 @@ import DeleteConfirmationModal from './DeleteConfirmationModal';
 interface TransactionTableProps {
   transactions: Transaction[];
   onTransactionUpdated: () => void;
+  type?: 'despesa' | 'receita';
 }
 
-const TransactionTable: React.FC<TransactionTableProps> = ({ transactions, onTransactionUpdated }) => {
+const TransactionTable: React.FC<TransactionTableProps> = ({ 
+  transactions, 
+  onTransactionUpdated,
+  type = 'despesa'
+}) => {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
 
@@ -153,6 +157,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({ transactions, onTra
         onClose={() => setDeletingTransaction(null)}
         transaction={deletingTransaction}
         onTransactionDeleted={onTransactionUpdated}
+        type={type}
       />
     </>
   );
