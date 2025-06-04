@@ -53,35 +53,45 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
-      <AlertDialogContent className="max-w-md mx-4">
-        <AlertDialogHeader>
-          <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-          <AlertDialogDescription className="text-left">
+      <AlertDialogContent className="sm:max-w-[425px] w-[95vw] max-h-[90vh] overflow-y-auto">
+        <AlertDialogHeader className="space-y-3">
+          <AlertDialogTitle className="text-lg font-semibold">
+            Confirmar Exclusão
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-sm text-gray-600">
             Tem certeza que deseja excluir esta {type}? Esta ação não pode ser desfeita.
           </AlertDialogDescription>
         </AlertDialogHeader>
         
-        <div className="space-y-3 py-4">
-          <div>
-            <span className="font-medium text-gray-700">Empresa:</span>
-            <div className="text-gray-900">{transaction?.company}</div>
+        <div className="grid gap-4 py-4">
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-gray-700">Empresa:</label>
+            <p className="text-sm text-gray-900 p-2 bg-gray-50 rounded border">
+              {transaction?.company}
+            </p>
           </div>
-          <div>
-            <span className="font-medium text-gray-700">Descrição:</span>
-            <div className="text-gray-900 break-words max-w-full overflow-hidden text-sm">
+          
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-gray-700">Descrição:</label>
+            <p className="text-sm text-gray-900 p-2 bg-gray-50 rounded border break-words max-h-20 overflow-y-auto">
               {transaction?.description}
-            </div>
+            </p>
           </div>
-          <div>
-            <span className="font-medium text-gray-700">Valor:</span>
-            <div className="text-gray-900">
+          
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-gray-700">Valor:</label>
+            <p className="text-sm text-gray-900 p-2 bg-gray-50 rounded border font-medium">
               R$ {transaction?.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </div>
+            </p>
           </div>
         </div>
 
-        <AlertDialogFooter className="flex flex-col sm:flex-row gap-2 pt-4">
-          <AlertDialogCancel onClick={onClose} disabled={isLoading} className="w-full sm:w-auto">
+        <AlertDialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+          <AlertDialogCancel 
+            onClick={onClose} 
+            disabled={isLoading}
+            className="w-full sm:w-auto"
+          >
             Cancelar
           </AlertDialogCancel>
           <AlertDialogAction 
