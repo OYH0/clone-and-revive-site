@@ -29,84 +29,16 @@ body {
 /* Ajuste para conteúdo principal com sidebar fixa - exceto páginas de auth */
 .main-content {
   margin-left: 0;
-  padding: 1rem;
 }
 
 /* Ajuste responsivo */
 @media (min-width: 768px) {
   .main-content {
     margin-left: 16rem;
-    padding: 2rem;
   }
 }
 
 /* Página de auth não deve ter margem da sidebar */
 .auth-page {
   margin-left: 0 !important;
-}
-
-/* Responsividade para dispositivos móveis */
-@media (max-width: 767px) {
-  /* Garantir que cards e componentes sejam responsivos */
-  .responsive-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  /* Ajustar padding em telas pequenas */
-  .mobile-padding {
-    padding: 0.5rem;
-  }
-  
-  /* Melhorar texto em dispositivos móveis */
-  .mobile-text {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-  }
-  
-  /* Cards responsivos */
-  .mobile-card {
-    padding: 1rem;
-    margin-bottom: 1rem;
-  }
-  
-  /* Botões responsivos */
-  .mobile-button {
-    min-height: 44px; /* Tamanho mínimo para touch */
-    padding: 0.75rem 1rem;
-  }
-}
-
-/* Melhorias para touch devices */
-@media (hover: none) and (pointer: coarse) {
-  /* Aumentar área de toque para botões */
-  button, .clickable {
-    min-height: 44px;
-    min-width: 44px;
-  }
-  
-  /* Remover hover effects em touch devices */
-  .hover\:bg-gray-50:hover {
-    background-color: transparent;
-  }
-}
-
-/* Scrollbar personalizada para mobile */
-@media (max-width: 767px) {
-  .overflow-x-auto::-webkit-scrollbar {
-    height: 4px;
-  }
-  
-  .overflow-x-auto::-webkit-scrollbar-track {
-    background: #f1f1f1;
-  }
-  
-  .overflow-x-auto::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 2px;
-  }
-  
-  .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-    background: #a1a1a1;
-  }
 }

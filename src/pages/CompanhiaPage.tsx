@@ -55,43 +55,43 @@ const CompanhiaPage = () => {
     <div className="flex min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50">
       <Sidebar />
       
-      <div className="flex-1 p-4 md:p-8 main-content">
+      <div className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}
-          <div className="mb-6 md:mb-8">
-            <div className="flex items-center gap-3 mb-4 md:mb-6">
-              <div className="p-2 md:p-3 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl shadow-lg">
-                <Building2 className="h-6 w-6 md:h-8 md:w-8 text-white" />
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl shadow-lg">
+                <Building2 className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-red-600 via-red-700 to-red-800 bg-clip-text text-transparent">
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-red-600 via-red-700 to-red-800 bg-clip-text text-transparent">
                   Companhia do Churrasco
                 </h1>
-                <p className="text-gray-600 text-sm md:text-lg">Análise financeira detalhada da empresa</p>
+                <p className="text-gray-600 text-lg">Análise financeira detalhada da empresa</p>
               </div>
             </div>
             
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
-              <Button className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-2xl h-10 md:h-12 text-xs md:text-sm mobile-button">
-                Relatório
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Button className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-2xl h-12">
+                Relatório Mensal
               </Button>
               <Button 
                 variant="outline" 
-                className="rounded-2xl h-10 md:h-12 text-xs md:text-sm mobile-button"
+                className="rounded-2xl h-12"
                 onClick={() => setActiveModal('costs')}
               >
-                Custos
+                Análise de Custos
               </Button>
               <Button 
                 variant="outline" 
-                className="rounded-2xl h-10 md:h-12 text-xs md:text-sm mobile-button"
+                className="rounded-2xl h-12"
                 onClick={() => setActiveModal('projections')}
               >
                 Projeções
               </Button>
               <Button 
                 variant="outline" 
-                className="rounded-2xl h-10 md:h-12 text-xs md:text-sm mobile-button"
+                className="rounded-2xl h-12"
                 onClick={() => setActiveModal('comparative')}
               >
                 Comparativo
@@ -100,46 +100,46 @@ const CompanhiaPage = () => {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl mobile-card">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 md:pb-3">
-                <CardTitle className="text-xs md:text-sm font-medium text-gray-600">Receita Total</CardTitle>
-                <div className="p-1.5 md:p-2 bg-gradient-to-r from-green-100 to-green-200 rounded-xl">
-                  <TrendingUp className="h-3 w-3 md:h-4 md:w-4 text-green-600" />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Receita Total</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-green-100 to-green-200 rounded-xl">
+                  <TrendingUp className="h-4 w-4 text-green-600" />
                 </div>
               </CardHeader>
-              <CardContent className="mobile-padding">
-                <div className="text-xl md:text-2xl font-bold text-green-600">
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">
                   R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">{companhiaReceitas.length} transações</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl mobile-card">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 md:pb-3">
-                <CardTitle className="text-xs md:text-sm font-medium text-gray-600">Despesas Totais</CardTitle>
-                <div className="p-1.5 md:p-2 bg-gradient-to-r from-red-100 to-red-200 rounded-xl">
-                  <DollarSign className="h-3 w-3 md:h-4 md:w-4 text-red-600" />
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Despesas Totais</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-red-100 to-red-200 rounded-xl">
+                  <DollarSign className="h-4 w-4 text-red-600" />
                 </div>
               </CardHeader>
-              <CardContent className="mobile-padding">
-                <div className="text-xl md:text-2xl font-bold text-red-600">
+              <CardContent>
+                <div className="text-2xl font-bold text-red-600">
                   R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">{companhiaDespesas.length} transações</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl mobile-card">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 md:pb-3">
-                <CardTitle className="text-xs md:text-sm font-medium text-gray-600">Lucro Líquido</CardTitle>
-                <div className="p-1.5 md:p-2 bg-gradient-to-r from-blue-100 to-blue-200 rounded-xl">
-                  <BarChart3 className="h-3 w-3 md:h-4 md:w-4 text-blue-600" />
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Lucro Líquido</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-blue-100 to-blue-200 rounded-xl">
+                  <BarChart3 className="h-4 w-4 text-blue-600" />
                 </div>
               </CardHeader>
-              <CardContent className="mobile-padding">
-                <div className={`text-xl md:text-2xl font-bold ${lucro >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <CardContent>
+                <div className={`text-2xl font-bold ${lucro >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   R$ {lucro.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
@@ -148,15 +148,15 @@ const CompanhiaPage = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl mobile-card">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 md:pb-3">
-                <CardTitle className="text-xs md:text-sm font-medium text-gray-600">Ticket Médio</CardTitle>
-                <div className="p-1.5 md:p-2 bg-gradient-to-r from-purple-100 to-purple-200 rounded-xl">
-                  <Users className="h-3 w-3 md:h-4 md:w-4 text-purple-600" />
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Ticket Médio</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-purple-100 to-purple-200 rounded-xl">
+                  <Users className="h-4 w-4 text-purple-600" />
                 </div>
               </CardHeader>
-              <CardContent className="mobile-padding">
-                <div className="text-xl md:text-2xl font-bold text-purple-600">
+              <CardContent>
+                <div className="text-2xl font-bold text-purple-600">
                   R$ {companhiaReceitas.length > 0 ? (totalReceitas / companhiaReceitas.length).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">Por transação</p>
@@ -165,15 +165,15 @@ const CompanhiaPage = () => {
           </div>
 
           {/* Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             {/* Evolução Mensal */}
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader>
-                <CardTitle className="text-lg md:text-xl text-gray-800">Evolução Mensal</CardTitle>
-                <CardDescription className="text-sm">Performance financeira mês a mês</CardDescription>
+                <CardTitle className="text-xl text-gray-800">Evolução Mensal</CardTitle>
+                <CardDescription>Performance financeira mês a mês</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-60 md:h-80">
+                <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={evolucaoMensal}>
                       <XAxis dataKey="month" />
@@ -191,8 +191,8 @@ const CompanhiaPage = () => {
             {/* Distribuição de Despesas */}
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader>
-                <CardTitle className="text-lg md:text-xl text-gray-800">Distribuição de Despesas</CardTitle>
-                <CardDescription className="text-sm">Categorias de gastos</CardDescription>
+                <CardTitle className="text-xl text-gray-800">Distribuição de Despesas</CardTitle>
+                <CardDescription>Categorias de gastos</CardDescription>
               </CardHeader>
               <CardContent>
                 <ExpenseDistribution despesas={companhiaDespesas} empresa="Companhia do Churrasco" />
@@ -201,31 +201,31 @@ const CompanhiaPage = () => {
           </div>
 
           {/* Informações Adicionais */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 responsive-grid">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Indicadores de Performance */}
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader>
-                <CardTitle className="text-lg md:text-xl text-gray-800">Indicadores</CardTitle>
-                <CardDescription className="text-sm">KPIs principais</CardDescription>
+                <CardTitle className="text-xl text-gray-800">Indicadores</CardTitle>
+                <CardDescription>KPIs principais</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3 md:space-y-4">
-                <div className="flex justify-between items-center p-2 md:p-3 bg-red-50 rounded-xl">
-                  <span className="text-red-700 font-medium text-sm md:text-base">ROI</span>
-                  <span className="text-red-800 font-bold text-sm md:text-base">
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center p-3 bg-red-50 rounded-xl">
+                  <span className="text-red-700 font-medium">ROI</span>
+                  <span className="text-red-800 font-bold">
                     {totalDespesas > 0 ? ((lucro / totalDespesas) * 100).toFixed(1) : '0'}%
                   </span>
                 </div>
                 
-                <div className="flex justify-between items-center p-2 md:p-3 bg-orange-50 rounded-xl">
-                  <span className="text-orange-700 font-medium text-sm md:text-base">Break Even</span>
-                  <span className="text-orange-800 font-bold text-xs md:text-sm">
+                <div className="flex justify-between items-center p-3 bg-orange-50 rounded-xl">
+                  <span className="text-orange-700 font-medium">Break Even</span>
+                  <span className="text-orange-800 font-bold">
                     R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </span>
                 </div>
                 
-                <div className="flex justify-between items-center p-2 md:p-3 bg-yellow-50 rounded-xl">
-                  <span className="text-yellow-700 font-medium text-sm md:text-base">Crescimento</span>
-                  <span className="text-yellow-800 font-bold text-sm md:text-base">+12.5%</span>
+                <div className="flex justify-between items-center p-3 bg-yellow-50 rounded-xl">
+                  <span className="text-yellow-700 font-medium">Crescimento</span>
+                  <span className="text-yellow-800 font-bold">+12.5%</span>
                 </div>
               </CardContent>
             </Card>
