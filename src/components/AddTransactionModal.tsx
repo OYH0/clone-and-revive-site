@@ -24,7 +24,8 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     valor: '',
     empresa: '',
     descricao: '',
-    categoria: 'INSUMOS'
+    categoria: 'INSUMOS',
+    data_vencimento: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -44,20 +45,35 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       return;
     }
 
+    // Validar data de vencimento para boletos atrasados
+    if (formData.categoria === 'ATRASADOS' && !formData.data_vencimento) {
+      toast({
+        title: "Erro",
+        description: "Data de vencimento é obrigatória para boletos atrasados.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsLoading(true);
     
     try {
+      const insertData: any = {
+        data: formData.data,
+        valor: parseFloat(formData.valor),
+        empresa: formData.empresa,
+        descricao: formData.descricao || 'Sem descrição',
+        categoria: formData.categoria
+      };
+
+      // Adicionar data de vencimento apenas se for fornecida
+      if (formData.data_vencimento) {
+        insertData.data_vencimento = formData.data_vencimento;
+      }
+
       const { error } = await supabase
         .from('despesas')
-        .insert([
-          {
-            data: formData.data,
-            valor: parseFloat(formData.valor),
-            empresa: formData.empresa,
-            descricao: formData.descricao || 'Sem descrição',
-            categoria: formData.categoria
-          }
-        ]);
+        .insert([insertData]);
 
       if (error) {
         console.error('Error inserting despesa:', error);
@@ -80,7 +96,8 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         valor: '',
         empresa: '',
         descricao: '',
-        categoria: 'INSUMOS'
+        categoria: 'INSUMOS',
+        data_vencimento: ''
       });
 
       onTransactionAdded();
@@ -165,6 +182,19 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               ))}
             </select>
           </div>
+
+          {formData.categoria === 'ATRASADOS' && (
+            <div className="space-y-2">
+              <Label htmlFor="data_vencimento">Data de Vencimento *</Label>
+              <Input
+                id="data_vencimento"
+                type="date"
+                value={formData.data_vencimento}
+                onChange={(e) => handleInputChange('data_vencimento', e.target.value)}
+                required
+              />
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="descricao">Descrição</Label>

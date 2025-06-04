@@ -9,6 +9,7 @@ export interface Despesa {
   empresa: string;
   descricao: string;
   categoria: string;
+  data_vencimento?: string;
 }
 
 export const useDespesas = () => {
