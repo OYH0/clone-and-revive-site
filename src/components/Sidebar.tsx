@@ -25,8 +25,8 @@ const Sidebar: React.FC = () => {
   };
 
   return (
-    <div className="fixed left-0 top-0 w-64 sidebar-blue text-white h-screen flex flex-col z-50">
-      <div className="p-6 border-b border-gray-600">
+    <div className="fixed left-0 top-0 w-64 bg-gradient-to-b from-blue-600 via-blue-700 to-blue-800 text-white h-screen flex flex-col z-50 shadow-xl">
+      <div className="p-6 border-b border-blue-500/30">
         <h1 className="text-xl font-bold">Gestão Financeira</h1>
       </div>
       
@@ -39,10 +39,10 @@ const Sidebar: React.FC = () => {
             <button
               key={item.id}
               onClick={() => navigate(item.path)}
-              className={`w-full flex items-center gap-3 p-3 rounded-lg mb-2 text-left transition-colors ${
+              className={`w-full flex items-center gap-3 p-3 rounded-xl mb-2 text-left transition-all duration-200 ${
                 isActive 
-                  ? 'bg-red-500 text-white' 
-                  : 'hover:bg-gray-600 text-gray-300'
+                  ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm' 
+                  : 'hover:bg-white/10 text-blue-100 hover:text-white'
               }`}
             >
               <Icon size={18} />
@@ -53,10 +53,10 @@ const Sidebar: React.FC = () => {
         
         <button
           onClick={() => navigate('/admin')}
-          className={`w-full flex items-center gap-3 p-3 rounded-lg mb-2 text-left transition-colors ${
+          className={`w-full flex items-center gap-3 p-3 rounded-xl mb-2 text-left transition-all duration-200 ${
             location.pathname === '/admin'
-              ? 'bg-red-500 text-white' 
-              : 'hover:bg-gray-600 text-gray-300'
+              ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm' 
+              : 'hover:bg-white/10 text-blue-100 hover:text-white'
           }`}
         >
           <Shield size={18} />
@@ -64,16 +64,16 @@ const Sidebar: React.FC = () => {
         </button>
       </nav>
       
-      <div className="p-4 border-t border-gray-600">
+      <div className="p-4 border-t border-blue-500/30">
         <div className="flex items-center gap-2 mb-4">
-          <div className="w-8 h-8 bg-gray-500 rounded-full"></div>
-          <span className="text-sm">{user?.email || 'Admin'}</span>
+          <div className="w-8 h-8 bg-white/20 rounded-full backdrop-blur-sm"></div>
+          <span className="text-sm text-blue-100">{user?.email || 'Admin'}</span>
         </div>
         <Button 
           onClick={handleLogout}
           variant="outline" 
           size="sm" 
-          className="w-full text-white border-gray-600 hover:bg-gray-600"
+          className="w-full text-white border-white/30 bg-white/10 hover:bg-white/20 rounded-xl backdrop-blur-sm transition-all duration-200"
         >
           <LogOut size={16} className="mr-2" />
           Sair

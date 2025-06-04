@@ -10,10 +10,6 @@ body {
   padding: 0;
 }
 
-.sidebar-blue {
-  background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
-}
-
 .category-insumos {
   @apply bg-blue-500 text-white;
 }
