@@ -1,140 +1,57 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import Sidebar from './Sidebar';
 import CompanyCard from './CompanyCard';
-import TransactionTable from './TransactionTable';
 import ExpenseDistributionChart from './ExpenseDistributionChart';
 import MonthlyEvolutionChart from './MonthlyEvolutionChart';
-import AddTransactionModal from './AddTransactionModal';
-import { Toaster } from '@/components/ui/toaster';
 import { useDespesas } from '@/hooks/useDespesas';
-import { processCompanyData, processTransactionData, processCategoryDistribution } from '@/utils/dashboardData';
 
-const Dashboard: React.FC = () => {
-  const [activeSection, setActiveSection] = useState('dashboard');
-  const [selectedCompany, setSelectedCompany] = useState('Todas Empresas');
-  const [currentPeriod, setCurrentPeriod] = useState('Mês');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+const Dashboard = () => {
+  const { data: despesas } = useDespesas();
 
-  const { data: despesas, isLoading, error, refetch } = useDespesas();
-
-  const periods = ['Hoje', 'Semana', 'Mês', 'Ano'];
-
-  // Processar dados quando disponíveis
-  const companyData = despesas ? processCompanyData(despesas) : [];
-  const transactions = despesas ? processTransactionData(despesas) : [];
-  const categoryDistribution = despesas ? processCategoryDistribution(despesas) : [];
-
-  const handleTransactionAdded = () => {
-    refetch();
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex h-screen bg-gray-50">
-        <Sidebar activeSection={activeSection} setActiveSection={setActiveSection} />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <p className="text-gray-600">Carregando dados...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex h-screen bg-gray-50">
-        <Sidebar activeSection={activeSection} setActiveSection={setActiveSection} />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-red-600 mb-2">Erro ao carregar dados</p>
-            <p className="text-gray-600">Verifique a conexão com o banco de dados</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const totalDespesas = despesas?.reduce((sum, despesa) => sum + despesa.valor, 0) || 0;
+  const churrascoDespesas = despesas?.filter(d => d.empresa === 'Churrasco').reduce((sum, despesa) => sum + despesa.valor, 0) || 0;
+  const johnnyDespesas = despesas?.filter(d => d.empresa === 'Johnny').reduce((sum, despesa) => sum + despesa.valor, 0) || 0;
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar activeSection={activeSection} setActiveSection={setActiveSection} />
+    <div className="flex min-h-screen bg-gray-50">
+      <Sidebar />
       
-      <div className="flex-1 overflow-auto">
-        <div className="p-6">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-semibold text-gray-800">Dashboard Financeiro</h1>
-            <div className="flex gap-2">
-              {periods.map(period => (
-                <button
-                  key={period}
-                  onClick={() => setCurrentPeriod(period)}
-                  className={`px-4 py-2 rounded ${
-                    currentPeriod === period
-                      ? 'bg-gray-700 text-white'
-                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                  }`}
-                >
-                  {period}
-                </button>
-              ))}
-              <button 
-                onClick={() => setIsModalOpen(true)}
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 flex items-center gap-2"
-              >
-                + Nova Transação
-              </button>
-            </div>
+      <div className="flex-1 p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
+            <p className="text-gray-600">Visão geral das finanças do negócio</p>
           </div>
 
-          {/* Company Cards */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            {companyData.length > 0 ? (
-              companyData.map((company, index) => (
-                <CompanyCard
-                  key={index}
-                  name={company.name}
-                  period={company.period}
-                  totalExpenses={company.totalExpenses}
-                  status={company.status}
-                  categories={company.categories}
-                  chartData={company.chartData}
-                  chartColor={company.chartColor}
-                />
-              ))
-            ) : (
-              <div className="col-span-2 text-center py-8 text-gray-500">
-                Nenhum dado de empresa encontrado
-              </div>
-            )}
-          </div>
-
-          {/* Transactions Table */}
-          <div className="mb-6">
-            <TransactionTable 
-              transactions={transactions}
-              selectedCompany={selectedCompany}
-              setSelectedCompany={setSelectedCompany}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <CompanyCard
+              name="Companhia do Churrasco"
+              totalDespesas={churrascoDespesas}
+              totalReceitas={0}
+              color="bg-red-500"
+            />
+            <CompanyCard
+              name="Johnny Rockets"
+              totalDespesas={johnnyDespesas}
+              totalReceitas={0}
+              color="bg-blue-500"
             />
           </div>
 
-          {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <ExpenseDistributionChart data={categoryDistribution} />
-            <MonthlyEvolutionChart />
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <h3 className="text-lg font-semibold mb-4">Distribuição de Despesas</h3>
+              <ExpenseDistributionChart />
+            </div>
+            
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <h3 className="text-lg font-semibold mb-4">Evolução Mensal</h3>
+              <MonthlyEvolutionChart />
+            </div>
           </div>
         </div>
       </div>
-
-      <AddTransactionModal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onTransactionAdded={handleTransactionAdded}
-      />
-      
-      <Toaster />
     </div>
   );
 };
