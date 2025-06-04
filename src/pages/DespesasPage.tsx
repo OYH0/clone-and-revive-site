@@ -3,10 +3,11 @@ import React, { useState, useMemo } from 'react';
 import Sidebar from '@/components/Sidebar';
 import TransactionTable from '@/components/TransactionTable';
 import AddTransactionModal from '@/components/AddTransactionModal';
-import DespesasFilter from '@/components/DespesasFilter';
-import DespesasExport from '@/components/DespesasExport';
+import DespesasHeader from '@/components/DespesasHeader';
+import DespesasStats from '@/components/DespesasStats';
+import DespesasActions from '@/components/DespesasActions';
 import { Button } from '@/components/ui/button';
-import { Plus, TrendingDown, DollarSign, CheckCircle, AlertTriangle, Clock, FileText } from 'lucide-react';
+import { FileText } from 'lucide-react';
 import { useDespesas } from '@/hooks/useDespesas';
 import { useAuth } from '@/contexts/AuthContext';
 import { Transaction } from '@/types/transaction';
@@ -155,109 +156,29 @@ const DespesasPage = () => {
       
       <div className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
-          {/* Header Section */}
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-3 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl shadow-lg">
-                <TrendingDown className="h-8 w-8 text-white" />
-              </div>
-              <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent">
-                  Despesas
-                </h1>
-                <p className="text-gray-600 text-lg">Gerencie todas as despesas do negócio</p>
-                {hasActiveFilters && (
-                  <p className="text-sm text-purple-600">
-                    Mostrando {filteredTransactions.length} de {allTransactions.length} registros
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
+          <DespesasHeader
+            filteredCount={filteredTransactions.length}
+            totalCount={allTransactions.length}
+            hasActiveFilters={hasActiveFilters}
+          />
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/20">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-gradient-to-r from-red-100 to-red-200 rounded-2xl">
-                  <DollarSign className="h-6 w-6 text-red-600" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-700">Total de Despesas</h3>
-                  <p className="text-2xl font-bold bg-gradient-to-r from-red-600 to-red-700 bg-clip-text text-transparent">
-                    R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </p>
-                  <p className="text-xs text-gray-500">{filteredTransactions.length} registros</p>
-                </div>
-              </div>
-            </div>
+          <DespesasStats
+            totalDespesas={totalDespesas}
+            valorPago={valorPago}
+            valorPendente={valorPendente}
+            valorAtrasado={valorAtrasado}
+            despesasPagasCount={despesasPagas.length}
+            despesasPendentesCount={despesasPendentes.length}
+            despesasAtrasadasCount={despesasAtrasadas.length}
+            filteredTransactionsCount={filteredTransactions.length}
+          />
 
-            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/20">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-gradient-to-r from-green-100 to-green-200 rounded-2xl">
-                  <CheckCircle className="h-6 w-6 text-green-600" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-700">Pagas</h3>
-                  <p className="text-2xl font-bold text-green-600">
-                    R$ {valorPago.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </p>
-                  <p className="text-xs text-gray-500">{despesasPagas.length} despesas</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/20">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-gradient-to-r from-yellow-100 to-yellow-200 rounded-2xl">
-                  <Clock className="h-6 w-6 text-yellow-600" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-700">Pendentes</h3>
-                  <p className="text-2xl font-bold text-yellow-600">
-                    R$ {valorPendente.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </p>
-                  <p className="text-xs text-gray-500">{despesasPendentes.length} despesas</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/20">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-gradient-to-r from-red-100 to-red-200 rounded-2xl">
-                  <AlertTriangle className="h-6 w-6 text-red-600" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-700">Atrasadas</h3>
-                  <p className="text-2xl font-bold text-red-600">
-                    R$ {valorAtrasado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </p>
-                  <p className="text-xs text-gray-500">{despesasAtrasadas.length} despesas</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/20 mb-8">
-            <div className="flex justify-between items-center">
-              <div className="flex gap-3">
-                <DespesasFilter 
-                  onFilterChange={handleFilterChange}
-                  onClearFilters={handleClearFilters}
-                />
-                <DespesasExport transactions={filteredTransactions} />
-              </div>
-              
-              <Button 
-                onClick={() => setIsModalOpen(true)}
-                className="flex items-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200"
-              >
-                <Plus className="h-4 w-4" />
-                Nova Despesa
-              </Button>
-            </div>
-          </div>
+          <DespesasActions
+            onFilterChange={handleFilterChange}
+            onClearFilters={handleClearFilters}
+            onAddTransaction={() => setIsModalOpen(true)}
+            filteredTransactions={filteredTransactions}
+          />
 
           {/* Transaction Table */}
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
