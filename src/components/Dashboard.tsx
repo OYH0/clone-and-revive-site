@@ -17,6 +17,9 @@ const Dashboard = () => {
   const { user } = useAuth();
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'year'>('month');
 
+  console.log('Dashboard - despesas data:', despesas);
+  console.log('Dashboard - receitas data:', receitas);
+
   // Verificar se o usuário está autenticado
   if (!user) {
     return (
@@ -41,7 +44,7 @@ const Dashboard = () => {
 
   // Filter data based on selected period
   const filterDataByPeriod = (data: any[], period: string) => {
-    if (!data) return [];
+    if (!data || data.length === 0) return [];
     
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -68,6 +71,9 @@ const Dashboard = () => {
 
   const filteredDespesas = filterDataByPeriod(despesas || [], selectedPeriod);
   const filteredReceitas = filterDataByPeriod(receitas || [], selectedPeriod);
+
+  console.log('Dashboard - filtered despesas:', filteredDespesas);
+  console.log('Dashboard - filtered receitas:', filteredReceitas);
 
   // Calculate values only when data exists
   const totalDespesas = filteredDespesas.reduce((sum, despesa) => sum + despesa.valor, 0);
@@ -110,6 +116,8 @@ const Dashboard = () => {
   };
 
   const period = getPeriodString();
+
+  console.log('Dashboard - totals:', { totalDespesas, totalReceitas, churrascoDespesas, johnnyDespesas });
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -167,8 +175,8 @@ const Dashboard = () => {
                 <CompanyCard
                   name="Companhia do Churrasco"
                   totalDespesas={churrascoDespesas}
-                  status={filteredDespesas && filteredDespesas.length > 0 ? "Atualizado" : "Sem dados"}
-                  statusColor={filteredDespesas && filteredDespesas.length > 0 ? "green" : "yellow"}
+                  status={despesas && despesas.length > 0 ? "Atualizado" : "Sem dados"}
+                  statusColor={despesas && despesas.length > 0 ? "green" : "yellow"}
                   periodo={period}
                   insumos={churrascoInsumos > 0 ? churrascoInsumos : undefined}
                   variaveis={churrascoVariaveis > 0 ? churrascoVariaveis : undefined}
@@ -186,8 +194,8 @@ const Dashboard = () => {
                 <CompanyCard
                   name="Johnny Rockets"
                   totalDespesas={johnnyDespesas}
-                  status={filteredDespesas && filteredDespesas.length > 0 ? "Atualizado" : "Sem dados"}
-                  statusColor={filteredDespesas && filteredDespesas.length > 0 ? "green" : "yellow"}
+                  status={despesas && despesas.length > 0 ? "Atualizado" : "Sem dados"}
+                  statusColor={despesas && despesas.length > 0 ? "green" : "yellow"}
                   periodo={period}
                   fixas={johnnyFixas > 0 ? johnnyFixas : undefined}
                   insumos={johnnyInsumos > 0 ? johnnyInsumos : undefined}
@@ -214,8 +222,8 @@ const Dashboard = () => {
                     <option>Johnny Rockets</option>
                   </select>
                 </div>
-                {filteredDespesas && filteredDespesas.length > 0 ? (
-                  <RecentTransactions despesas={filteredDespesas} />
+                {despesas && despesas.length > 0 ? (
+                  <RecentTransactions despesas={despesas} />
                 ) : (
                   <Card className="p-6 text-center text-gray-600">
                     <p>Não há transações recentes para mostrar.</p>
@@ -228,8 +236,8 @@ const Dashboard = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
                   <h3 className="text-lg font-semibold text-gray-800 mb-6">Distribuição de Despesas</h3>
-                  {filteredDespesas && filteredDespesas.length > 0 ? (
-                    <ExpenseDistributionChart despesas={filteredDespesas} />
+                  {despesas && despesas.length > 0 ? (
+                    <ExpenseDistributionChart despesas={despesas} />
                   ) : (
                     <Card className="p-6 text-center text-gray-600">
                       <p>Não há dados suficientes para gerar o gráfico de distribuição.</p>
@@ -239,8 +247,8 @@ const Dashboard = () => {
                 
                 <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
                   <h3 className="text-lg font-semibold text-gray-800 mb-6">Evolução Mensal</h3>
-                  {filteredDespesas && filteredDespesas.length > 0 ? (
-                    <MonthlyEvolutionChart despesas={filteredDespesas} selectedPeriod={selectedPeriod} />
+                  {despesas && despesas.length > 0 ? (
+                    <MonthlyEvolutionChart despesas={despesas} selectedPeriod={selectedPeriod} />
                   ) : (
                     <Card className="p-6 text-center text-gray-600">
                       <p>Não há dados suficientes para gerar o gráfico de evolução.</p>
