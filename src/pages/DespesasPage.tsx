@@ -1,19 +1,32 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Sidebar from '@/components/Sidebar';
 import TransactionTable from '@/components/TransactionTable';
 import AddTransactionModal from '@/components/AddTransactionModal';
+import DespesasFilter from '@/components/DespesasFilter';
+import DespesasExport from '@/components/DespesasExport';
 import { Button } from '@/components/ui/button';
-import { Plus, Download, Filter, TrendingDown, DollarSign, Calendar, FileText, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Plus, TrendingDown, DollarSign, CheckCircle, AlertTriangle, Clock, FileText } from 'lucide-react';
 import { useDespesas } from '@/hooks/useDespesas';
 import { Transaction } from '@/types/transaction';
 
+interface FilterOptions {
+  empresa?: string;
+  categoria?: string;
+  dataInicio?: Date;
+  dataFim?: Date;
+  valorMin?: number;
+  valorMax?: number;
+  status?: string;
+}
+
 const DespesasPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filters, setFilters] = useState<FilterOptions>({});
   const { data: despesas = [], isLoading, refetch } = useDespesas();
 
   // Converter Despesa para Transaction
-  const transactions: Transaction[] = despesas.map(despesa => ({
+  const allTransactions: Transaction[] = despesas.map(despesa => ({
     id: despesa.id,
     date: despesa.data,
     valor: despesa.valor,
@@ -43,10 +56,58 @@ const DespesasPage = () => {
     return 'PAGO';
   };
 
-  const totalDespesas = despesas.reduce((sum, despesa) => sum + (despesa.valor || 0), 0);
-  const despesasPagas = transactions.filter(t => getTransactionStatus(t) === 'PAGO');
-  const despesasPendentes = transactions.filter(t => getTransactionStatus(t) === 'PENDENTE');
-  const despesasAtrasadas = transactions.filter(t => getTransactionStatus(t) === 'ATRASADO');
+  // Aplicar filtros
+  const filteredTransactions = useMemo(() => {
+    return allTransactions.filter(transaction => {
+      const status = getTransactionStatus(transaction);
+      
+      // Filtro por empresa
+      if (filters.empresa && transaction.company !== filters.empresa) {
+        return false;
+      }
+      
+      // Filtro por categoria
+      if (filters.categoria && transaction.category !== filters.categoria) {
+        return false;
+      }
+      
+      // Filtro por status
+      if (filters.status && status !== filters.status) {
+        return false;
+      }
+      
+      // Filtro por data
+      if (filters.dataInicio) {
+        const transactionDate = new Date(transaction.date);
+        if (transactionDate < filters.dataInicio) {
+          return false;
+        }
+      }
+      
+      if (filters.dataFim) {
+        const transactionDate = new Date(transaction.date);
+        if (transactionDate > filters.dataFim) {
+          return false;
+        }
+      }
+      
+      // Filtro por valor
+      if (filters.valorMin && transaction.valor < filters.valorMin) {
+        return false;
+      }
+      
+      if (filters.valorMax && transaction.valor > filters.valorMax) {
+        return false;
+      }
+      
+      return true;
+    });
+  }, [allTransactions, filters]);
+
+  const totalDespesas = filteredTransactions.reduce((sum, transaction) => sum + transaction.valor, 0);
+  const despesasPagas = filteredTransactions.filter(t => getTransactionStatus(t) === 'PAGO');
+  const despesasPendentes = filteredTransactions.filter(t => getTransactionStatus(t) === 'PENDENTE');
+  const despesasAtrasadas = filteredTransactions.filter(t => getTransactionStatus(t) === 'ATRASADO');
 
   const valorPago = despesasPagas.reduce((sum, t) => sum + t.valor, 0);
   const valorPendente = despesasPendentes.reduce((sum, t) => sum + t.valor, 0);
@@ -61,6 +122,14 @@ const DespesasPage = () => {
     refetch();
   };
 
+  const handleFilterChange = (newFilters: FilterOptions) => {
+    setFilters(newFilters);
+  };
+
+  const handleClearFilters = () => {
+    setFilters({});
+  };
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
@@ -73,6 +142,8 @@ const DespesasPage = () => {
       </div>
     );
   }
+
+  const hasActiveFilters = Object.values(filters).some(value => value !== undefined && value !== '');
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
@@ -91,6 +162,11 @@ const DespesasPage = () => {
                   Despesas
                 </h1>
                 <p className="text-gray-600 text-lg">Gerencie todas as despesas do negócio</p>
+                {hasActiveFilters && (
+                  <p className="text-sm text-purple-600">
+                    Mostrando {filteredTransactions.length} de {allTransactions.length} registros
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -107,7 +183,7 @@ const DespesasPage = () => {
                   <p className="text-2xl font-bold bg-gradient-to-r from-red-600 to-red-700 bg-clip-text text-transparent">
                     R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </p>
-                  <p className="text-xs text-gray-500">{despesas.length} registros</p>
+                  <p className="text-xs text-gray-500">{filteredTransactions.length} registros</p>
                 </div>
               </div>
             </div>
@@ -162,14 +238,11 @@ const DespesasPage = () => {
           <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/20 mb-8">
             <div className="flex justify-between items-center">
               <div className="flex gap-3">
-                <Button variant="outline" className="flex items-center gap-2 bg-white/50 hover:bg-white/80 border-gray-200">
-                  <Filter className="h-4 w-4" />
-                  Filtrar
-                </Button>
-                <Button variant="outline" className="flex items-center gap-2 bg-white/50 hover:bg-white/80 border-gray-200">
-                  <Download className="h-4 w-4" />
-                  Exportar
-                </Button>
+                <DespesasFilter 
+                  onFilterChange={handleFilterChange}
+                  onClearFilters={handleClearFilters}
+                />
+                <DespesasExport transactions={filteredTransactions} />
               </div>
               
               <Button 
@@ -188,10 +261,15 @@ const DespesasPage = () => {
               <div className="flex items-center gap-3">
                 <FileText className="h-5 w-5 text-gray-600" />
                 <h2 className="text-xl font-semibold text-gray-800">Lista de Despesas</h2>
+                {hasActiveFilters && (
+                  <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded-lg text-sm">
+                    Filtrado
+                  </span>
+                )}
               </div>
             </div>
             <TransactionTable 
-              transactions={transactions} 
+              transactions={filteredTransactions} 
               onTransactionUpdated={handleTransactionUpdated}
             />
           </div>
