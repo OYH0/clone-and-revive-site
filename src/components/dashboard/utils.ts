@@ -3,25 +3,31 @@ export const filterDataByPeriod = (data: any[], period: string) => {
   if (!data || data.length === 0) return [];
   
   const now = new Date();
-  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const startOfYear = new Date(now.getFullYear(), 0, 1);
+  let startDate: Date;
+
+  switch (period) {
+    case 'today':
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      break;
+    case 'week':
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay());
+      startOfWeek.setHours(0, 0, 0, 0);
+      startDate = startOfWeek;
+      break;
+    case 'month':
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      break;
+    case 'year':
+      startDate = new Date(now.getFullYear(), 0, 1);
+      break;
+    default:
+      return data; // Return all data if period is not recognized
+  }
 
   return data.filter(item => {
     const itemDate = new Date(item.data);
-    switch (period) {
-      case 'today':
-        return itemDate >= startOfDay;
-      case 'week':
-        return itemDate >= startOfWeek;
-      case 'month':
-        return itemDate >= startOfMonth;
-      case 'year':
-        return itemDate >= startOfYear;
-      default:
-        return true;
-    }
+    return itemDate >= startDate;
   });
 };
 
