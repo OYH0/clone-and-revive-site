@@ -32,14 +32,14 @@ const CompanyCard: React.FC<CompanyCardProps> = ({
   const statusBgColor = statusColor === 'green' ? 'bg-green-500' : 'bg-yellow-500';
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
       <div className="border-l-4 border-red-500 p-6">
         <div className="flex justify-between items-start mb-4">
           <div>
             <h3 className="text-lg font-semibold text-gray-800">{name}</h3>
             <p className="text-sm text-gray-500">{periodo}</p>
           </div>
-          <span className={`px-3 py-1 rounded-full text-xs font-medium text-white ${statusBgColor}`}>
+          <span className={`px-3 py-1 rounded-2xl text-xs font-medium text-white ${statusBgColor}`}>
             {status}
           </span>
         </div>
