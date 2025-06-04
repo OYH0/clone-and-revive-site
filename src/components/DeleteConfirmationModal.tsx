@@ -13,6 +13,7 @@ import {
 import { useDeleteDespesa } from '@/hooks/useDespesas';
 import { useDeleteReceita } from '@/hooks/useReceitas';
 import { Transaction } from '@/types/transaction';
+import { truncateDescription } from '@/utils/transactionUtils';
 
 interface DeleteConfirmationModalProps {
   isOpen: boolean;
@@ -51,6 +52,9 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
 
   const isLoading = deleteDespesa.isPending || deleteReceita.isPending;
 
+  // Truncar a descrição para exibição no modal
+  const { text: truncatedDescription } = truncateDescription(transaction?.description || '', 50);
+
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent className="sm:max-w-[425px] w-[95vw] max-h-[90vh] overflow-y-auto">
@@ -73,8 +77,8 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
           
           <div className="space-y-1">
             <label className="text-sm font-medium text-gray-700">Descrição:</label>
-            <p className="text-sm text-gray-900 p-2 bg-gray-50 rounded border break-words max-h-20 overflow-y-auto">
-              {transaction?.description}
+            <p className="text-sm text-gray-900 p-2 bg-gray-50 rounded border break-words">
+              {truncatedDescription}
             </p>
           </div>
           
