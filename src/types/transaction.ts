@@ -1,0 +1,10 @@
+
+export interface Transaction {
+  id: number;
+  date: string;
+  valor: number;
+  company: string;
+  description: string;
+  category: string;
+  data_vencimento?: string;
+}
