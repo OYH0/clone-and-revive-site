@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Edit, Trash2 } from 'lucide-react';
 import { Transaction } from '@/types/transaction';
@@ -31,22 +32,18 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
     const transactionDate = new Date(transaction.date);
     const dueDate = transaction.data_vencimento ? new Date(transaction.data_vencimento) : transactionDate;
     
-    // Se tem data de vencimento e está atrasada
     if (transaction.data_vencimento && dueDate < today) {
       return 'ATRASADO';
     }
     
-    // Se é categoria ATRASADOS
     if (transaction.category === 'ATRASADOS') {
       return 'ATRASADO';
     }
     
-    // Se a data da transação é futura, está pendente
     if (transactionDate > today) {
       return 'PENDENTE';
     }
     
-    // Se não tem data de vencimento ou está dentro do prazo
     return 'PAGO';
   };
 
@@ -80,7 +77,8 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
 
   return (
     <>
-      <div className="overflow-x-auto">
+      {/* Desktop Table */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-200">
@@ -143,6 +141,58 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
             })}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="md:hidden space-y-4">
+        {transactions.map((transaction) => {
+          const status = getTransactionStatus(transaction);
+          return (
+            <div key={transaction.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="px-2 py-1 rounded text-xs bg-blue-500 text-white">
+                      {transaction.company}
+                    </span>
+                    <span className={`px-2 py-1 rounded text-xs ${getStatusColor(status)}`}>
+                      {status}
+                    </span>
+                  </div>
+                  <h3 className="font-medium text-gray-900 mb-1">{transaction.description}</h3>
+                  <p className="text-sm text-gray-600">
+                    {new Date(transaction.date).toLocaleDateString('pt-BR')}
+                  </p>
+                </div>
+                <div className="flex gap-2 ml-4">
+                  <button
+                    onClick={() => handleEdit(transaction)}
+                    className="text-blue-500 hover:text-blue-700 p-2 rounded hover:bg-blue-50"
+                    title="Editar"
+                  >
+                    <Edit size={18} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(transaction)}
+                    className="text-red-500 hover:text-red-700 p-2 rounded hover:bg-red-50"
+                    title="Excluir"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+                <span className={`px-2 py-1 rounded text-xs ${getCategoryColor(transaction.category)}`}>
+                  {transaction.category}
+                </span>
+                <span className="font-bold text-lg text-gray-900">
+                  R$ {transaction.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </span>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <EditTransactionModal
