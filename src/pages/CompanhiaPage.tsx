@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Building2, TrendingUp, DollarSign, Users, Calendar, PieChart, BarChart3 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -16,18 +15,18 @@ const CompanhiaPage = () => {
   const companhiaDespesas = despesas?.filter(d => d.empresa === 'Churrasco') || [];
   const companhiaReceitas = receitas?.filter(r => r.empresa === 'Churrasco') || [];
 
-  // Calcular estatísticas
-  const totalDespesas = companhiaDespesas.reduce((sum, d) => sum + d.valor, 0) / 100;
+  // Calcular estatísticas - removendo divisão por 100
+  const totalDespesas = companhiaDespesas.reduce((sum, d) => sum + d.valor, 0);
   const totalReceitas = companhiaReceitas.reduce((sum, r) => sum + r.valor, 0);
   const lucro = totalReceitas - totalDespesas;
   const margemLucro = totalReceitas > 0 ? (lucro / totalReceitas) * 100 : 0;
 
-  // Dados para gráficos
+  // Dados para gráficos - removendo divisão por 100
   const despesasPorCategoria = [
-    { name: 'Insumos', value: companhiaDespesas.filter(d => d.categoria === 'INSUMOS').reduce((sum, d) => sum + d.valor, 0) / 100, color: '#ef4444' },
-    { name: 'Variáveis', value: companhiaDespesas.filter(d => d.categoria === 'VARIAVEIS').reduce((sum, d) => sum + d.valor, 0) / 100, color: '#f59e0b' },
-    { name: 'Fixas', value: companhiaDespesas.filter(d => d.categoria === 'FIXAS').reduce((sum, d) => sum + d.valor, 0) / 100, color: '#8b5cf6' },
-    { name: 'Atrasados', value: companhiaDespesas.filter(d => d.categoria === 'ATRASADOS').reduce((sum, d) => sum + d.valor, 0) / 100, color: '#6b7280' }
+    { name: 'Insumos', value: companhiaDespesas.filter(d => d.categoria === 'INSUMOS').reduce((sum, d) => sum + d.valor, 0), color: '#ef4444' },
+    { name: 'Variáveis', value: companhiaDespesas.filter(d => d.categoria === 'VARIAVEIS').reduce((sum, d) => sum + d.valor, 0), color: '#f59e0b' },
+    { name: 'Fixas', value: companhiaDespesas.filter(d => d.categoria === 'FIXAS').reduce((sum, d) => sum + d.valor, 0), color: '#8b5cf6' },
+    { name: 'Atrasados', value: companhiaDespesas.filter(d => d.categoria === 'ATRASADOS').reduce((sum, d) => sum + d.valor, 0), color: '#6b7280' }
   ].filter(item => item.value > 0);
 
   const evolucaoMensal = React.useMemo(() => {
@@ -36,7 +35,7 @@ const CompanhiaPage = () => {
       const monthDespesas = companhiaDespesas.filter(d => {
         const date = new Date(d.data);
         return date.getMonth() === index;
-      }).reduce((sum, d) => sum + d.valor, 0) / 100;
+      }).reduce((sum, d) => sum + d.valor, 0);
       
       const monthReceitas = companhiaReceitas.filter(r => {
         const date = new Date(r.data);

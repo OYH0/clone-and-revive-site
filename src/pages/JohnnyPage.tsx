@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Building2, TrendingUp, DollarSign, Users, Calendar, PieChart, BarChart3 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -16,18 +15,18 @@ const JohnnyPage = () => {
   const johnnyDespesas = despesas?.filter(d => d.empresa === 'Johnny') || [];
   const johnnyReceitas = receitas?.filter(r => r.empresa === 'Johnny') || [];
 
-  // Calcular estatísticas
-  const totalDespesas = johnnyDespesas.reduce((sum, d) => sum + d.valor, 0) / 100;
+  // Calcular estatísticas - removendo divisão por 100
+  const totalDespesas = johnnyDespesas.reduce((sum, d) => sum + d.valor, 0);
   const totalReceitas = johnnyReceitas.reduce((sum, r) => sum + r.valor, 0);
   const lucro = totalReceitas - totalDespesas;
   const margemLucro = totalReceitas > 0 ? (lucro / totalReceitas) * 100 : 0;
 
-  // Dados para gráficos
+  // Dados para gráficos - removendo divisão por 100
   const despesasPorCategoria = [
-    { name: 'Insumos', value: johnnyDespesas.filter(d => d.categoria === 'INSUMOS').reduce((sum, d) => sum + d.valor, 0) / 100, color: '#3b82f6' },
-    { name: 'Fixas', value: johnnyDespesas.filter(d => d.categoria === 'FIXAS').reduce((sum, d) => sum + d.valor, 0) / 100, color: '#8b5cf6' },
-    { name: 'Atrasados', value: johnnyDespesas.filter(d => d.categoria === 'ATRASADOS').reduce((sum, d) => sum + d.valor, 0) / 100, color: '#ef4444' },
-    { name: 'Variáveis', value: johnnyDespesas.filter(d => d.categoria === 'VARIAVEIS').reduce((sum, d) => sum + d.valor, 0) / 100, color: '#f59e0b' }
+    { name: 'Insumos', value: johnnyDespesas.filter(d => d.categoria === 'INSUMOS').reduce((sum, d) => sum + d.valor, 0), color: '#3b82f6' },
+    { name: 'Fixas', value: johnnyDespesas.filter(d => d.categoria === 'FIXAS').reduce((sum, d) => sum + d.valor, 0), color: '#8b5cf6' },
+    { name: 'Atrasados', value: johnnyDespesas.filter(d => d.categoria === 'ATRASADOS').reduce((sum, d) => sum + d.valor, 0), color: '#ef4444' },
+    { name: 'Variáveis', value: johnnyDespesas.filter(d => d.categoria === 'VARIAVEIS').reduce((sum, d) => sum + d.valor, 0), color: '#f59e0b' }
   ].filter(item => item.value > 0);
 
   const evolucaoMensal = React.useMemo(() => {
@@ -36,7 +35,7 @@ const JohnnyPage = () => {
       const monthDespesas = johnnyDespesas.filter(d => {
         const date = new Date(d.data);
         return date.getMonth() === index;
-      }).reduce((sum, d) => sum + d.valor, 0) / 100;
+      }).reduce((sum, d) => sum + d.valor, 0);
       
       const monthReceitas = johnnyReceitas.filter(r => {
         const date = new Date(r.data);
