@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { FileText, Download, TrendingUp, DollarSign, Calendar, PieChart as PieChartIcon } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -36,9 +37,9 @@ const RelatoriosPage = () => {
       
       return {
         month,
-        despesas: monthDespesas / 100, // Converter de centavos
+        despesas: monthDespesas, // Removido divisão por 100
         receitas: monthReceitas,
-        lucro: monthReceitas - (monthDespesas / 100)
+        lucro: monthReceitas - monthDespesas // Removido divisão por 100
       };
     });
   }, [despesas, receitas]);
@@ -54,7 +55,7 @@ const RelatoriosPage = () => {
       
       return {
         name: category,
-        value: value / 100, // Converter de centavos
+        value: value, // Removido divisão por 100
         color: colors[index]
       };
     }).filter(item => item.value > 0);
@@ -78,7 +79,7 @@ const RelatoriosPage = () => {
   }, [receitas]);
 
   // Calcular estatísticas
-  const totalDespesas = despesas?.reduce((sum, d) => sum + d.valor, 0) / 100 || 0;
+  const totalDespesas = despesas?.reduce((sum, d) => sum + d.valor, 0) || 0; // Removido divisão por 100
   const totalReceitas = receitas?.reduce((sum, r) => sum + r.valor, 0) || 0;
   const lucroTotal = totalReceitas - totalDespesas;
   const margemLucro = totalReceitas > 0 ? (lucroTotal / totalReceitas) * 100 : 0;
@@ -154,7 +155,7 @@ const RelatoriosPage = () => {
 
       doc.setFontSize(12);
       const maiorReceita = Math.max(...(receitas?.map(r => r.valor) || [0]));
-      const maiorDespesa = Math.max(...(despesas?.map(d => d.valor) || [0])) / 100;
+      const maiorDespesa = Math.max(...(despesas?.map(d => d.valor) || [0])); // Removido divisão por 100
       const mediaMensal = totalReceitas / 12;
       const totalTransacoes = (despesas?.length || 0) + (receitas?.length || 0);
 
@@ -398,7 +399,7 @@ const RelatoriosPage = () => {
                 <div className="flex justify-between items-center p-4 bg-red-50 rounded-xl">
                   <span className="text-red-700 font-medium">Maior Despesa</span>
                   <span className="text-red-800 font-bold">
-                    R$ {(Math.max(...(despesas?.map(d => d.valor) || [0])) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    R$ {Math.max(...(despesas?.map(d => d.valor) || [0])).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </span>
                 </div>
                 
