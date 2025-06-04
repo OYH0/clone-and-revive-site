@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { FileText, Download, TrendingUp, DollarSign, Calendar, PieChart as PieChartIcon } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -8,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Tooltip, Legend } from 'recharts';
 import { useDespesas } from '@/hooks/useDespesas';
 import { useReceitas } from '@/hooks/useReceitas';
+import jsPDF from 'jspdf';
+import { useToast } from '@/hooks/use-toast';
 
 const RelatoriosPage = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('mes');
@@ -15,6 +16,7 @@ const RelatoriosPage = () => {
   
   const { data: despesas } = useDespesas();
   const { data: receitas } = useReceitas();
+  const { toast } = useToast();
 
   // Dados para gráfico de evolução mensal
   const monthlyData = React.useMemo(() => {
@@ -81,6 +83,112 @@ const RelatoriosPage = () => {
   const lucroTotal = totalReceitas - totalDespesas;
   const margemLucro = totalReceitas > 0 ? (lucroTotal / totalReceitas) * 100 : 0;
 
+  const generatePDF = () => {
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.width;
+      const margin = 20;
+      let yPosition = margin;
+
+      // Header
+      doc.setFontSize(20);
+      doc.setTextColor(59, 130, 246); // Blue color
+      doc.text('Relatório Financeiro', margin, yPosition);
+      yPosition += 15;
+
+      doc.setFontSize(12);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Período: ${selectedPeriod === 'mes' ? 'Este Mês' : selectedPeriod === 'trimestre' ? 'Trimestre' : selectedPeriod === 'semestre' ? 'Semestre' : 'Ano'}`, margin, yPosition);
+      yPosition += 10;
+      doc.text(`Tipo: ${selectedType === 'geral' ? 'Relatório Geral' : selectedType === 'despesas' ? 'Apenas Despesas' : selectedType === 'receitas' ? 'Apenas Receitas' : 'Comparativo'}`, margin, yPosition);
+      yPosition += 20;
+
+      // Financial Summary
+      doc.setFontSize(16);
+      doc.setTextColor(0, 0, 0);
+      doc.text('Resumo Financeiro', margin, yPosition);
+      yPosition += 15;
+
+      doc.setFontSize(12);
+      doc.text(`Total de Receitas: R$ ${totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, margin, yPosition);
+      yPosition += 8;
+      doc.text(`Total de Despesas: R$ ${totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, margin, yPosition);
+      yPosition += 8;
+      doc.text(`Lucro Líquido: R$ ${lucroTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, margin, yPosition);
+      yPosition += 8;
+      doc.text(`Margem de Lucro: ${margemLucro.toFixed(1)}%`, margin, yPosition);
+      yPosition += 20;
+
+      // Despesas por Categoria
+      if (categoryData.length > 0) {
+        doc.setFontSize(16);
+        doc.text('Despesas por Categoria', margin, yPosition);
+        yPosition += 15;
+
+        doc.setFontSize(12);
+        categoryData.forEach((category) => {
+          doc.text(`${category.name}: R$ ${category.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, margin, yPosition);
+          yPosition += 8;
+        });
+        yPosition += 15;
+      }
+
+      // Receitas por Empresa
+      if (receitasEmpresaData.length > 0) {
+        doc.setFontSize(16);
+        doc.text('Receitas por Empresa', margin, yPosition);
+        yPosition += 15;
+
+        doc.setFontSize(12);
+        receitasEmpresaData.forEach((empresa) => {
+          doc.text(`${empresa.name}: R$ ${empresa.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, margin, yPosition);
+          yPosition += 8;
+        });
+        yPosition += 15;
+      }
+
+      // Indicadores Principais
+      doc.setFontSize(16);
+      doc.text('Indicadores Principais', margin, yPosition);
+      yPosition += 15;
+
+      doc.setFontSize(12);
+      const maiorReceita = Math.max(...(receitas?.map(r => r.valor) || [0]));
+      const maiorDespesa = Math.max(...(despesas?.map(d => d.valor) || [0])) / 100;
+      const mediaMensal = totalReceitas / 12;
+      const totalTransacoes = (despesas?.length || 0) + (receitas?.length || 0);
+
+      doc.text(`Maior Receita: R$ ${maiorReceita.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, margin, yPosition);
+      yPosition += 8;
+      doc.text(`Maior Despesa: R$ ${maiorDespesa.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, margin, yPosition);
+      yPosition += 8;
+      doc.text(`Média Mensal: R$ ${mediaMensal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, margin, yPosition);
+      yPosition += 8;
+      doc.text(`Total de Transações: ${totalTransacoes}`, margin, yPosition);
+
+      // Footer
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Relatório gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`, margin, doc.internal.pageSize.height - 20);
+
+      // Save the PDF
+      const fileName = `relatorio-financeiro-${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(fileName);
+
+      toast({
+        title: "PDF gerado com sucesso!",
+        description: `O relatório foi baixado como ${fileName}`,
+      });
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      toast({
+        title: "Erro ao gerar PDF",
+        description: "Ocorreu um erro ao gerar o relatório. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
       <Sidebar />
@@ -126,7 +234,10 @@ const RelatoriosPage = () => {
                 </SelectContent>
               </Select>
 
-              <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg rounded-2xl">
+              <Button 
+                onClick={generatePDF}
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg rounded-2xl"
+              >
                 <Download className="w-4 h-4 mr-2" />
                 Exportar PDF
               </Button>
