@@ -30,14 +30,19 @@ body {
   @apply bg-yellow-500 text-white;
 }
 
-/* Ajuste para conteúdo principal com sidebar fixa */
-.ml-64 {
+/* Ajuste para conteúdo principal com sidebar fixa - exceto páginas de auth */
+.main-content {
   margin-left: 0;
 }
 
 /* Ajuste responsivo */
 @media (min-width: 768px) {
-  .ml-64 {
+  .main-content {
     margin-left: 16rem;
   }
+}
+
+/* Página de auth não deve ter margem da sidebar */
+.auth-page {
+  margin-left: 0 !important;
 }

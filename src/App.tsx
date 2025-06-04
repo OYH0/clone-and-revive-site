@@ -25,54 +25,68 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <div className="ml-64">
-          <BrowserRouter>
-            <Routes>
-              <Route path="/auth" element={<AuthPage />} />
-              <Route path="/" element={
+        <BrowserRouter>
+          <Routes>
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/" element={
+              <div className="main-content">
                 <ProtectedRoute>
                   <Index />
                 </ProtectedRoute>
-              } />
-              <Route path="/despesas" element={
+              </div>
+            } />
+            <Route path="/despesas" element={
+              <div className="main-content">
                 <ProtectedRoute>
                   <DespesasPage />
                 </ProtectedRoute>
-              } />
-              <Route path="/receitas" element={
+              </div>
+            } />
+            <Route path="/receitas" element={
+              <div className="main-content">
                 <ProtectedRoute>
                   <ReceitasPage />
                 </ProtectedRoute>
-              } />
-              <Route path="/relatorios" element={
+              </div>
+            } />
+            <Route path="/relatorios" element={
+              <div className="main-content">
                 <ProtectedRoute>
                   <RelatoriosPage />
                 </ProtectedRoute>
-              } />
-              <Route path="/configuracoes" element={
+              </div>
+            } />
+            <Route path="/configuracoes" element={
+              <div className="main-content">
                 <ProtectedRoute>
                   <ConfiguracoesPage />
                 </ProtectedRoute>
-              } />
-              <Route path="/companhia" element={
+              </div>
+            } />
+            <Route path="/companhia" element={
+              <div className="main-content">
                 <ProtectedRoute>
                   <CompanhiaPage />
                 </ProtectedRoute>
-              } />
-              <Route path="/johnny" element={
+              </div>
+            } />
+            <Route path="/johnny" element={
+              <div className="main-content">
                 <ProtectedRoute>
                   <JohnnyPage />
                 </ProtectedRoute>
-              } />
-              <Route path="/admin" element={
+              </div>
+            } />
+            <Route path="/admin" element={
+              <div className="main-content">
                 <ProtectedRoute>
                   <AdminPage />
                 </ProtectedRoute>
-              } />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </div>
+              </div>
+            } />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
