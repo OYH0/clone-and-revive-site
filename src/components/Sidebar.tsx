@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Settings, FileText, DollarSign, LogOut, Shield } from 'lucide-react';
@@ -12,7 +11,18 @@ const Sidebar: React.FC = () => {
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/' },
-    { id: 'companhia', label: 'Companhia do Churrasco', icon: Settings, path: '/companhia' },
+    { 
+      id: 'companhia', 
+      label: 'Companhia do Churrasco', 
+      icon: () => (
+        <img 
+          src="/lovable-uploads/7affde4e-c307-4d29-bfbf-e874f3f2bc19.png" 
+          alt="Companhia do Churrasco" 
+          className="w-4 h-4 object-contain"
+        />
+      ), 
+      path: '/companhia' 
+    },
     { 
       id: 'johnny', 
       label: 'Johnny Rockets', 
