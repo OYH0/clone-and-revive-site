@@ -1,28 +1,21 @@
 
 import React from 'react';
 import { Edit, Trash2 } from 'lucide-react';
+import { useDespesas } from '@/hooks/useDespesas';
 
 const RecentTransactions: React.FC = () => {
-  const transactions = [
-    {
-      id: 1,
-      date: '27/05/2025',
-      company: 'Churrasco',
-      description: 'COMPRAS',
-      category: 'INSUMOS',
-      value: 2250.00,
-      status: 'PAGO'
-    },
-    {
-      id: 2,
-      date: '27/05/2025',
-      company: 'Johnny',
-      description: 'MANUTENÇÃO VEÍCULOS',
-      category: 'FIXAS',
-      value: 5200.00,
-      status: 'PAGO'
-    }
-  ];
+  const { data: despesas } = useDespesas();
+  
+  // Use actual data from database if available, otherwise show empty or sample data
+  const transactions = despesas?.slice(0, 5).map(despesa => ({
+    id: despesa.id,
+    date: new Date(despesa.data).toLocaleDateString('pt-BR'),
+    company: despesa.empresa,
+    description: despesa.descricao,
+    category: despesa.categoria,
+    value: despesa.valor,
+    status: 'PAGO'
+  })) || [];
 
   const getCategoryColor = (category: string) => {
     switch (category) {
@@ -30,6 +23,10 @@ const RecentTransactions: React.FC = () => {
         return 'bg-blue-500 text-white';
       case 'FIXAS':
         return 'bg-teal-500 text-white';
+      case 'VARIAVEIS':
+        return 'bg-orange-500 text-white';
+      case 'ATRASADOS':
+        return 'bg-red-500 text-white';
       default:
         return 'bg-gray-500 text-white';
     }
@@ -38,6 +35,15 @@ const RecentTransactions: React.FC = () => {
   const getCompanyColor = (company: string) => {
     return company === 'Churrasco' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white';
   };
+
+  if (transactions.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-300">
+        <p>Não há transações para exibir.</p>
+        <p className="text-sm mt-2">Adicione transações para visualizá-las aqui.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="overflow-x-auto">
@@ -69,7 +75,7 @@ const RecentTransactions: React.FC = () => {
                 </span>
               </td>
               <td className="py-3 text-white font-medium">
-                R$ {transaction.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                R$ {(transaction.value / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </td>
               <td className="py-3">
                 <span className="px-2 py-1 rounded text-xs bg-green-500 text-white">
