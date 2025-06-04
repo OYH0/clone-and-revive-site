@@ -69,6 +69,8 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
     try {
       const today = new Date().toISOString().split('T')[0];
       
+      console.log('Marking transaction as paid:', transaction.id, 'Setting date to:', today);
+      
       // Update the transaction date to today and remove from ATRASADOS category if needed
       const updateData: any = {
         data: today
@@ -77,18 +79,22 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
       // If transaction is in ATRASADOS category, move it to FIXAS
       if (transaction.category === 'ATRASADOS') {
         updateData.categoria = 'FIXAS';
+        console.log('Moving from ATRASADOS to FIXAS');
       }
 
-      const { error } = await supabase
+      const { error, data } = await supabase
         .from('despesas')
         .update(updateData)
         .eq('id', transaction.id)
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .select();
 
       if (error) {
         console.error('Error updating despesa:', error);
         throw error;
       }
+
+      console.log('Transaction updated successfully:', data);
 
       toast({
         title: "Sucesso",
