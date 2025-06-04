@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -97,5 +98,53 @@
 
   body {
     @apply bg-background text-foreground;
+    margin: 0;
+    padding: 0;
   }
+}
+
+.sidebar-blue {
+  background: #2c3e50;
+}
+
+.sidebar-blue-dark {
+  background: #34495e;
+}
+
+.red-chart {
+  color: #e74c3c;
+}
+
+.blue-chart {
+  color: #3498db;
+}
+
+.status-paid {
+  background: #27ae60;
+  color: white;
+}
+
+.status-pending {
+  background: #f39c12;
+  color: white;
+}
+
+.category-insumos {
+  background: #3498db;
+  color: white;
+}
+
+.category-fixas {
+  background: #16a085;
+  color: white;
+}
+
+.category-variaveis {
+  background: #f39c12;
+  color: white;
+}
+
+.category-atrasados {
+  background: #e74c3c;
+  color: white;
 }
