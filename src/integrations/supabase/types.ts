@@ -18,6 +18,7 @@ export type Database = {
           descricao: string | null
           empresa: string | null
           id: number
+          status: string | null
           user_id: string
           valor: number | null
         }
@@ -29,6 +30,7 @@ export type Database = {
           descricao?: string | null
           empresa?: string | null
           id?: number
+          status?: string | null
           user_id: string
           valor?: number | null
         }
@@ -40,6 +42,7 @@ export type Database = {
           descricao?: string | null
           empresa?: string | null
           id?: number
+          status?: string | null
           user_id?: string
           valor?: number | null
         }
