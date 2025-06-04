@@ -29,7 +29,9 @@ const DespesasFilter: React.FC<DespesasFilterProps> = ({ onFilterChange, onClear
   const [isOpen, setIsOpen] = useState(false);
 
   const handleFilterChange = (key: keyof FilterOptions, value: any) => {
-    const newFilters = { ...filters, [key]: value };
+    // Convert "all" values back to undefined for filtering logic
+    const filterValue = value === 'all' ? undefined : value;
+    const newFilters = { ...filters, [key]: filterValue };
     setFilters(newFilters);
     onFilterChange(newFilters);
   };
@@ -72,12 +74,12 @@ const DespesasFilter: React.FC<DespesasFilterProps> = ({ onFilterChange, onClear
           <div className="space-y-3">
             <div>
               <label className="text-sm font-medium text-gray-700">Empresa</label>
-              <Select value={filters.empresa || ''} onValueChange={(value) => handleFilterChange('empresa', value)}>
+              <Select value={filters.empresa || 'all'} onValueChange={(value) => handleFilterChange('empresa', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Todas as empresas" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas as empresas</SelectItem>
+                  <SelectItem value="all">Todas as empresas</SelectItem>
                   <SelectItem value="Churrasco">Churrasco</SelectItem>
                   <SelectItem value="Johnny">Johnny</SelectItem>
                 </SelectContent>
@@ -86,12 +88,12 @@ const DespesasFilter: React.FC<DespesasFilterProps> = ({ onFilterChange, onClear
 
             <div>
               <label className="text-sm font-medium text-gray-700">Categoria</label>
-              <Select value={filters.categoria || ''} onValueChange={(value) => handleFilterChange('categoria', value)}>
+              <Select value={filters.categoria || 'all'} onValueChange={(value) => handleFilterChange('categoria', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Todas as categorias" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas as categorias</SelectItem>
+                  <SelectItem value="all">Todas as categorias</SelectItem>
                   <SelectItem value="INSUMOS">Insumos</SelectItem>
                   <SelectItem value="FIXAS">Fixas</SelectItem>
                   <SelectItem value="VARIÁVEIS">Variáveis</SelectItem>
@@ -102,12 +104,12 @@ const DespesasFilter: React.FC<DespesasFilterProps> = ({ onFilterChange, onClear
 
             <div>
               <label className="text-sm font-medium text-gray-700">Status</label>
-              <Select value={filters.status || ''} onValueChange={(value) => handleFilterChange('status', value)}>
+              <Select value={filters.status || 'all'} onValueChange={(value) => handleFilterChange('status', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Todos os status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os status</SelectItem>
+                  <SelectItem value="all">Todos os status</SelectItem>
                   <SelectItem value="PAGO">Pago</SelectItem>
                   <SelectItem value="PENDENTE">Pendente</SelectItem>
                   <SelectItem value="ATRASADO">Atrasado</SelectItem>
