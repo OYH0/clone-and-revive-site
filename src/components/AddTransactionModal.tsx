@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -79,7 +80,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     try {
       const insertData: any = {
         data: formData.data,
-        valor: parseFloat(formData.valor),
+        valor: parseFloat(formData.valor) * 100, // Convert to cents
         empresa: formData.empresa,
         descricao: formData.descricao || 'Sem descrição',
         categoria: formData.categoria,
@@ -161,7 +162,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="valor">Valor *</Label>
+            <Label htmlFor="valor">Valor (R$) *</Label>
             <Input
               id="valor"
               type="number"

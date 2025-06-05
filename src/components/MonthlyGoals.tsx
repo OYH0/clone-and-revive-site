@@ -7,6 +7,7 @@ import { Edit, Plus, Target, Trash2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useMetasMensais, useCreateMetaMensal, useUpdateMetaMensal, useDeleteMetaMensal } from '@/hooks/useMetasMensais';
 import { useReceitas } from '@/hooks/useReceitas';
 
@@ -26,27 +27,32 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
   const [formData, setFormData] = useState({
     nome_meta: '',
     valor_meta: '',
+    categoria_receita: 'VENDAS',
     cor: '#8b5cf6'
   });
 
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
 
-  // Calcular receitas do mês atual para a empresa
-  const receitasDoMes = receitas.filter(r => {
-    const receitaDate = new Date(r.data);
-    return r.empresa === empresa && 
-           receitaDate.getMonth() + 1 === currentMonth && 
-           receitaDate.getFullYear() === currentYear;
-  });
-
-  const totalReceitasDoMes = receitasDoMes.reduce((sum, r) => sum + r.valor, 0);
+  // Calcular receitas do mês atual para a empresa e categoria específica
+  const calcularValorAtual = (categoriaReceita: string) => {
+    const receitasDoMes = receitas.filter(r => {
+      const receitaDate = new Date(r.data + 'T00:00:00'); // Adicionar horário para evitar problemas de timezone
+      return r.empresa === empresa && 
+             r.categoria === categoriaReceita &&
+             receitaDate.getMonth() + 1 === currentMonth && 
+             receitaDate.getFullYear() === currentYear;
+    });
+    
+    return receitasDoMes.reduce((sum, r) => sum + r.valor, 0);
+  };
 
   const handleEditMeta = (meta: any) => {
     setEditingMeta(meta);
     setFormData({
       nome_meta: meta.nome_meta,
       valor_meta: (meta.valor_meta / 100).toString(),
+      categoria_receita: meta.categoria_receita || 'VENDAS',
       cor: meta.cor
     });
     setIsDialogOpen(true);
@@ -54,10 +60,13 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
 
   const handleSaveMeta = async () => {
     try {
+      const valorAtual = calcularValorAtual(formData.categoria_receita);
+      
       const metaData = {
         nome_meta: formData.nome_meta,
         valor_meta: parseFloat(formData.valor_meta) * 100, // Convert to cents
-        valor_atual: totalReceitasDoMes, // Usar o valor calculado automaticamente
+        valor_atual: valorAtual,
+        categoria_receita: formData.categoria_receita,
         cor: formData.cor,
         empresa,
         mes: currentMonth,
@@ -75,6 +84,7 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
       setFormData({
         nome_meta: '',
         valor_meta: '',
+        categoria_receita: 'VENDAS',
         cor: '#8b5cf6'
       });
     } catch (error) {
@@ -87,6 +97,7 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
     setFormData({
       nome_meta: '',
       valor_meta: '',
+      categoria_receita: 'VENDAS',
       cor: '#8b5cf6'
     });
     setIsDialogOpen(true);
@@ -100,8 +111,8 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
     }
   };
 
-  const getProgress = (target: number) => {
-    return Math.min(100, Math.max(0, (totalReceitasDoMes / target) * 100));
+  const getProgress = (target: number, valorAtual: number) => {
+    return Math.min(100, Math.max(0, (valorAtual / target) * 100));
   };
 
   return (
@@ -137,11 +148,17 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
           </div>
         ) : (
           metas.map((meta) => {
-            const progress = getProgress(meta.valor_meta);
+            const valorAtual = calcularValorAtual(meta.categoria_receita || 'VENDAS');
+            const progress = getProgress(meta.valor_meta, valorAtual);
             return (
               <div key={meta.id} className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">{meta.nome_meta}</span>
+                  <div>
+                    <span className="text-sm font-medium">{meta.nome_meta}</span>
+                    <span className="text-xs text-gray-500 ml-2">
+                      ({meta.categoria_receita || 'VENDAS'})
+                    </span>
+                  </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-600">{progress.toFixed(1)}%</span>
                     <Button
@@ -165,7 +182,7 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
                 <div className="space-y-1">
                   <Progress value={progress} className="h-2" />
                   <div className="flex justify-between text-xs text-gray-500">
-                    <span>R$ {(totalReceitasDoMes / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    <span>R$ {(valorAtual / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                     <span>Meta: R$ {(meta.valor_meta / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </div>
                 </div>
@@ -181,7 +198,7 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
                 {editingMeta ? 'Editar Meta' : 'Nova Meta'}
               </DialogTitle>
               <DialogDescription>
-                {editingMeta ? 'Edite os detalhes da meta' : 'Adicione uma nova meta para acompanhar'}. O valor atual será calculado automaticamente com base nas receitas do mês.
+                {editingMeta ? 'Edite os detalhes da meta' : 'Adicione uma nova meta para acompanhar'}. O valor atual será calculado automaticamente com base nas receitas da categoria selecionada.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -191,7 +208,7 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
                   id="goalName"
                   value={formData.nome_meta}
                   onChange={(e) => setFormData({ ...formData, nome_meta: e.target.value })}
-                  placeholder="Ex: Receita Meta"
+                  placeholder="Ex: Meta de Vendas Mensais"
                 />
               </div>
               <div>
@@ -205,12 +222,28 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
                   placeholder="Ex: 10000"
                 />
               </div>
+              <div>
+                <Label htmlFor="categoria">Categoria de Receita</Label>
+                <Select 
+                  value={formData.categoria_receita} 
+                  onValueChange={(value) => setFormData({ ...formData, categoria_receita: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="VENDAS">Vendas</SelectItem>
+                    <SelectItem value="SERVICOS">Serviços</SelectItem>
+                    <SelectItem value="OUTROS">Outros</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="p-3 bg-blue-50 rounded-lg">
                 <p className="text-sm text-blue-700">
-                  <strong>Valor atual calculado:</strong> R$ {(totalReceitasDoMes / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  <strong>Valor atual calculado:</strong> R$ {(calcularValorAtual(formData.categoria_receita) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </p>
                 <p className="text-xs text-blue-600 mt-1">
-                  Baseado nas receitas de {empresa} do mês atual ({receitasDoMes.length} transações)
+                  Baseado nas receitas de {empresa} na categoria "{formData.categoria_receita}" do mês atual
                 </p>
               </div>
               <div>
