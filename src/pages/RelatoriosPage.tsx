@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { FileText, Download, TrendingUp, DollarSign, Calendar, PieChart as PieChartIcon } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -9,7 +10,6 @@ import { useDespesas } from '@/hooks/useDespesas';
 import { useReceitas } from '@/hooks/useReceitas';
 import jsPDF from 'jspdf';
 import { useToast } from '@/hooks/use-toast';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 const RelatoriosPage = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('mes');
@@ -18,7 +18,6 @@ const RelatoriosPage = () => {
   const { data: despesas } = useDespesas();
   const { data: receitas } = useReceitas();
   const { toast } = useToast();
-  const isMobile = useIsMobile();
 
   // Dados para gráfico de evolução mensal
   const monthlyData = React.useMemo(() => {
@@ -38,9 +37,9 @@ const RelatoriosPage = () => {
       
       return {
         month,
-        despesas: monthDespesas,
+        despesas: monthDespesas, // Removido divisão por 100
         receitas: monthReceitas,
-        lucro: monthReceitas - monthDespesas
+        lucro: monthReceitas - monthDespesas // Removido divisão por 100
       };
     });
   }, [despesas, receitas]);
@@ -56,7 +55,7 @@ const RelatoriosPage = () => {
       
       return {
         name: category,
-        value: value,
+        value: value, // Removido divisão por 100
         color: colors[index]
       };
     }).filter(item => item.value > 0);
@@ -80,7 +79,7 @@ const RelatoriosPage = () => {
   }, [receitas]);
 
   // Calcular estatísticas
-  const totalDespesas = despesas?.reduce((sum, d) => sum + d.valor, 0) || 0;
+  const totalDespesas = despesas?.reduce((sum, d) => sum + d.valor, 0) || 0; // Removido divisão por 100
   const totalReceitas = receitas?.reduce((sum, r) => sum + r.valor, 0) || 0;
   const lucroTotal = totalReceitas - totalDespesas;
   const margemLucro = totalReceitas > 0 ? (lucroTotal / totalReceitas) * 100 : 0;
@@ -94,7 +93,7 @@ const RelatoriosPage = () => {
 
       // Header
       doc.setFontSize(20);
-      doc.setTextColor(59, 130, 246);
+      doc.setTextColor(59, 130, 246); // Blue color
       doc.text('Relatório Financeiro', margin, yPosition);
       yPosition += 15;
 
@@ -195,25 +194,25 @@ const RelatoriosPage = () => {
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
       <Sidebar />
       
-      <div className={`flex-1 ${isMobile ? 'p-4' : 'p-8'} ${!isMobile ? 'main-content' : ''}`}>
-        <div className={`max-w-7xl mx-auto ${isMobile ? 'mt-16' : ''}`}>
+      <div className="flex-1 p-8">
+        <div className="max-w-7xl mx-auto">
           {/* Header Section */}
-          <div className={isMobile ? 'mb-6' : 'mb-8'}>
+          <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl shadow-lg">
-                <FileText className={`${isMobile ? 'h-6 w-6' : 'h-8 w-8'} text-white`} />
+                <FileText className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent`}>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent">
                   Relatórios
                 </h1>
-                <p className={`text-gray-600 ${isMobile ? 'text-base' : 'text-lg'}`}>Análises e relatórios financeiros</p>
+                <p className="text-gray-600 text-lg">Análises e relatórios financeiros</p>
               </div>
             </div>
             
-            <div className={`flex ${isMobile ? 'flex-col gap-3' : 'gap-4'}`}>
+            <div className="flex gap-4">
               <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-                <SelectTrigger className={`${isMobile ? 'w-full' : 'w-48'} rounded-2xl h-11`}>
+                <SelectTrigger className="w-48 rounded-2xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -225,7 +224,7 @@ const RelatoriosPage = () => {
               </Select>
               
               <Select value={selectedType} onValueChange={setSelectedType}>
-                <SelectTrigger className={`${isMobile ? 'w-full' : 'w-48'} rounded-2xl h-11`}>
+                <SelectTrigger className="w-48 rounded-2xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -238,7 +237,7 @@ const RelatoriosPage = () => {
 
               <Button 
                 onClick={generatePDF}
-                className={`bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg rounded-2xl ${isMobile ? 'w-full h-11' : ''}`}
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg rounded-2xl"
               >
                 <Download className="w-4 h-4 mr-2" />
                 Exportar PDF
@@ -247,7 +246,7 @@ const RelatoriosPage = () => {
           </div>
 
           {/* Stats Cards */}
-          <div className={`grid grid-cols-1 ${isMobile ? 'gap-4 mb-6' : 'md:grid-cols-4 gap-6 mb-8'}`}>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                 <CardTitle className="text-sm font-medium text-gray-600">Total Receitas</CardTitle>
@@ -256,7 +255,7 @@ const RelatoriosPage = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-green-600`}>
+                <div className="text-2xl font-bold text-green-600">
                   R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
               </CardContent>
@@ -270,7 +269,7 @@ const RelatoriosPage = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-red-600`}>
+                <div className="text-2xl font-bold text-red-600">
                   R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
               </CardContent>
@@ -284,7 +283,7 @@ const RelatoriosPage = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold ${lucroTotal >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <div className={`text-2xl font-bold ${lucroTotal >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   R$ {lucroTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
               </CardContent>
@@ -298,7 +297,7 @@ const RelatoriosPage = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold ${margemLucro >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <div className={`text-2xl font-bold ${margemLucro >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {margemLucro.toFixed(1)}%
                 </div>
               </CardContent>
@@ -306,15 +305,15 @@ const RelatoriosPage = () => {
           </div>
 
           {/* Charts */}
-          <div className={`grid grid-cols-1 ${isMobile ? 'gap-4 mb-6' : 'lg:grid-cols-2 gap-6 mb-8'}`}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             {/* Evolução Mensal */}
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader>
-                <CardTitle className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-800`}>Evolução Mensal</CardTitle>
+                <CardTitle className="text-xl text-gray-800">Evolução Mensal</CardTitle>
                 <CardDescription>Receitas vs Despesas por mês</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className={isMobile ? 'h-60' : 'h-80'}>
+                <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={monthlyData}>
                       <XAxis dataKey="month" />
@@ -333,19 +332,19 @@ const RelatoriosPage = () => {
             {/* Distribuição de Despesas */}
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader>
-                <CardTitle className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-800`}>Distribuição de Despesas</CardTitle>
+                <CardTitle className="text-xl text-gray-800">Distribuição de Despesas</CardTitle>
                 <CardDescription>Por categoria</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className={isMobile ? 'h-60' : 'h-80'}>
+                <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
                         data={categoryData}
                         cx="50%"
                         cy="50%"
-                        innerRadius={isMobile ? 40 : 60}
-                        outerRadius={isMobile ? 80 : 120}
+                        innerRadius={60}
+                        outerRadius={120}
                         dataKey="value"
                       >
                         {categoryData.map((entry, index) => (
@@ -362,15 +361,15 @@ const RelatoriosPage = () => {
           </div>
 
           {/* Mais gráficos */}
-          <div className={`grid grid-cols-1 ${isMobile ? 'gap-4' : 'lg:grid-cols-2 gap-6'}`}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Receitas por Empresa */}
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader>
-                <CardTitle className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-800`}>Receitas por Empresa</CardTitle>
+                <CardTitle className="text-xl text-gray-800">Receitas por Empresa</CardTitle>
                 <CardDescription>Distribuição das receitas</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className={isMobile ? 'h-60' : 'h-80'}>
+                <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={receitasEmpresaData}>
                       <XAxis dataKey="name" />
@@ -386,34 +385,34 @@ const RelatoriosPage = () => {
             {/* Resumo do Período */}
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader>
-                <CardTitle className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-800`}>Resumo do Período</CardTitle>
+                <CardTitle className="text-xl text-gray-800">Resumo do Período</CardTitle>
                 <CardDescription>Principais indicadores</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between items-center p-4 bg-green-50 rounded-xl">
-                  <span className={`text-green-700 font-medium ${isMobile ? 'text-sm' : ''}`}>Maior Receita</span>
-                  <span className={`text-green-800 font-bold ${isMobile ? 'text-sm' : ''}`}>
+                  <span className="text-green-700 font-medium">Maior Receita</span>
+                  <span className="text-green-800 font-bold">
                     R$ {Math.max(...(receitas?.map(r => r.valor) || [0])).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </span>
                 </div>
                 
                 <div className="flex justify-between items-center p-4 bg-red-50 rounded-xl">
-                  <span className={`text-red-700 font-medium ${isMobile ? 'text-sm' : ''}`}>Maior Despesa</span>
-                  <span className={`text-red-800 font-bold ${isMobile ? 'text-sm' : ''}`}>
+                  <span className="text-red-700 font-medium">Maior Despesa</span>
+                  <span className="text-red-800 font-bold">
                     R$ {Math.max(...(despesas?.map(d => d.valor) || [0])).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </span>
                 </div>
                 
                 <div className="flex justify-between items-center p-4 bg-blue-50 rounded-xl">
-                  <span className={`text-blue-700 font-medium ${isMobile ? 'text-sm' : ''}`}>Média Mensal</span>
-                  <span className={`text-blue-800 font-bold ${isMobile ? 'text-sm' : ''}`}>
+                  <span className="text-blue-700 font-medium">Média Mensal</span>
+                  <span className="text-blue-800 font-bold">
                     R$ {(totalReceitas / 12).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </span>
                 </div>
                 
                 <div className="flex justify-between items-center p-4 bg-purple-50 rounded-xl">
-                  <span className={`text-purple-700 font-medium ${isMobile ? 'text-sm' : ''}`}>Total de Transações</span>
-                  <span className={`text-purple-800 font-bold ${isMobile ? 'text-sm' : ''}`}>
+                  <span className="text-purple-700 font-medium">Total de Transações</span>
+                  <span className="text-purple-800 font-bold">
                     {(despesas?.length || 0) + (receitas?.length || 0)}
                   </span>
                 </div>

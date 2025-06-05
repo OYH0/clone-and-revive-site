@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -132,72 +133,70 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] w-[95vw] max-h-[90vh] overflow-y-auto rounded-3xl">
+      <DialogContent className="sm:max-w-[425px] rounded-3xl">
         <DialogHeader>
-          <DialogTitle className="text-lg">Nova Transação</DialogTitle>
+          <DialogTitle>Nova Transação</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="data" className="text-sm font-medium">Data</Label>
+            <Label htmlFor="data">Data</Label>
             <Input
               id="data"
               type="date"
               value={formData.data}
               onChange={(e) => handleInputChange('data', e.target.value)}
-              className="rounded-full h-11"
+              className="rounded-full"
             />
             <p className="text-xs text-gray-500">Se não informada, será usada a data atual</p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="data_vencimento" className="text-sm font-medium">Data de Vencimento *</Label>
+            <Label htmlFor="data_vencimento">Data de Vencimento *</Label>
             <Input
               id="data_vencimento"
               type="date"
               value={formData.data_vencimento}
               onChange={(e) => handleInputChange('data_vencimento', e.target.value)}
               required
-              className="rounded-full h-11"
+              className="rounded-full"
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="valor" className="text-sm font-medium">Valor (R$) *</Label>
-              <Input
-                id="valor"
-                type="number"
-                step="0.01"
-                placeholder="0.00"
-                value={formData.valor}
-                onChange={(e) => handleInputChange('valor', e.target.value)}
-                required
-                className="rounded-full h-11"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="valor_juros" className="text-sm font-medium">Valor dos Juros (R$)</Label>
-              <Input
-                id="valor_juros"
-                type="number"
-                step="0.01"
-                placeholder="0.00"
-                value={formData.valor_juros}
-                onChange={(e) => handleInputChange('valor_juros', e.target.value)}
-                className="rounded-full h-11"
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="valor">Valor (R$) *</Label>
+            <Input
+              id="valor"
+              type="number"
+              step="0.01"
+              placeholder="0.00"
+              value={formData.valor}
+              onChange={(e) => handleInputChange('valor', e.target.value)}
+              required
+              className="rounded-full"
+            />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="empresa" className="text-sm font-medium">Empresa *</Label>
+            <Label htmlFor="valor_juros">Valor dos Juros (R$)</Label>
+            <Input
+              id="valor_juros"
+              type="number"
+              step="0.01"
+              placeholder="0.00"
+              value={formData.valor_juros}
+              onChange={(e) => handleInputChange('valor_juros', e.target.value)}
+              className="rounded-full"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="empresa">Empresa *</Label>
             <select
               id="empresa"
               value={formData.empresa}
               onChange={(e) => handleInputChange('empresa', e.target.value)}
-              className="flex h-11 w-full rounded-full border border-input bg-background px-4 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-10 w-full rounded-full border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               required
             >
               <option value="">Selecione uma empresa</option>
@@ -208,12 +207,12 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="categoria" className="text-sm font-medium">Categoria</Label>
+            <Label htmlFor="categoria">Categoria</Label>
             <select
               id="categoria"
               value={formData.categoria}
               onChange={(e) => handleInputChange('categoria', e.target.value)}
-              className="flex h-11 w-full rounded-full border border-input bg-background px-4 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-10 w-full rounded-full border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {categories.map(category => (
                 <option key={category} value={category}>{category}</option>
@@ -222,28 +221,28 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="descricao" className="text-sm font-medium">Descrição</Label>
+            <Label htmlFor="descricao">Descrição</Label>
             <Textarea
               id="descricao"
               placeholder="Descrição da despesa..."
               value={formData.descricao}
               onChange={(e) => handleInputChange('descricao', e.target.value)}
               rows={3}
-              className="rounded-2xl min-h-[80px]"
+              className="rounded-2xl"
             />
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
+          <div className="flex justify-end gap-2 pt-4">
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
               disabled={isLoading}
-              className="rounded-full h-11 w-full sm:w-auto"
+              className="rounded-full"
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading} className="rounded-full h-11 w-full sm:w-auto">
+            <Button type="submit" disabled={isLoading} className="rounded-full">
               {isLoading ? 'Salvando...' : 'Salvar Transação'}
             </Button>
           </div>
