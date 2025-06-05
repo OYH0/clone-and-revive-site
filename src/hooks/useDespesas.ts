@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -21,12 +20,9 @@ export const useDespesas = () => {
   const { user } = useAuth();
   
   return useQuery({
-    queryKey: ['despesas', user?.id],
+    queryKey: ['despesas'],
     queryFn: async () => {
-      if (!user) return [];
-      
-      console.log('Fetching all despesas from Supabase for user:', user.id);
-      // Now fetch all despesas, not just user's own
+      console.log('Fetching all despesas from Supabase');
       const { data, error } = await supabase
         .from('despesas')
         .select('*')
@@ -40,7 +36,7 @@ export const useDespesas = () => {
       console.log('All despesas fetched:', data);
       return data as Despesa[];
     },
-    enabled: !!user,
+    enabled: true, // Always enabled, not dependent on user
   });
 };
 

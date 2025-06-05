@@ -24,26 +24,6 @@ const DespesasPage = () => {
   const { user } = useAuth();
   const { isAdmin } = useAdminAccess();
 
-  // Verificar se o usuário está autenticado
-  if (!user) {
-    return (
-      <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-red-50 to-red-100">
-        <Sidebar />
-        <div className="flex-1 p-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center py-16">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Acesso Restrito</h2>
-              <p className="text-gray-600 mb-8">Você precisa estar logado para acessar as despesas.</p>
-              <Button onClick={() => window.location.href = '/auth'}>
-                Fazer Login
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // Converter Despesa para Transaction
   const allTransactions: Transaction[] = despesas.map(despesa => ({
     id: despesa.id,

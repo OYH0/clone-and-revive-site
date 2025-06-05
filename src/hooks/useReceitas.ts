@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -21,20 +20,19 @@ export const useReceitas = () => {
   const { user } = useAuth();
   
   return useQuery({
-    queryKey: ['receitas', user?.id],
+    queryKey: ['receitas'],
     queryFn: async () => {
-      if (!user) return [];
-      
-      // Now fetch all receitas, not just user's own
+      console.log('Fetching all receitas from Supabase');
       const { data, error } = await supabase
         .from('receitas')
         .select('*')
         .order('data', { ascending: false });
 
       if (error) throw error;
+      console.log('All receitas fetched:', data);
       return data as Receita[];
     },
-    enabled: !!user,
+    enabled: true, // Always enabled, not dependent on user
   });
 };
 
