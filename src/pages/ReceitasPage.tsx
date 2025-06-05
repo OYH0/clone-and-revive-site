@@ -53,8 +53,8 @@ const ReceitasPage = () => {
       <div className="flex-1 p-4 md:p-8 main-content">
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}
-          <div className="text-center mb-6 md:mb-8">
-            <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="mb-6 md:mb-8">
+            <div className="flex items-center gap-3 mb-4">
               <div className="p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-2xl shadow-lg">
                 <TrendingUp className="h-6 w-6 md:h-8 md:w-8 text-white" />
               </div>
@@ -66,27 +66,25 @@ const ReceitasPage = () => {
               </div>
             </div>
             
-            <div className="flex justify-center">
-              {isAdmin ? (
-                <Button 
-                  onClick={() => setIsModalOpen(true)}
-                  className="w-full md:w-auto bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200 rounded-2xl"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Nova Receita
-                </Button>
-              ) : (
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 max-w-lg">
-                  <div className="flex items-center gap-3">
-                    <Shield className="h-5 w-5 text-blue-600" />
-                    <div>
-                      <p className="text-blue-800 font-medium">Modo Visualização</p>
-                      <p className="text-blue-600 text-sm">Apenas administradores podem adicionar novas receitas.</p>
-                    </div>
+            {isAdmin ? (
+              <Button 
+                onClick={() => setIsModalOpen(true)}
+                className="w-full md:w-auto bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200 rounded-2xl"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Nova Receita
+              </Button>
+            ) : (
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <div className="flex items-center gap-3">
+                  <Shield className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <p className="text-blue-800 font-medium">Modo Visualização</p>
+                    <p className="text-blue-600 text-sm">Apenas administradores podem adicionar novas receitas.</p>
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Filters */}

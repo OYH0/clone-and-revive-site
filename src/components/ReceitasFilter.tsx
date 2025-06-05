@@ -72,6 +72,7 @@ const ReceitasFilter: React.FC<ReceitasFilterProps> = ({
                 <SelectItem value="Churrasco">Companhia do Churrasco</SelectItem>
                 <SelectItem value="Johnny">Johnny Rockets</SelectItem>
                 <SelectItem value="Camerino">Camerino</SelectItem>
+                <SelectItem value="Outros">Outros</SelectItem>
               </SelectContent>
             </Select>
           </div>
