@@ -181,6 +181,7 @@ const DespesasPage = () => {
             onClearFilters={handleClearFilters}
             onAddTransaction={isAdmin ? () => setIsModalOpen(true) : undefined}
             filteredTransactions={filteredTransactions}
+            hasActiveFilters={hasActiveFilters}
           />
 
           {!isAdmin && (
