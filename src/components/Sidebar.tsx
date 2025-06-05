@@ -22,7 +22,14 @@ const Sidebar: React.FC = () => {
   ];
 
   const handleLogout = async () => {
-    await signOut();
+    try {
+      console.log('Logout button clicked');
+      await signOut();
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Force redirect if there's an error
+      window.location.href = '/auth';
+    }
   };
 
   return (
@@ -75,6 +82,7 @@ const Sidebar: React.FC = () => {
           variant="outline" 
           size="sm" 
           className="w-full text-white border-white/30 bg-white/10 hover:bg-white/20 rounded-xl backdrop-blur-sm transition-all duration-200"
+          disabled={false}
         >
           <LogOut size={16} className="mr-2" />
           Sair
