@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -106,78 +107,76 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md w-[95vw] max-h-[90vh] overflow-y-auto rounded-3xl">
+      <DialogContent className="max-w-md rounded-3xl">
         <DialogHeader>
-          <DialogTitle className="text-lg">Editar Despesa</DialogTitle>
+          <DialogTitle>Editar Despesa</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="space-y-2">
-            <Label htmlFor="data" className="text-sm font-medium">Data</Label>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="data">Data</Label>
             <Input
               id="data"
               type="date"
               value={formData.data}
               onChange={(e) => handleInputChange('data', e.target.value)}
-              className="rounded-full h-11"
+              className="rounded-full"
             />
-            <p className="text-xs text-gray-500">Se não informada, será usada a data atual</p>
+            <p className="text-xs text-gray-500 mt-1">Se não informada, será usada a data atual</p>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="data_vencimento" className="text-sm font-medium">Data de Vencimento *</Label>
+          <div>
+            <Label htmlFor="data_vencimento">Data de Vencimento *</Label>
             <Input
               id="data_vencimento"
               type="date"
               value={formData.data_vencimento}
               onChange={(e) => handleInputChange('data_vencimento', e.target.value)}
               required
-              className="rounded-full h-11"
+              className="rounded-full"
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="valor" className="text-sm font-medium">Valor *</Label>
-              <Input
-                id="valor"
-                type="number"
-                step="0.01"
-                value={formData.valor}
-                onChange={(e) => handleInputChange('valor', e.target.value)}
-                required
-                className="rounded-full h-11"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="valor_juros" className="text-sm font-medium">Valor dos Juros</Label>
-              <Input
-                id="valor_juros"
-                type="number"
-                step="0.01"
-                value={formData.valor_juros}
-                onChange={(e) => handleInputChange('valor_juros', e.target.value)}
-                className="rounded-full h-11"
-              />
-            </div>
+          <div>
+            <Label htmlFor="valor">Valor *</Label>
+            <Input
+              id="valor"
+              type="number"
+              step="0.01"
+              value={formData.valor}
+              onChange={(e) => handleInputChange('valor', e.target.value)}
+              required
+              className="rounded-full"
+            />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="empresa" className="text-sm font-medium">Empresa *</Label>
+          <div>
+            <Label htmlFor="valor_juros">Valor dos Juros</Label>
+            <Input
+              id="valor_juros"
+              type="number"
+              step="0.01"
+              value={formData.valor_juros}
+              onChange={(e) => handleInputChange('valor_juros', e.target.value)}
+              className="rounded-full"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="empresa">Empresa *</Label>
             <Input
               id="empresa"
               value={formData.empresa}
               onChange={(e) => handleInputChange('empresa', e.target.value)}
               required
-              className="rounded-full h-11"
+              className="rounded-full"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="categoria" className="text-sm font-medium">Categoria</Label>
+          <div>
+            <Label htmlFor="categoria">Categoria</Label>
             <Select value={formData.categoria} onValueChange={(value) => handleInputChange('categoria', value)}>
-              <SelectTrigger className="rounded-full h-11">
+              <SelectTrigger className="rounded-full">
                 <SelectValue placeholder="Selecione uma categoria" />
               </SelectTrigger>
               <SelectContent className="rounded-2xl">
@@ -189,22 +188,22 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="descricao" className="text-sm font-medium">Descrição</Label>
+          <div>
+            <Label htmlFor="descricao">Descrição</Label>
             <Textarea
               id="descricao"
               value={formData.descricao}
               onChange={(e) => handleInputChange('descricao', e.target.value)}
               rows={3}
-              className="rounded-2xl min-h-[80px]"
+              className="rounded-2xl"
             />
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1 rounded-full h-11">
+          <div className="flex gap-3 pt-4">
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1 rounded-full">
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading} className="flex-1 rounded-full h-11">
+            <Button type="submit" disabled={isLoading} className="flex-1 rounded-full">
               {isLoading ? 'Salvando...' : 'Salvar'}
             </Button>
           </div>

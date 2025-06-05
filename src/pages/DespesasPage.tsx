@@ -10,7 +10,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useDespesas } from '@/hooks/useDespesas';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminAccess } from '@/hooks/useAdminAccess';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { Transaction } from '@/types/transaction';
 import { getTransactionStatus } from '@/utils/transactionUtils';
 
@@ -24,7 +23,6 @@ const DespesasPage = () => {
   const { data: despesas = [], isLoading, refetch } = useDespesas();
   const { user } = useAuth();
   const { isAdmin } = useAdminAccess();
-  const isMobile = useIsMobile();
 
   // Converter Despesa para Transaction
   const allTransactions: Transaction[] = despesas.map(despesa => ({
@@ -81,8 +79,8 @@ const DespesasPage = () => {
     return (
       <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-red-50 to-red-100">
         <Sidebar />
-        <div className={`flex-1 ${isMobile ? 'p-4' : 'p-8'} ${!isMobile ? 'ml-64' : ''} flex items-center justify-center`}>
-          <p className={`${isMobile ? 'text-base mt-16' : 'text-lg'} text-gray-600`}>Carregando despesas...</p>
+        <div className="flex-1 p-8 flex items-center justify-center">
+          <p className="text-lg text-gray-600">Carregando despesas...</p>
         </div>
       </div>
     );
@@ -92,39 +90,37 @@ const DespesasPage = () => {
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-red-50 to-red-100">
       <Sidebar />
       
-      <div className={`flex-1 ${isMobile ? 'p-3' : 'p-8'} ${!isMobile ? 'ml-64' : ''}`}>
-        <div className={`max-w-7xl mx-auto ${isMobile ? 'mt-16' : ''}`}>
+      <div className="flex-1 p-8">
+        <div className="max-w-7xl mx-auto">
           {/* Header Section */}
-          <div className={isMobile ? 'mb-4' : 'mb-8'}>
-            <div className={`flex ${isMobile ? 'flex-col gap-3' : 'items-center gap-3'} mb-4`}>
-              <div className={`flex items-center gap-3 ${isMobile ? 'w-full' : ''}`}>
-                <div className={`${isMobile ? 'p-2' : 'p-3'} bg-gradient-to-r from-red-500 to-red-600 rounded-2xl shadow-lg`}>
-                  <TrendingDown className={`${isMobile ? 'h-5 w-5' : 'h-8 w-8'} text-white`} />
-                </div>
-                <div className="flex-1">
-                  <h1 className={`${isMobile ? 'text-xl' : 'text-4xl'} font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent`}>
-                    Despesas
-                  </h1>
-                  <p className={`text-gray-600 ${isMobile ? 'text-sm' : 'text-lg'}`}>Gerencie todas as despesas do negócio</p>
-                </div>
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl shadow-lg">
+                <TrendingDown className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent">
+                  Despesas
+                </h1>
+                <p className="text-gray-600 text-lg">Gerencie todas as despesas do negócio</p>
               </div>
             </div>
             
             {isAdmin ? (
               <Button 
                 onClick={() => setIsModalOpen(true)}
-                className={`bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200 rounded-2xl ${isMobile ? 'w-full h-12 text-sm' : ''}`}
+                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200 rounded-2xl"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Nova Despesa
               </Button>
             ) : (
-              <div className={`bg-blue-50 border border-blue-200 rounded-xl ${isMobile ? 'p-3' : 'p-4'}`}>
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                 <div className="flex items-center gap-3">
-                  <Shield className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-blue-600`} />
+                  <Shield className="h-5 w-5 text-blue-600" />
                   <div>
-                    <p className={`text-blue-800 font-medium ${isMobile ? 'text-xs' : 'text-sm'}`}>Modo Visualização</p>
-                    <p className={`text-blue-600 ${isMobile ? 'text-xs' : 'text-sm'}`}>Apenas administradores podem adicionar novas despesas.</p>
+                    <p className="text-blue-800 font-medium">Modo Visualização</p>
+                    <p className="text-blue-600 text-sm">Apenas administradores podem adicionar novas despesas.</p>
                   </div>
                 </div>
               </div>
@@ -132,108 +128,106 @@ const DespesasPage = () => {
           </div>
 
           {/* Stats Cards */}
-          <div className={`grid ${isMobile ? 'grid-cols-2 gap-3 mb-4' : 'grid-cols-1 md:grid-cols-5 gap-6 mb-8'}`}>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader className={`flex flex-row items-center justify-between space-y-0 ${isMobile ? 'pb-2 px-3 pt-3' : 'pb-3'}`}>
-                <CardTitle className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>Total de Despesas</CardTitle>
-                <div className={`${isMobile ? 'p-1' : 'p-2'} bg-gradient-to-r from-red-100 to-red-200 rounded-xl`}>
-                  <TrendingDown className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'} text-red-600`} />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Total de Despesas</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-red-100 to-red-200 rounded-xl">
+                  <TrendingDown className="h-4 w-4 text-red-600" />
                 </div>
               </CardHeader>
-              <CardContent className={isMobile ? 'px-3 pb-3' : ''}>
-                <div className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold bg-gradient-to-r from-red-600 to-red-700 bg-clip-text text-transparent`}>
+              <CardContent>
+                <div className="text-2xl font-bold bg-gradient-to-r from-red-600 to-red-700 bg-clip-text text-transparent">
                   R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
-                <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-500 mt-1`}>{filteredTransactions.length} despesas</p>
+                <p className="text-xs text-gray-500 mt-1">{filteredTransactions.length} despesas</p>
               </CardContent>
             </Card>
 
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader className={`flex flex-row items-center justify-between space-y-0 ${isMobile ? 'pb-2 px-3 pt-3' : 'pb-3'}`}>
-                <CardTitle className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>Total em Juros</CardTitle>
-                <div className={`${isMobile ? 'p-1' : 'p-2'} bg-gradient-to-r from-orange-100 to-orange-200 rounded-xl`}>
-                  <DollarSign className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'} text-orange-600`} />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Total em Juros</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-orange-100 to-orange-200 rounded-xl">
+                  <DollarSign className="h-4 w-4 text-orange-600" />
                 </div>
               </CardHeader>
-              <CardContent className={isMobile ? 'px-3 pb-3' : ''}>
-                <div className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-orange-600`}>
+              <CardContent>
+                <div className="text-2xl font-bold text-orange-600">
                   R$ {totalJuros.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
-                <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-500 mt-1`}>Juros acumulados</p>
+                <p className="text-xs text-gray-500 mt-1">Juros acumulados</p>
               </CardContent>
             </Card>
 
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader className={`flex flex-row items-center justify-between space-y-0 ${isMobile ? 'pb-2 px-3 pt-3' : 'pb-3'}`}>
-                <CardTitle className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>Valor Pago</CardTitle>
-                <div className={`${isMobile ? 'p-1' : 'p-2'} bg-gradient-to-r from-green-100 to-green-200 rounded-xl`}>
-                  <CheckCircle className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'} text-green-600`} />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Valor Pago</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-green-100 to-green-200 rounded-xl">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
                 </div>
               </CardHeader>
-              <CardContent className={isMobile ? 'px-3 pb-3' : ''}>
-                <div className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-gray-800`}>
+              <CardContent>
+                <div className="text-2xl font-bold text-gray-800">
                   R$ {valorPago.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
-                <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-500 mt-1`}>{despesasPagas.length} pagas</p>
+                <p className="text-xs text-gray-500 mt-1">{despesasPagas.length} pagas</p>
               </CardContent>
             </Card>
 
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader className={`flex flex-row items-center justify-between space-y-0 ${isMobile ? 'pb-2 px-3 pt-3' : 'pb-3'}`}>
-                <CardTitle className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>Pendentes</CardTitle>
-                <div className={`${isMobile ? 'p-1' : 'p-2'} bg-gradient-to-r from-yellow-100 to-yellow-200 rounded-xl`}>
-                  <Clock className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'} text-yellow-600`} />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Pendentes</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-yellow-100 to-yellow-200 rounded-xl">
+                  <Clock className="h-4 w-4 text-yellow-600" />
                 </div>
               </CardHeader>
-              <CardContent className={isMobile ? 'px-3 pb-3' : ''}>
-                <div className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-gray-800`}>{despesasPendentes.length}</div>
-                <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-500 mt-1`}>Aguardando</p>
+              <CardContent>
+                <div className="text-2xl font-bold text-gray-800">{despesasPendentes.length}</div>
+                <p className="text-xs text-gray-500 mt-1">Aguardando</p>
               </CardContent>
             </Card>
 
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader className={`flex flex-row items-center justify-between space-y-0 ${isMobile ? 'pb-2 px-3 pt-3' : 'pb-3'}`}>
-                <CardTitle className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium text-gray-600`}>Atrasadas</CardTitle>
-                <div className={`${isMobile ? 'p-1' : 'p-2'} bg-gradient-to-r from-red-100 to-red-200 rounded-xl`}>
-                  <AlertTriangle className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'} text-red-600`} />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Atrasadas</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-red-100 to-red-200 rounded-xl">
+                  <AlertTriangle className="h-4 w-4 text-red-600" />
                 </div>
               </CardHeader>
-              <CardContent className={isMobile ? 'px-3 pb-3' : ''}>
-                <div className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-red-600`}>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-600">
                   {despesasAtrasadas.length}
                 </div>
-                <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-500 mt-1`}>Vencidas</p>
+                <p className="text-xs text-gray-500 mt-1">Vencidas</p>
               </CardContent>
             </Card>
           </div>
 
           {/* Filters */}
-          <div className={isMobile ? 'mb-4' : 'mb-8'}>
-            <DespesasFilterSimple
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              filterEmpresa={filterEmpresa}
-              setFilterEmpresa={setFilterEmpresa}
-              filterCategoria={filterCategoria}
-              setFilterCategoria={setFilterCategoria}
-              filterStatus={filterStatus}
-              setFilterStatus={setFilterStatus}
-            />
-          </div>
+          <DespesasFilterSimple
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            filterEmpresa={filterEmpresa}
+            setFilterEmpresa={setFilterEmpresa}
+            filterCategoria={filterCategoria}
+            setFilterCategoria={setFilterCategoria}
+            filterStatus={filterStatus}
+            setFilterStatus={setFilterStatus}
+          />
 
           {/* Main Content Card */}
           <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-            <CardHeader className={`border-b border-gray-100 ${isMobile ? 'p-4' : ''}`}>
+            <CardHeader className="border-b border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className={`${isMobile ? 'text-base' : 'text-xl'} text-gray-800`}>Lista de Despesas</CardTitle>
-                  <CardDescription className={`text-gray-600 ${isMobile ? 'text-sm' : ''}`}>
+                  <CardTitle className="text-xl text-gray-800">Lista de Despesas</CardTitle>
+                  <CardDescription className="text-gray-600">
                     {filteredTransactions.length} despesa(s) encontrada(s)
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className={isMobile ? 'p-2' : 'p-6'}>
+            <CardContent className="p-6">
               <TransactionTable 
                 transactions={filteredTransactions} 
                 onTransactionUpdated={handleTransactionUpdated}
