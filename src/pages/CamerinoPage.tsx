@@ -11,7 +11,6 @@ import AnalyseCostsModal from '@/components/AnalyseCostsModal';
 import ProjectionsModal from '@/components/ProjectionsModal';
 import ComparativeModal from '@/components/ComparativeModal';
 import ExpenseDistribution from '@/components/ExpenseDistribution';
-import MonthlyGoals from '@/components/MonthlyGoals';
 import NextActions from '@/components/NextActions';
 
 const CamerinoPage = () => {
@@ -201,42 +200,7 @@ const CamerinoPage = () => {
           </div>
 
           {/* Informações Adicionais */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Indicadores de Performance */}
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader>
-                <CardTitle className="text-xl text-gray-800">Indicadores</CardTitle>
-                <CardDescription>KPIs principais</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center p-3 bg-purple-50 rounded-xl">
-                  <span className="text-purple-700 font-medium">ROI</span>
-                  <span className="text-purple-800 font-bold">
-                    {totalDespesas > 0 ? ((lucro / totalDespesas) * 100).toFixed(1) : '0'}%
-                  </span>
-                </div>
-                
-                <div className="flex justify-between items-center p-3 bg-indigo-50 rounded-xl">
-                  <span className="text-indigo-700 font-medium">Break Even</span>
-                  <span className="text-indigo-800 font-bold">
-                    R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
-                
-                <div className="flex justify-between items-center p-3 bg-blue-50 rounded-xl">
-                  <span className="text-blue-700 font-medium">Crescimento</span>
-                  <span className="text-blue-800 font-bold">+15.2%</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Metas e Objetivos */}
-            <MonthlyGoals 
-              totalReceitas={totalReceitas} 
-              totalDespesas={totalDespesas} 
-              empresa="Camerino" 
-            />
-
+          <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
             {/* Próximas Ações */}
             <NextActions empresa="Camerino" />
           </div>
