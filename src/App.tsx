@@ -12,6 +12,7 @@ import DespesasPage from "./pages/DespesasPage";
 import ReceitasPage from "./pages/ReceitasPage";
 import RelatoriosPage from "./pages/RelatoriosPage";
 import ConfiguracoesPage from "./pages/ConfiguracoesPage";
+import CamerinoPage from "./pages/CamerinoPage";
 import CompanhiaPage from "./pages/CompanhiaPage";
 import JohnnyPage from "./pages/JohnnyPage";
 import AdminPage from "./pages/AdminPage";
@@ -60,6 +61,13 @@ const App = () => (
               <div className="main-content">
                 <ProtectedRoute>
                   <ConfiguracoesPage />
+                </ProtectedRoute>
+              </div>
+            } />
+            <Route path="/camerino" element={
+              <div className="main-content">
+                <ProtectedRoute>
+                  <CamerinoPage />
                 </ProtectedRoute>
               </div>
             } />
