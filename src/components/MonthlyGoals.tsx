@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useMetasMensais, useCreateMetaMensal, useUpdateMetaMensal, useDeleteMetaMensal } from '@/hooks/useMetasMensais';
+import { useReceitas } from '@/hooks/useReceitas';
 
 interface MonthlyGoalsProps {
   empresa: string;
@@ -15,6 +16,7 @@ interface MonthlyGoalsProps {
 
 const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
   const { data: metas = [] } = useMetasMensais(empresa);
+  const { data: receitas = [] } = useReceitas();
   const createMeta = useCreateMetaMensal();
   const updateMeta = useUpdateMetaMensal();
   const deleteMeta = useDeleteMetaMensal();
@@ -24,19 +26,27 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
   const [formData, setFormData] = useState({
     nome_meta: '',
     valor_meta: '',
-    valor_atual: '',
     cor: '#8b5cf6'
   });
 
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
 
+  // Calcular receitas do mês atual para a empresa
+  const receitasDoMes = receitas.filter(r => {
+    const receitaDate = new Date(r.data);
+    return r.empresa === empresa && 
+           receitaDate.getMonth() + 1 === currentMonth && 
+           receitaDate.getFullYear() === currentYear;
+  });
+
+  const totalReceitasDoMes = receitasDoMes.reduce((sum, r) => sum + r.valor, 0);
+
   const handleEditMeta = (meta: any) => {
     setEditingMeta(meta);
     setFormData({
       nome_meta: meta.nome_meta,
       valor_meta: (meta.valor_meta / 100).toString(),
-      valor_atual: (meta.valor_atual / 100).toString(),
       cor: meta.cor
     });
     setIsDialogOpen(true);
@@ -47,7 +57,7 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
       const metaData = {
         nome_meta: formData.nome_meta,
         valor_meta: parseFloat(formData.valor_meta) * 100, // Convert to cents
-        valor_atual: parseFloat(formData.valor_atual) * 100, // Convert to cents
+        valor_atual: totalReceitasDoMes, // Usar o valor calculado automaticamente
         cor: formData.cor,
         empresa,
         mes: currentMonth,
@@ -65,7 +75,6 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
       setFormData({
         nome_meta: '',
         valor_meta: '',
-        valor_atual: '',
         cor: '#8b5cf6'
       });
     } catch (error) {
@@ -78,7 +87,6 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
     setFormData({
       nome_meta: '',
       valor_meta: '',
-      valor_atual: '',
       cor: '#8b5cf6'
     });
     setIsDialogOpen(true);
@@ -92,8 +100,8 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
     }
   };
 
-  const getProgress = (current: number, target: number) => {
-    return Math.min(100, Math.max(0, (current / target) * 100));
+  const getProgress = (target: number) => {
+    return Math.min(100, Math.max(0, (totalReceitasDoMes / target) * 100));
   };
 
   return (
@@ -129,7 +137,7 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
           </div>
         ) : (
           metas.map((meta) => {
-            const progress = getProgress(meta.valor_atual, meta.valor_meta);
+            const progress = getProgress(meta.valor_meta);
             return (
               <div key={meta.id} className="space-y-2">
                 <div className="flex justify-between items-center">
@@ -157,7 +165,7 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
                 <div className="space-y-1">
                   <Progress value={progress} className="h-2" />
                   <div className="flex justify-between text-xs text-gray-500">
-                    <span>R$ {(meta.valor_atual / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    <span>R$ {(totalReceitasDoMes / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                     <span>Meta: R$ {(meta.valor_meta / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </div>
                 </div>
@@ -173,7 +181,7 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
                 {editingMeta ? 'Editar Meta' : 'Nova Meta'}
               </DialogTitle>
               <DialogDescription>
-                {editingMeta ? 'Edite os detalhes da meta' : 'Adicione uma nova meta para acompanhar'}
+                {editingMeta ? 'Edite os detalhes da meta' : 'Adicione uma nova meta para acompanhar'}. O valor atual será calculado automaticamente com base nas receitas do mês.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -197,16 +205,13 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
                   placeholder="Ex: 10000"
                 />
               </div>
-              <div>
-                <Label htmlFor="goalCurrent">Valor Atual (R$)</Label>
-                <Input
-                  id="goalCurrent"
-                  type="number"
-                  step="0.01"
-                  value={formData.valor_atual}
-                  onChange={(e) => setFormData({ ...formData, valor_atual: e.target.value })}
-                  placeholder="Ex: 5000"
-                />
+              <div className="p-3 bg-blue-50 rounded-lg">
+                <p className="text-sm text-blue-700">
+                  <strong>Valor atual calculado:</strong> R$ {(totalReceitasDoMes / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </p>
+                <p className="text-xs text-blue-600 mt-1">
+                  Baseado nas receitas de {empresa} do mês atual ({receitasDoMes.length} transações)
+                </p>
               </div>
               <div>
                 <Label htmlFor="goalColor">Cor</Label>
