@@ -133,7 +133,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] rounded-3xl">
         <DialogHeader>
           <DialogTitle>Nova Transação</DialogTitle>
         </DialogHeader>
@@ -146,6 +146,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               type="date"
               value={formData.data}
               onChange={(e) => handleInputChange('data', e.target.value)}
+              className="rounded-full"
             />
             <p className="text-xs text-gray-500">Se não informada, será usada a data atual</p>
           </div>
@@ -158,6 +159,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               value={formData.data_vencimento}
               onChange={(e) => handleInputChange('data_vencimento', e.target.value)}
               required
+              className="rounded-full"
             />
           </div>
 
@@ -171,6 +173,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               value={formData.valor}
               onChange={(e) => handleInputChange('valor', e.target.value)}
               required
+              className="rounded-full"
             />
           </div>
 
@@ -183,6 +186,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               placeholder="0.00"
               value={formData.valor_juros}
               onChange={(e) => handleInputChange('valor_juros', e.target.value)}
+              className="rounded-full"
             />
           </div>
 
@@ -192,7 +196,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               id="empresa"
               value={formData.empresa}
               onChange={(e) => handleInputChange('empresa', e.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-10 w-full rounded-full border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               required
             >
               <option value="">Selecione uma empresa</option>
@@ -208,7 +212,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               id="categoria"
               value={formData.categoria}
               onChange={(e) => handleInputChange('categoria', e.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-10 w-full rounded-full border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {categories.map(category => (
                 <option key={category} value={category}>{category}</option>
@@ -224,6 +228,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               value={formData.descricao}
               onChange={(e) => handleInputChange('descricao', e.target.value)}
               rows={3}
+              className="rounded-2xl"
             />
           </div>
 
@@ -233,10 +238,11 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               variant="outline"
               onClick={onClose}
               disabled={isLoading}
+              className="rounded-full"
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading} className="rounded-full">
               {isLoading ? 'Salvando...' : 'Salvar Transação'}
             </Button>
           </div>
