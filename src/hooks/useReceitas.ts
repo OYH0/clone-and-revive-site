@@ -25,10 +25,10 @@ export const useReceitas = () => {
     queryFn: async () => {
       if (!user) return [];
       
+      // Now fetch all receitas, not just user's own
       const { data, error } = await supabase
         .from('receitas')
         .select('*')
-        .eq('user_id', user.id)
         .order('data', { ascending: false });
 
       if (error) throw error;
@@ -87,7 +87,6 @@ export const useUpdateReceita = () => {
         .from('receitas')
         .update({ ...receita, user_id: user.id })
         .eq('id', id)
-        .eq('user_id', user.id)
         .select()
         .single();
 
@@ -124,8 +123,7 @@ export const useDeleteReceita = () => {
       const { error } = await supabase
         .from('receitas')
         .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
+        .eq('id', id);
 
       if (error) throw error;
     },

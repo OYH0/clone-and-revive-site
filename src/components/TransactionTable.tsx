@@ -51,6 +51,16 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
 
   const handleMarkAsPaid = async (transaction: Transaction) => {
     if (!user) return;
+    
+    // Only allow marking as paid if user is admin or owns the transaction
+    if (!isAdmin && transaction.user_id !== user?.id) {
+      toast({
+        title: "Erro",
+        description: "Você não tem permissão para alterar esta despesa.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
       const today = new Date().toISOString().split('T')[0];
@@ -67,7 +77,6 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
         .from('despesas')
         .update(updateData)
         .eq('id', transaction.id)
-        .eq('user_id', user.id)
         .select();
 
       if (error) {
@@ -94,12 +103,24 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
   };
 
   const handleAttachReceipt = async (transaction: Transaction) => {
+    if (!user) return;
+    
+    // Only allow attaching receipt if user is admin or owns the transaction
+    if (!isAdmin && transaction.user_id !== user?.id) {
+      toast({
+        title: "Erro",
+        description: "Você não tem permissão para alterar esta despesa.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*,.pdf';
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
-      if (!file || !user) return;
+      if (!file) return;
 
       try {
         const fileExt = file.name.split('.').pop();
@@ -121,8 +142,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
         const { error: updateError } = await supabase
           .from('despesas')
           .update({ comprovante: fileName })
-          .eq('id', transaction.id)
-          .eq('user_id', user.id);
+          .eq('id', transaction.id);
 
         if (updateError) {
           console.error('Database update error:', updateError);

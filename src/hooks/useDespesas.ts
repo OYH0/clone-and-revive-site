@@ -25,11 +25,11 @@ export const useDespesas = () => {
     queryFn: async () => {
       if (!user) return [];
       
-      console.log('Fetching despesas from Supabase for user:', user.id);
+      console.log('Fetching all despesas from Supabase for user:', user.id);
+      // Now fetch all despesas, not just user's own
       const { data, error } = await supabase
         .from('despesas')
         .select('*')
-        .eq('user_id', user.id)
         .order('data', { ascending: false });
       
       if (error) {
@@ -37,7 +37,7 @@ export const useDespesas = () => {
         throw error;
       }
       
-      console.log('Despesas fetched:', data);
+      console.log('All despesas fetched:', data);
       return data as Despesa[];
     },
     enabled: !!user,
@@ -100,7 +100,6 @@ export const useUpdateDespesa = () => {
         .from('despesas')
         .update({ ...despesa, user_id: user.id })
         .eq('id', id)
-        .eq('user_id', user.id)
         .select()
         .single();
 
@@ -143,8 +142,7 @@ export const useDeleteDespesa = () => {
       const { error } = await supabase
         .from('despesas')
         .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
+        .eq('id', id);
 
       if (error) {
         console.error('Error deleting despesa:', error);
