@@ -16,7 +16,7 @@ const CamerinoPage = () => {
   const [isAddDespesaModalOpen, setIsAddDespesaModalOpen] = useState(false);
   const [isAddReceitaModalOpen, setIsAddReceitaModalOpen] = useState(false);
   
-  const { data: despesas = [], isLoading: isLoadingDespesas } = useDespesas();
+  const { data: despesas = [], isLoading: isLoadingDespesas, refetch: refetchDespesas } = useDespesas();
   const { data: receitas = [], isLoading: isLoadingReceitas } = useReceitas();
 
   // Filtrar dados específicos para Camerino
@@ -27,6 +27,23 @@ const CamerinoPage = () => {
   const totalDespesas = camerinoDespesas.reduce((sum, despesa) => sum + (despesa.valor || 0), 0);
   const totalReceitas = camerinoReceitas.reduce((sum, receita) => sum + (receita.valor || 0), 0);
   const saldoAtual = totalReceitas - totalDespesas;
+
+  // Converter despesas para formato de transação
+  const transactions = camerinoDespesas.map(despesa => ({
+    id: despesa.id,
+    date: despesa.data,
+    company: despesa.empresa || '',
+    description: despesa.descricao || '',
+    category: despesa.categoria || '',
+    valor: despesa.valor || 0,
+    status: despesa.status || '',
+    comprovante: despesa.comprovante || '',
+    data_vencimento: despesa.data_vencimento
+  }));
+
+  const handleTransactionUpdated = () => {
+    refetchDespesas();
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -108,8 +125,11 @@ const CamerinoPage = () => {
                   <div className="text-center py-8">
                     <p className="text-gray-600">Carregando despesas...</p>
                   </div>
-                ) : camerinoDespesas.length > 0 ? (
-                  <TransactionTable despesas={camerinoDespesas} />
+                ) : transactions.length > 0 ? (
+                  <TransactionTable 
+                    transactions={transactions} 
+                    onTransactionUpdated={handleTransactionUpdated}
+                  />
                 ) : (
                   <div className="text-center py-8">
                     <p className="text-gray-600">Nenhuma despesa encontrada para a Camerino.</p>
@@ -154,6 +174,7 @@ const CamerinoPage = () => {
       <AddTransactionModal
         isOpen={isAddDespesaModalOpen}
         onClose={() => setIsAddDespesaModalOpen(false)}
+        onTransactionAdded={handleTransactionUpdated}
         defaultEmpresa="Camerino"
       />
       <AddReceitaModal

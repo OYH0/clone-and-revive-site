@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -18,9 +18,14 @@ import { useCreateReceita } from '@/hooks/useReceitas';
 interface AddReceitaModalProps {
   isOpen: boolean;
   onClose: () => void;
+  defaultEmpresa?: string;
 }
 
-const AddReceitaModal: React.FC<AddReceitaModalProps> = ({ isOpen, onClose }) => {
+const AddReceitaModal: React.FC<AddReceitaModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  defaultEmpresa 
+}) => {
   const [formData, setFormData] = useState({
     data: '',
     valor: '',
@@ -31,6 +36,13 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({ isOpen, onClose }) =>
   });
 
   const createReceita = useCreateReceita();
+
+  // Set default empresa when modal opens
+  useEffect(() => {
+    if (defaultEmpresa && isOpen) {
+      setFormData(prev => ({ ...prev, empresa: defaultEmpresa }));
+    }
+  }, [defaultEmpresa, isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +63,7 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({ isOpen, onClose }) =>
           valor: '',
           data_recebimento: '',
           descricao: '',
-          empresa: '',
+          empresa: defaultEmpresa || '',
           categoria: 'VENDAS'
         });
         onClose();
@@ -98,20 +110,21 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({ isOpen, onClose }) =>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="empresa">Empresa/Cliente</Label>
-              <Select onValueChange={(value) => setFormData({ ...formData, empresa: value })}>
+              <Select onValueChange={(value) => setFormData({ ...formData, empresa: value })} value={formData.empresa}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione a empresa" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Churrasco">Companhia do Churrasco</SelectItem>
                   <SelectItem value="Johnny">Johnny Rockets</SelectItem>
+                  <SelectItem value="Camerino">Camerino</SelectItem>
                   <SelectItem value="Outros">Outros</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label htmlFor="categoria">Categoria</Label>
-              <Select onValueChange={(value) => setFormData({ ...formData, categoria: value })}>
+              <Select onValueChange={(value) => setFormData({ ...formData, categoria: value })} value={formData.categoria}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione a categoria" />
                 </SelectTrigger>
