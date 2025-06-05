@@ -10,6 +10,9 @@ export interface AppSettings {
   language: 'pt-BR' | 'en-US' | 'es-ES';
   backupFrequency: 'daily' | 'weekly' | 'monthly';
   monthlyReports: boolean;
+  reminderDueExpenses: boolean;
+  reminderDaysBeforeDue: number;
+  emailReminderDueExpenses: boolean;
   userProfile: {
     nome: string;
     empresaPrincipal: string;
@@ -25,6 +28,9 @@ const defaultSettings: AppSettings = {
   language: 'pt-BR',
   backupFrequency: 'daily',
   monthlyReports: false,
+  reminderDueExpenses: true,
+  reminderDaysBeforeDue: 3,
+  emailReminderDueExpenses: false,
   userProfile: {
     nome: '',
     empresaPrincipal: 'churrasco'

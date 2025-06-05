@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Settings, User, Bell, Database, Shield, Palette, Download, Upload, Save } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -183,7 +182,8 @@ const ConfiguracoesPage = () => {
                     <SelectContent>
                       <SelectItem value="churrasco">Companhia do Churrasco</SelectItem>
                       <SelectItem value="johnny">Johnny Rockets</SelectItem>
-                      <SelectItem value="ambas">Ambas</SelectItem>
+                      <SelectItem value="camerino">Camerino</SelectItem>
+                      <SelectItem value="ambas">Todas</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -223,6 +223,45 @@ const ConfiguracoesPage = () => {
                   />
                 </div>
                 
+                {settings.notifications && (
+                  <>
+                    <Separator />
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label className="text-base font-medium">Lembrete de Despesas Próximas ao Vencimento</Label>
+                        <p className={`text-sm ${settings.darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                          Receba notificações quando despesas estão prestes a vencer
+                        </p>
+                      </div>
+                      <Switch 
+                        checked={settings.reminderDueExpenses}
+                        onCheckedChange={(checked) => updateSettings({ reminderDueExpenses: checked })}
+                      />
+                    </div>
+                    
+                    {settings.reminderDueExpenses && (
+                      <div className="ml-6">
+                        <Label htmlFor="reminderDays">Dias de antecedência</Label>
+                        <Select 
+                          value={settings.reminderDaysBeforeDue.toString()}
+                          onValueChange={(value) => updateSettings({ reminderDaysBeforeDue: parseInt(value) })}
+                        >
+                          <SelectTrigger className="rounded-xl max-w-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1">1 dia antes</SelectItem>
+                            <SelectItem value="2">2 dias antes</SelectItem>
+                            <SelectItem value="3">3 dias antes</SelectItem>
+                            <SelectItem value="5">5 dias antes</SelectItem>
+                            <SelectItem value="7">7 dias antes</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                  </>
+                )}
+                
                 <Separator />
                 
                 <div className="flex items-center justify-between">
@@ -237,6 +276,24 @@ const ConfiguracoesPage = () => {
                     onCheckedChange={(checked) => updateSettings({ emailAlerts: checked })}
                   />
                 </div>
+                
+                {settings.emailAlerts && (
+                  <>
+                    <Separator />
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label className="text-base font-medium">Email - Lembrete de Despesas Próximas ao Vencimento</Label>
+                        <p className={`text-sm ${settings.darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                          Receba emails quando despesas estão prestes a vencer
+                        </p>
+                      </div>
+                      <Switch 
+                        checked={settings.emailReminderDueExpenses}
+                        onCheckedChange={(checked) => updateSettings({ emailReminderDueExpenses: checked })}
+                      />
+                    </div>
+                  </>
+                )}
                 
                 <Separator />
                 
