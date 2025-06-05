@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Building2, TrendingUp, DollarSign, Users, BarChart3 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -231,11 +230,7 @@ const CompanhiaPage = () => {
             </Card>
 
             {/* Metas e Objetivos */}
-            <MonthlyGoals 
-              totalReceitas={totalReceitas} 
-              totalDespesas={totalDespesas} 
-              empresa="Companhia do Churrasco" 
-            />
+            <MonthlyGoals empresa="Churrasco" />
 
             {/* Próximas Ações */}
             <NextActions empresa="Companhia do Churrasco" />

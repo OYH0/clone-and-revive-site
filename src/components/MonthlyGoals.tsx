@@ -3,90 +3,93 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Edit, Plus, Target } from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Edit, Plus, Target, Trash2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-
-interface Goal {
-  id: string;
-  name: string;
-  target: number;
-  current: number;
-  color: string;
-}
+import { useMetasMensais, useCreateMetaMensal, useUpdateMetaMensal, useDeleteMetaMensal } from '@/hooks/useMetasMensais';
 
 interface MonthlyGoalsProps {
-  totalReceitas: number;
-  totalDespesas: number;
   empresa: string;
 }
 
-const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ totalReceitas, totalDespesas, empresa }) => {
-  const [goals, setGoals] = useState<Goal[]>([
-    {
-      id: '1',
-      name: 'Receita Meta',
-      target: 1000000, // R$ 10.000,00
-      current: totalReceitas,
-      color: 'bg-blue-500'
-    },
-    {
-      id: '2',
-      name: 'Controle Custos',
-      target: 800000, // R$ 8.000,00
-      current: Math.max(0, 800000 - totalDespesas),
-      color: 'bg-green-500'
-    },
-    {
-      id: '3',
-      name: 'Margem Lucro',
-      target: 200000, // R$ 2.000,00
-      current: totalReceitas - totalDespesas,
-      color: 'bg-yellow-500'
-    }
-  ]);
+const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
+  const { data: metas = [] } = useMetasMensais(empresa);
+  const createMeta = useCreateMetaMensal();
+  const updateMeta = useUpdateMetaMensal();
+  const deleteMeta = useDeleteMetaMensal();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
-  const [newGoalName, setNewGoalName] = useState('');
-  const [newGoalTarget, setNewGoalTarget] = useState('');
+  const [editingMeta, setEditingMeta] = useState<any | null>(null);
+  const [formData, setFormData] = useState({
+    nome_meta: '',
+    valor_meta: '',
+    valor_atual: '',
+    cor: '#8b5cf6'
+  });
 
-  const handleEditGoal = (goal: Goal) => {
-    setEditingGoal(goal);
-    setNewGoalName(goal.name);
-    setNewGoalTarget((goal.target / 100).toString());
+  const currentMonth = new Date().getMonth() + 1;
+  const currentYear = new Date().getFullYear();
+
+  const handleEditMeta = (meta: any) => {
+    setEditingMeta(meta);
+    setFormData({
+      nome_meta: meta.nome_meta,
+      valor_meta: (meta.valor_meta / 100).toString(),
+      valor_atual: (meta.valor_atual / 100).toString(),
+      cor: meta.cor
+    });
     setIsDialogOpen(true);
   };
 
-  const handleSaveGoal = () => {
-    if (editingGoal) {
-      setGoals(goals.map(goal => 
-        goal.id === editingGoal.id 
-          ? { ...goal, name: newGoalName, target: parseFloat(newGoalTarget) * 100 }
-          : goal
-      ));
-    } else {
-      const newGoal: Goal = {
-        id: Date.now().toString(),
-        name: newGoalName,
-        target: parseFloat(newGoalTarget) * 100,
-        current: 0,
-        color: 'bg-purple-500'
+  const handleSaveMeta = async () => {
+    try {
+      const metaData = {
+        nome_meta: formData.nome_meta,
+        valor_meta: parseFloat(formData.valor_meta) * 100, // Convert to cents
+        valor_atual: parseFloat(formData.valor_atual) * 100, // Convert to cents
+        cor: formData.cor,
+        empresa,
+        mes: currentMonth,
+        ano: currentYear
       };
-      setGoals([...goals, newGoal]);
+
+      if (editingMeta) {
+        await updateMeta.mutateAsync({ id: editingMeta.id, ...metaData });
+      } else {
+        await createMeta.mutateAsync(metaData);
+      }
+
+      setIsDialogOpen(false);
+      setEditingMeta(null);
+      setFormData({
+        nome_meta: '',
+        valor_meta: '',
+        valor_atual: '',
+        cor: '#8b5cf6'
+      });
+    } catch (error) {
+      console.error('Error saving meta:', error);
     }
-    setIsDialogOpen(false);
-    setEditingGoal(null);
-    setNewGoalName('');
-    setNewGoalTarget('');
   };
 
-  const handleAddGoal = () => {
-    setEditingGoal(null);
-    setNewGoalName('');
-    setNewGoalTarget('');
+  const handleAddMeta = () => {
+    setEditingMeta(null);
+    setFormData({
+      nome_meta: '',
+      valor_meta: '',
+      valor_atual: '',
+      cor: '#8b5cf6'
+    });
     setIsDialogOpen(true);
+  };
+
+  const handleDeleteMeta = async (id: string) => {
+    try {
+      await deleteMeta.mutateAsync(id);
+    } catch (error) {
+      console.error('Error deleting meta:', error);
+    }
   };
 
   const getProgress = (current: number, target: number) => {
@@ -102,12 +105,14 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ totalReceitas, totalDespesa
               <Target className="h-5 w-5" />
               Metas do Mês
             </CardTitle>
-            <CardDescription>Objetivos e progresso</CardDescription>
+            <CardDescription>
+              {new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+            </CardDescription>
           </div>
           <Button 
             variant="outline" 
             size="sm" 
-            onClick={handleAddGoal}
+            onClick={handleAddMeta}
             className="flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
@@ -116,43 +121,59 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ totalReceitas, totalDespesa
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {goals.map((goal) => {
-          const progress = getProgress(goal.current, goal.target);
-          return (
-            <div key={goal.id} className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">{goal.name}</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">{progress.toFixed(1)}%</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEditGoal(goal)}
-                    className="h-6 w-6 p-0"
-                  >
-                    <Edit className="h-3 w-3" />
-                  </Button>
+        {metas.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p>Nenhuma meta definida para este mês</p>
+            <p className="text-sm">Clique em "Adicionar" para criar uma meta</p>
+          </div>
+        ) : (
+          metas.map((meta) => {
+            const progress = getProgress(meta.valor_atual, meta.valor_meta);
+            return (
+              <div key={meta.id} className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">{meta.nome_meta}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600">{progress.toFixed(1)}%</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEditMeta(meta)}
+                      className="h-6 w-6 p-0"
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeleteMeta(meta.id)}
+                      className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <Progress value={progress} className="h-2" />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>R$ {(meta.valor_atual / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    <span>Meta: R$ {(meta.valor_meta / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                  </div>
                 </div>
               </div>
-              <div className="space-y-1">
-                <Progress value={progress} className="h-2" />
-                <div className="flex justify-between text-xs text-gray-500">
-                  <span>R$ {(goal.current / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                  <span>Meta: R$ {(goal.target / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                </div>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {editingGoal ? 'Editar Meta' : 'Nova Meta'}
+                {editingMeta ? 'Editar Meta' : 'Nova Meta'}
               </DialogTitle>
               <DialogDescription>
-                {editingGoal ? 'Edite os detalhes da meta' : 'Adicione uma nova meta para acompanhar'}
+                {editingMeta ? 'Edite os detalhes da meta' : 'Adicione uma nova meta para acompanhar'}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -160,8 +181,8 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ totalReceitas, totalDespesa
                 <Label htmlFor="goalName">Nome da Meta</Label>
                 <Input
                   id="goalName"
-                  value={newGoalName}
-                  onChange={(e) => setNewGoalName(e.target.value)}
+                  value={formData.nome_meta}
+                  onChange={(e) => setFormData({ ...formData, nome_meta: e.target.value })}
                   placeholder="Ex: Receita Meta"
                 />
               </div>
@@ -170,9 +191,30 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ totalReceitas, totalDespesa
                 <Input
                   id="goalTarget"
                   type="number"
-                  value={newGoalTarget}
-                  onChange={(e) => setNewGoalTarget(e.target.value)}
+                  step="0.01"
+                  value={formData.valor_meta}
+                  onChange={(e) => setFormData({ ...formData, valor_meta: e.target.value })}
                   placeholder="Ex: 10000"
+                />
+              </div>
+              <div>
+                <Label htmlFor="goalCurrent">Valor Atual (R$)</Label>
+                <Input
+                  id="goalCurrent"
+                  type="number"
+                  step="0.01"
+                  value={formData.valor_atual}
+                  onChange={(e) => setFormData({ ...formData, valor_atual: e.target.value })}
+                  placeholder="Ex: 5000"
+                />
+              </div>
+              <div>
+                <Label htmlFor="goalColor">Cor</Label>
+                <Input
+                  id="goalColor"
+                  type="color"
+                  value={formData.cor}
+                  onChange={(e) => setFormData({ ...formData, cor: e.target.value })}
                 />
               </div>
             </div>
@@ -180,8 +222,11 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ totalReceitas, totalDespesa
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                 Cancelar
               </Button>
-              <Button onClick={handleSaveGoal}>
-                {editingGoal ? 'Salvar' : 'Adicionar'}
+              <Button 
+                onClick={handleSaveMeta}
+                disabled={createMeta.isPending || updateMeta.isPending}
+              >
+                {editingMeta ? 'Salvar' : 'Adicionar'}
               </Button>
             </DialogFooter>
           </DialogContent>

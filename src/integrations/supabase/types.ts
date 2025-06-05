@@ -48,6 +48,48 @@ export type Database = {
         }
         Relationships: []
       }
+      metas_mensais: {
+        Row: {
+          ano: number
+          cor: string | null
+          created_at: string
+          empresa: string
+          id: string
+          mes: number
+          nome_meta: string
+          updated_at: string
+          user_id: string
+          valor_atual: number
+          valor_meta: number
+        }
+        Insert: {
+          ano: number
+          cor?: string | null
+          created_at?: string
+          empresa: string
+          id?: string
+          mes: number
+          nome_meta: string
+          updated_at?: string
+          user_id: string
+          valor_atual?: number
+          valor_meta?: number
+        }
+        Update: {
+          ano?: number
+          cor?: string | null
+          created_at?: string
+          empresa?: string
+          id?: string
+          mes?: number
+          nome_meta?: string
+          updated_at?: string
+          user_id?: string
+          valor_atual?: number
+          valor_meta?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
