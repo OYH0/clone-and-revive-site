@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { Edit, Trash2, CheckCircle, Paperclip, Eye } from 'lucide-react';
+import { Edit, Trash2, CheckCircle, Paperclip, Eye, Lock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Transaction } from '@/types/transaction';
 import { getTransactionStatus } from '@/utils/transactionUtils';
 
@@ -10,7 +11,9 @@ interface ActionsCellProps {
   onDelete: (transaction: Transaction) => void;
   onMarkAsPaid: (transaction: Transaction) => void;
   onAttachReceipt: (transaction: Transaction) => void;
-  onViewReceipt?: (transaction: Transaction) => void;
+  onViewReceipt: (transaction: Transaction) => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
 }
 
 const ActionsCell: React.FC<ActionsCellProps> = ({
@@ -19,56 +22,101 @@ const ActionsCell: React.FC<ActionsCellProps> = ({
   onDelete,
   onMarkAsPaid,
   onAttachReceipt,
-  onViewReceipt
+  onViewReceipt,
+  canEdit = true,
+  canDelete = true
 }) => {
   const status = getTransactionStatus(transaction);
-  const isPaid = status === 'PAGO';
 
   return (
-    <div className="flex gap-2">
-      <button
-        onClick={() => onEdit(transaction)}
-        className="text-blue-500 hover:text-blue-700 p-1 rounded hover:bg-blue-50"
-        title="Editar"
-      >
-        <Edit size={16} />
-      </button>
-      
-      {!isPaid && (
-        <button
+    <div className="flex gap-1">
+      {canEdit ? (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onEdit(transaction)}
+          className="h-8 w-8 p-0 hover:bg-blue-100"
+          title="Editar"
+        >
+          <Edit size={14} className="text-blue-600" />
+        </Button>
+      ) : (
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled
+          className="h-8 w-8 p-0 opacity-50"
+          title="Sem permissão para editar"
+        >
+          <Lock size={14} className="text-gray-400" />
+        </Button>
+      )}
+
+      {canDelete ? (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onDelete(transaction)}
+          className="h-8 w-8 p-0 hover:bg-red-100"
+          title="Excluir"
+        >
+          <Trash2 size={14} className="text-red-600" />
+        </Button>
+      ) : (
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled
+          className="h-8 w-8 p-0 opacity-50"
+          title="Sem permissão para excluir"
+        >
+          <Lock size={14} className="text-gray-400" />
+        </Button>
+      )}
+
+      {status !== 'PAGO' && canEdit && (
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => onMarkAsPaid(transaction)}
-          className="text-green-500 hover:text-green-700 p-1 rounded hover:bg-green-50"
-          title="Marcar como Pago"
+          className="h-8 w-8 p-0 hover:bg-green-100"
+          title="Marcar como pago"
         >
-          <CheckCircle size={16} />
-        </button>
+          <CheckCircle size={14} className="text-green-600" />
+        </Button>
       )}
-      
-      {transaction.comprovante && onViewReceipt && (
-        <button
+
+      {transaction.comprovante ? (
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => onViewReceipt(transaction)}
-          className="text-blue-500 hover:text-blue-700 p-1 rounded hover:bg-blue-50"
-          title="Visualizar Comprovante"
+          className="h-8 w-8 p-0 hover:bg-purple-100"
+          title="Ver comprovante"
         >
-          <Eye size={16} />
-        </button>
+          <Eye size={14} className="text-purple-600" />
+        </Button>
+      ) : canEdit ? (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onAttachReceipt(transaction)}
+          className="h-8 w-8 p-0 hover:bg-gray-100"
+          title="Anexar comprovante"
+        >
+          <Paperclip size={14} className="text-gray-600" />
+        </Button>
+      ) : (
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled
+          className="h-8 w-8 p-0 opacity-50"
+          title="Sem permissão para anexar"
+        >
+          <Lock size={14} className="text-gray-400" />
+        </Button>
       )}
-      
-      <button
-        onClick={() => onAttachReceipt(transaction)}
-        className={`p-1 rounded ${transaction.comprovante ? 'text-green-500 hover:text-green-700 hover:bg-green-50' : 'text-purple-500 hover:text-purple-700 hover:bg-purple-50'}`}
-        title={transaction.comprovante ? "Comprovante anexado" : "Anexar Comprovante"}
-      >
-        <Paperclip size={16} />
-      </button>
-      
-      <button
-        onClick={() => onDelete(transaction)}
-        className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50"
-        title="Excluir"
-      >
-        <Trash2 size={16} />
-      </button>
     </div>
   );
 };

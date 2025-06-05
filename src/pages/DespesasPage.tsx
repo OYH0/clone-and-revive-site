@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import Sidebar from '@/components/Sidebar';
 import TransactionTable from '@/components/TransactionTable';
@@ -7,9 +6,10 @@ import DespesasHeader from '@/components/DespesasHeader';
 import DespesasStats from '@/components/DespesasStats';
 import DespesasActions from '@/components/DespesasActions';
 import { Button } from '@/components/ui/button';
-import { FileText } from 'lucide-react';
+import { FileText, Shield } from 'lucide-react';
 import { useDespesas } from '@/hooks/useDespesas';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAdminAccess } from '@/hooks/useAdminAccess';
 import { Transaction } from '@/types/transaction';
 import { getTransactionStatus } from '@/utils/transactionUtils';
 
@@ -28,6 +28,7 @@ const DespesasPage = () => {
   const [filters, setFilters] = useState<FilterOptions>({});
   const { data: despesas = [], isLoading, refetch } = useDespesas();
   const { user } = useAuth();
+  const { isAdmin } = useAdminAccess();
 
   // Verificar se o usuário está autenticado
   if (!user) {
@@ -177,9 +178,21 @@ const DespesasPage = () => {
           <DespesasActions
             onFilterChange={handleFilterChange}
             onClearFilters={handleClearFilters}
-            onAddTransaction={() => setIsModalOpen(true)}
+            onAddTransaction={isAdmin ? () => setIsModalOpen(true) : undefined}
             filteredTransactions={filteredTransactions}
           />
+
+          {!isAdmin && (
+            <div className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
+              <div className="flex items-center gap-3">
+                <Shield className="h-5 w-5 text-blue-600" />
+                <div>
+                  <p className="text-blue-800 font-medium">Modo Visualização</p>
+                  <p className="text-blue-600 text-sm">Apenas administradores podem adicionar novas despesas.</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Transaction Table */}
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
@@ -200,11 +213,13 @@ const DespesasPage = () => {
             />
           </div>
 
-          <AddTransactionModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onTransactionAdded={handleTransactionAdded}
-          />
+          {isAdmin && (
+            <AddTransactionModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              onTransactionAdded={handleTransactionAdded}
+            />
+          )}
         </div>
       </div>
     </div>

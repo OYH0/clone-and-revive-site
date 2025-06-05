@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Transaction } from '@/types/transaction';
 import EditTransactionModal from './EditTransactionModal';
@@ -10,6 +11,7 @@ import ActionsCell from './table/ActionsCell';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAdminAccess } from '@/hooks/useAdminAccess';
 
 interface TransactionTableProps {
   transactions: Transaction[];
@@ -27,13 +29,20 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
   const [viewingReceipt, setViewingReceipt] = useState<Transaction | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
+  const { isAdmin } = useAdminAccess();
 
   const handleEdit = (transaction: Transaction) => {
-    setEditingTransaction(transaction);
+    // Only allow editing if user is admin or owns the transaction
+    if (isAdmin || transaction.user_id === user?.id) {
+      setEditingTransaction(transaction);
+    }
   };
 
   const handleDelete = (transaction: Transaction) => {
-    setDeletingTransaction(transaction);
+    // Only allow deletion if user is admin or owns the transaction
+    if (isAdmin || transaction.user_id === user?.id) {
+      setDeletingTransaction(transaction);
+    }
   };
 
   const handleViewReceipt = (transaction: Transaction) => {
@@ -186,6 +195,8 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
                     onMarkAsPaid={handleMarkAsPaid}
                     onAttachReceipt={handleAttachReceipt}
                     onViewReceipt={handleViewReceipt}
+                    canEdit={isAdmin || transaction.user_id === user?.id}
+                    canDelete={isAdmin || transaction.user_id === user?.id}
                   />
                 </td>
               </tr>

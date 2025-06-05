@@ -1,54 +1,89 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Plus, Filter, Download, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import DespesasFilter from '@/components/DespesasFilter';
-import DespesasExport from '@/components/DespesasExport';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import DespesasFilter from './DespesasFilter';
+import DespesasExport from './DespesasExport';
 import { Transaction } from '@/types/transaction';
 
-interface FilterOptions {
-  empresa?: string;
-  categoria?: string;
-  dataInicio?: Date;
-  dataFim?: Date;
-  valorMin?: number;
-  valorMax?: number;
-  status?: string;
-}
-
 interface DespesasActionsProps {
-  onFilterChange: (newFilters: FilterOptions) => void;
+  onFilterChange: (filters: any) => void;
   onClearFilters: () => void;
-  onAddTransaction: () => void;
+  onAddTransaction?: () => void; // Made optional for non-admin users
   filteredTransactions: Transaction[];
 }
 
-const DespesasActions: React.FC<DespesasActionsProps> = ({
-  onFilterChange,
-  onClearFilters,
+const DespesasActions: React.FC<DespesasActionsProps> = ({ 
+  onFilterChange, 
+  onClearFilters, 
   onAddTransaction,
-  filteredTransactions
+  filteredTransactions 
 }) => {
+  const [showFilters, setShowFilters] = useState(false);
+  const [showExport, setShowExport] = useState(false);
+
   return (
-    <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/20 mb-8">
-      <div className="flex justify-between items-center">
-        <div className="flex gap-3">
-          <DespesasFilter 
-            onFilterChange={onFilterChange}
-            onClearFilters={onClearFilters}
-          />
-          <DespesasExport transactions={filteredTransactions} />
+    <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl mb-6">
+      <CardHeader>
+        <CardTitle className="text-xl text-gray-800 flex items-center gap-3">
+          <Filter className="h-5 w-5" />
+          Ações
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-wrap gap-3">
+          {onAddTransaction && (
+            <Button 
+              onClick={onAddTransaction}
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200 rounded-2xl"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nova Despesa
+            </Button>
+          )}
+          
+          <Button 
+            variant="outline" 
+            onClick={() => setShowFilters(!showFilters)}
+            className="rounded-2xl border-2"
+          >
+            <Filter className="w-4 h-4 mr-2" />
+            {showFilters ? 'Ocultar Filtros' : 'Filtros'}
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            onClick={() => setShowExport(!showExport)}
+            className="rounded-2xl border-2"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Exportar
+          </Button>
+          
+          <Button 
+            variant="ghost" 
+            onClick={onClearFilters}
+            className="rounded-2xl text-gray-600"
+          >
+            <X className="w-4 h-4 mr-2" />
+            Limpar Filtros
+          </Button>
         </div>
-        
-        <Button 
-          onClick={onAddTransaction}
-          className="flex items-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200"
-        >
-          <Plus className="h-4 w-4" />
-          Nova Despesa
-        </Button>
-      </div>
-    </div>
+
+        {showFilters && (
+          <div className="mt-6 p-4 bg-gray-50 rounded-xl border">
+            <DespesasFilter onFilterChange={onFilterChange} />
+          </div>
+        )}
+
+        {showExport && (
+          <div className="mt-6 p-4 bg-gray-50 rounded-xl border">
+            <DespesasExport transactions={filteredTransactions} />
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

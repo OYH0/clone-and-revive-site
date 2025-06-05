@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Plus, TrendingUp, DollarSign, Calendar, Filter } from 'lucide-react';
+import { Plus, TrendingUp, DollarSign, Calendar, Filter, Shield } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import AddReceitaModal from '@/components/AddReceitaModal';
 import ReceitaTable from '@/components/ReceitaTable';
 import { useReceitas } from '@/hooks/useReceitas';
+import { useAdminAccess } from '@/hooks/useAdminAccess';
 
 const ReceitasPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -17,6 +17,7 @@ const ReceitasPage = () => {
   const [filterCategoria, setFilterCategoria] = useState('all');
   
   const { data: receitas, isLoading } = useReceitas();
+  const { isAdmin } = useAdminAccess();
 
   // Calcular estatísticas
   const totalReceitas = receitas?.reduce((sum, receita) => sum + receita.valor, 0) || 0;
@@ -65,13 +66,25 @@ const ReceitasPage = () => {
               </div>
             </div>
             
-            <Button 
-              onClick={() => setIsModalOpen(true)}
-              className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200 rounded-2xl"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Nova Receita
-            </Button>
+            {isAdmin ? (
+              <Button 
+                onClick={() => setIsModalOpen(true)}
+                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200 rounded-2xl"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Nova Receita
+              </Button>
+            ) : (
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <div className="flex items-center gap-3">
+                  <Shield className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <p className="text-blue-800 font-medium">Modo Visualização</p>
+                    <p className="text-blue-600 text-sm">Apenas administradores podem adicionar novas receitas.</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Stats Cards */}
@@ -202,7 +215,9 @@ const ReceitasPage = () => {
         </div>
       </div>
 
-      <AddReceitaModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      {isAdmin && (
+        <AddReceitaModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      )}
     </div>
   );
 };

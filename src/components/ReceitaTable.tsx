@@ -1,10 +1,11 @@
-
 import React, { useState } from 'react';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, Lock } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Receita, useDeleteReceita } from '@/hooks/useReceitas';
+import { useAdminAccess } from '@/hooks/useAdminAccess';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +24,8 @@ interface ReceitaTableProps {
 const ReceitaTable: React.FC<ReceitaTableProps> = ({ receitas }) => {
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const deleteReceita = useDeleteReceita();
+  const { isAdmin } = useAdminAccess();
+  const { user } = useAuth();
 
   const handleDelete = () => {
     if (deleteId) {
@@ -30,6 +33,10 @@ const ReceitaTable: React.FC<ReceitaTableProps> = ({ receitas }) => {
         onSuccess: () => setDeleteId(null)
       });
     }
+  };
+
+  const canEditReceita = (receita: Receita) => {
+    return isAdmin || receita.user_id === user?.id;
   };
 
   const getCategoryBadge = (categoria: string) => {
@@ -75,53 +82,70 @@ const ReceitaTable: React.FC<ReceitaTableProps> = ({ receitas }) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {receitas.map((receita) => (
-              <TableRow key={receita.id}>
-                <TableCell>
-                  {new Date(receita.data).toLocaleDateString('pt-BR')}
-                </TableCell>
-                <TableCell>
-                  <Badge className={`${getEmpresaBadge(receita.empresa)} text-white`}>
-                    {receita.empresa}
-                  </Badge>
-                </TableCell>
-                <TableCell className="max-w-xs truncate">
-                  {receita.descricao}
-                </TableCell>
-                <TableCell>
-                  <Badge className={`${getCategoryBadge(receita.categoria)} text-white`}>
-                    {receita.categoria}
-                  </Badge>
-                </TableCell>
-                <TableCell className="font-medium">
-                  R$ {receita.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </TableCell>
-                <TableCell>
-                  {receita.data_recebimento ? (
-                    <Badge className="bg-green-500 text-white">
-                      {new Date(receita.data_recebimento).toLocaleDateString('pt-BR')}
+            {receitas.map((receita) => {
+              const canEdit = canEditReceita(receita);
+              
+              return (
+                <TableRow key={receita.id}>
+                  <TableCell>
+                    {new Date(receita.data).toLocaleDateString('pt-BR')}
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={`${getEmpresaBadge(receita.empresa)} text-white`}>
+                      {receita.empresa}
                     </Badge>
-                  ) : (
-                    <Badge className="bg-yellow-500 text-white">Pendente</Badge>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="sm">
-                      <Edit size={16} />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => setDeleteId(receita.id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <Trash2 size={16} />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
+                  </TableCell>
+                  <TableCell className="max-w-xs truncate">
+                    {receita.descricao}
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={`${getCategoryBadge(receita.categoria)} text-white`}>
+                      {receita.categoria}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    R$ {receita.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </TableCell>
+                  <TableCell>
+                    {receita.data_recebimento ? (
+                      <Badge className="bg-green-500 text-white">
+                        {new Date(receita.data_recebimento).toLocaleDateString('pt-BR')}
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-yellow-500 text-white">Pendente</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      {canEdit ? (
+                        <Button variant="ghost" size="sm">
+                          <Edit size={16} />
+                        </Button>
+                      ) : (
+                        <Button variant="ghost" size="sm" disabled className="opacity-50">
+                          <Lock size={16} className="text-gray-400" />
+                        </Button>
+                      )}
+                      
+                      {canEdit ? (
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => setDeleteId(receita.id)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <Trash2 size={16} />
+                        </Button>
+                      ) : (
+                        <Button variant="ghost" size="sm" disabled className="opacity-50">
+                          <Lock size={16} className="text-gray-400" />
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>
