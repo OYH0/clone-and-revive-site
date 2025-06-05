@@ -21,6 +21,8 @@ export type Database = {
           status: string | null
           user_id: string
           valor: number | null
+          valor_juros: number | null
+          valor_total: number | null
         }
         Insert: {
           categoria?: string | null
@@ -33,6 +35,8 @@ export type Database = {
           status?: string | null
           user_id: string
           valor?: number | null
+          valor_juros?: number | null
+          valor_total?: number | null
         }
         Update: {
           categoria?: string | null
@@ -45,6 +49,8 @@ export type Database = {
           status?: string | null
           user_id?: string
           valor?: number | null
+          valor_juros?: number | null
+          valor_total?: number | null
         }
         Relationships: []
       }

@@ -35,7 +35,9 @@ const DespesasPage = () => {
     data_vencimento: despesa.data_vencimento,
     comprovante: despesa.comprovante,
     status: despesa.status || null,
-    user_id: despesa.user_id
+    user_id: despesa.user_id,
+    valor_juros: despesa.valor_juros || 0,
+    valor_total: despesa.valor_total || despesa.valor
   }));
 
   // Filtrar despesas
@@ -53,15 +55,16 @@ const DespesasPage = () => {
     });
   }, [allTransactions, searchTerm, filterEmpresa, filterCategoria, filterStatus]);
 
-  // Calcular estatísticas
-  const totalDespesas = filteredTransactions.reduce((sum, transaction) => sum + transaction.valor, 0);
+  // Calcular estatísticas usando valor_total
+  const totalDespesas = filteredTransactions.reduce((sum, transaction) => sum + (transaction.valor_total || transaction.valor), 0);
+  const totalJuros = filteredTransactions.reduce((sum, transaction) => sum + (transaction.valor_juros || 0), 0);
   const despesasPagas = filteredTransactions.filter(t => getTransactionStatus(t) === 'PAGO');
   const despesasPendentes = filteredTransactions.filter(t => getTransactionStatus(t) === 'PENDENTE');
   const despesasAtrasadas = filteredTransactions.filter(t => getTransactionStatus(t) === 'ATRASADO');
 
-  const valorPago = despesasPagas.reduce((sum, t) => sum + t.valor, 0);
-  const valorPendente = despesasPendentes.reduce((sum, t) => sum + t.valor, 0);
-  const valorAtrasado = despesasAtrasadas.reduce((sum, t) => sum + t.valor, 0);
+  const valorPago = despesasPagas.reduce((sum, t) => sum + (t.valor_total || t.valor), 0);
+  const valorPendente = despesasPendentes.reduce((sum, t) => sum + (t.valor_total || t.valor), 0);
+  const valorAtrasado = despesasAtrasadas.reduce((sum, t) => sum + (t.valor_total || t.valor), 0);
 
   const handleTransactionAdded = () => {
     refetch();
@@ -125,7 +128,7 @@ const DespesasPage = () => {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                 <CardTitle className="text-sm font-medium text-gray-600">Total de Despesas</CardTitle>
@@ -134,10 +137,25 @@ const DespesasPage = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold bg-gradient-to-r from-red-600 to-red-700 bg-clip-text text-transparent">
+                <div className="text-2xl font-bold bg-gradient-to-r from-red-600 to-red-700 bg-clip-text text-transparent">
                   R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">{filteredTransactions.length} despesas cadastradas</p>
+                <p className="text-xs text-gray-500 mt-1">{filteredTransactions.length} despesas</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Total em Juros</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-orange-100 to-orange-200 rounded-xl">
+                  <DollarSign className="h-4 w-4 text-orange-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-orange-600">
+                  R$ {totalJuros.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Juros acumulados</p>
               </CardContent>
             </Card>
 
@@ -149,35 +167,35 @@ const DespesasPage = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-800">
+                <div className="text-2xl font-bold text-gray-800">
                   R$ {valorPago.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">{despesasPagas.length} despesas pagas</p>
+                <p className="text-xs text-gray-500 mt-1">{despesasPagas.length} pagas</p>
               </CardContent>
             </Card>
 
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">Despesas Pendentes</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600">Pendentes</CardTitle>
                 <div className="p-2 bg-gradient-to-r from-yellow-100 to-yellow-200 rounded-xl">
                   <Clock className="h-4 w-4 text-yellow-600" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-800">{despesasPendentes.length}</div>
-                <p className="text-xs text-gray-500 mt-1">Aguardando pagamento</p>
+                <div className="text-2xl font-bold text-gray-800">{despesasPendentes.length}</div>
+                <p className="text-xs text-gray-500 mt-1">Aguardando</p>
               </CardContent>
             </Card>
 
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">Despesas Atrasadas</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600">Atrasadas</CardTitle>
                 <div className="p-2 bg-gradient-to-r from-red-100 to-red-200 rounded-xl">
                   <AlertTriangle className="h-4 w-4 text-red-600" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-red-600">
+                <div className="text-2xl font-bold text-red-600">
                   {despesasAtrasadas.length}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">Vencidas</p>

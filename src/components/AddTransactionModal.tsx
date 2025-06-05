@@ -28,7 +28,8 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     empresa: '',
     descricao: '',
     categoria: 'INSUMOS',
-    data_vencimento: ''
+    data_vencimento: '',
+    valor_juros: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -56,20 +57,10 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       return;
     }
     
-    if (!formData.data || !formData.valor || !formData.empresa) {
+    if (!formData.valor || !formData.empresa || !formData.data_vencimento) {
       toast({
         title: "Erro",
-        description: "Por favor, preencha todos os campos obrigatórios.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Validar data de vencimento para boletos atrasados
-    if (formData.categoria === 'ATRASADOS' && !formData.data_vencimento) {
-      toast({
-        title: "Erro",
-        description: "Data de vencimento é obrigatória para boletos atrasados.",
+        description: "Por favor, preencha todos os campos obrigatórios (Valor, Empresa e Data de Vencimento).",
         variant: "destructive"
       });
       return;
@@ -79,18 +70,15 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     
     try {
       const insertData: any = {
-        data: formData.data,
-        valor: parseFloat(formData.valor) * 1, // Convert to cents
+        data: formData.data || new Date().toISOString().split('T')[0], // Use today if no date provided
+        valor: parseFloat(formData.valor),
         empresa: formData.empresa,
         descricao: formData.descricao || 'Sem descrição',
         categoria: formData.categoria,
+        data_vencimento: formData.data_vencimento,
+        valor_juros: formData.valor_juros ? parseFloat(formData.valor_juros) : 0,
         user_id: user.id
       };
-
-      // Adicionar data de vencimento apenas se for fornecida
-      if (formData.data_vencimento) {
-        insertData.data_vencimento = formData.data_vencimento;
-      }
 
       const { error } = await supabase
         .from('despesas')
@@ -118,7 +106,8 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         empresa: defaultEmpresa || '',
         descricao: '',
         categoria: 'INSUMOS',
-        data_vencimento: ''
+        data_vencimento: '',
+        valor_juros: ''
       });
 
       onTransactionAdded();
@@ -151,12 +140,23 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="data">Data *</Label>
+            <Label htmlFor="data">Data</Label>
             <Input
               id="data"
               type="date"
               value={formData.data}
               onChange={(e) => handleInputChange('data', e.target.value)}
+            />
+            <p className="text-xs text-gray-500">Se não informada, será usada a data atual</p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="data_vencimento">Data de Vencimento *</Label>
+            <Input
+              id="data_vencimento"
+              type="date"
+              value={formData.data_vencimento}
+              onChange={(e) => handleInputChange('data_vencimento', e.target.value)}
               required
             />
           </div>
@@ -171,6 +171,18 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               value={formData.valor}
               onChange={(e) => handleInputChange('valor', e.target.value)}
               required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="valor_juros">Valor dos Juros (R$)</Label>
+            <Input
+              id="valor_juros"
+              type="number"
+              step="0.01"
+              placeholder="0.00"
+              value={formData.valor_juros}
+              onChange={(e) => handleInputChange('valor_juros', e.target.value)}
             />
           </div>
 
@@ -203,22 +215,6 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               ))}
             </select>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="data_vencimento">Data de Vencimento</Label>
-            <Input
-              id="data_vencimento"
-              type="date"
-              value={formData.data_vencimento}
-              onChange={(e) => handleInputChange('data_vencimento', e.target.value)}
-            />
-          </div>
-
-          {formData.categoria === 'ATRASADOS' && !formData.data_vencimento && (
-            <p className="text-sm text-red-600">
-              * Data de vencimento é obrigatória para boletos atrasados
-            </p>
-          )}
 
           <div className="space-y-2">
             <Label htmlFor="descricao">Descrição</Label>

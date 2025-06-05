@@ -10,4 +10,6 @@ export interface Transaction {
   status?: string;
   comprovante?: string;
   user_id?: string;
+  valor_juros?: number;
+  valor_total?: number;
 }

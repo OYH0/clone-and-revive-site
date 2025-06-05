@@ -30,7 +30,8 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     empresa: '',
     categoria: '',
     data_vencimento: '',
-    descricao: ''
+    descricao: '',
+    valor_juros: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -44,7 +45,8 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
         empresa: transaction.company,
         categoria: transaction.category,
         data_vencimento: transaction.data_vencimento || '',
-        descricao: transaction.description
+        descricao: transaction.description,
+        valor_juros: transaction.valor_juros?.toString() || ''
       });
     }
   }, [transaction]);
@@ -53,17 +55,27 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     e.preventDefault();
     if (!transaction || !user) return;
 
+    if (!formData.data_vencimento) {
+      toast({
+        title: "Erro",
+        description: "Data de vencimento é obrigatória.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
       const { error } = await supabase
         .from('despesas')
         .update({
-          data: formData.data,
+          data: formData.data || new Date().toISOString().split('T')[0],
           valor: parseFloat(formData.valor),
           empresa: formData.empresa,
           categoria: formData.categoria,
-          data_vencimento: formData.data_vencimento || null,
+          data_vencimento: formData.data_vencimento,
           descricao: formData.descricao,
+          valor_juros: formData.valor_juros ? parseFloat(formData.valor_juros) : 0,
           user_id: user.id
         })
         .eq('id', transaction.id);
@@ -102,12 +114,24 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="data">Data *</Label>
+            <Label htmlFor="data">Data</Label>
             <Input
               id="data"
               type="date"
               value={formData.data}
               onChange={(e) => handleInputChange('data', e.target.value)}
+              className="rounded-full"
+            />
+            <p className="text-xs text-gray-500 mt-1">Se não informada, será usada a data atual</p>
+          </div>
+
+          <div>
+            <Label htmlFor="data_vencimento">Data de Vencimento *</Label>
+            <Input
+              id="data_vencimento"
+              type="date"
+              value={formData.data_vencimento}
+              onChange={(e) => handleInputChange('data_vencimento', e.target.value)}
               required
               className="rounded-full"
             />
@@ -122,6 +146,18 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
               value={formData.valor}
               onChange={(e) => handleInputChange('valor', e.target.value)}
               required
+              className="rounded-full"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="valor_juros">Valor dos Juros</Label>
+            <Input
+              id="valor_juros"
+              type="number"
+              step="0.01"
+              value={formData.valor_juros}
+              onChange={(e) => handleInputChange('valor_juros', e.target.value)}
               className="rounded-full"
             />
           </div>
@@ -150,17 +186,6 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                 <SelectItem value="ATRASADOS">Atrasados</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="data_vencimento">Data de Vencimento</Label>
-            <Input
-              id="data_vencimento"
-              type="date"
-              value={formData.data_vencimento}
-              onChange={(e) => handleInputChange('data_vencimento', e.target.value)}
-              className="rounded-full"
-            />
           </div>
 
           <div>
