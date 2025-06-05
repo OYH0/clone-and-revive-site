@@ -80,7 +80,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     try {
       const insertData: any = {
         data: formData.data,
-        valor: parseFloat(formData.valor) * 100, // Convert to cents
+        valor: parseFloat(formData.valor) * 1, // Convert to cents
         empresa: formData.empresa,
         descricao: formData.descricao || 'Sem descrição',
         categoria: formData.categoria,
