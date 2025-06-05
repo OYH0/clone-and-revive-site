@@ -51,6 +51,7 @@ export type Database = {
       metas_mensais: {
         Row: {
           ano: number
+          categoria_receita: string | null
           cor: string | null
           created_at: string
           empresa: string
@@ -64,6 +65,7 @@ export type Database = {
         }
         Insert: {
           ano: number
+          categoria_receita?: string | null
           cor?: string | null
           created_at?: string
           empresa: string
@@ -77,6 +79,7 @@ export type Database = {
         }
         Update: {
           ano?: number
+          categoria_receita?: string | null
           cor?: string | null
           created_at?: string
           empresa?: string
