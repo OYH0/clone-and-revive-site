@@ -182,7 +182,7 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
                 <div className="space-y-1">
                   <Progress value={progress} className="h-2" />
                   <div className="flex justify-between text-xs text-gray-500">
-                    <span>R$ {(valorAtual / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    <span>R$ {valorAtual.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                     <span>Meta: R$ {(meta.valor_meta / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </div>
                 </div>
@@ -241,7 +241,7 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
               </div>
               <div className="p-3 bg-blue-50 rounded-lg">
                 <p className="text-sm text-blue-700">
-                  <strong>Valor atual calculado:</strong> R$ {(calcularValorAtual(formData.categoria_receita) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  <strong>Valor atual calculado:</strong> R$ {calcularValorAtual(formData.categoria_receita).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </p>
                 <p className="text-xs text-blue-600 mt-1">
                   Baseado nas receitas de {empresa} na categoria "{formData.categoria_receita}" do mês atual
