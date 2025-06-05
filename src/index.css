@@ -42,3 +42,33 @@ body {
 .auth-page {
   margin-left: 0 !important;
 }
+
+/* Mobile improvements */
+@media (max-width: 768px) {
+  /* Ensure mobile dialogs don't overflow */
+  .dialog-content {
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  /* Better touch targets */
+  button {
+    min-height: 44px;
+  }
+  
+  input, select, textarea {
+    min-height: 44px;
+  }
+  
+  /* Improved table scrolling */
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Better spacing for mobile */
+  .mobile-spacing {
+    padding: 1rem;
+  }
+}
