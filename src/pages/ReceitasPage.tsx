@@ -9,6 +9,7 @@ import ReceitaTable from '@/components/ReceitaTable';
 import ReceitasFilter from '@/components/ReceitasFilter';
 import { useReceitas } from '@/hooks/useReceitas';
 import { useAdminAccess } from '@/hooks/useAdminAccess';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const ReceitasPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,6 +19,7 @@ const ReceitasPage = () => {
   
   const { data: receitas, isLoading } = useReceitas();
   const { isAdmin } = useAdminAccess();
+  const isMobile = useIsMobile();
 
   // Calcular estatísticas
   const totalReceitas = receitas?.reduce((sum, receita) => sum + receita.valor, 0) || 0;
@@ -39,8 +41,8 @@ const ReceitasPage = () => {
     return (
       <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-green-50 to-emerald-100">
         <Sidebar />
-        <div className="flex-1 p-8 flex items-center justify-center">
-          <p className="text-lg text-gray-600">Carregando receitas...</p>
+        <div className={`flex-1 ${isMobile ? 'p-4' : 'p-8'} ${!isMobile ? 'main-content' : ''} flex items-center justify-center`}>
+          <p className={`${isMobile ? 'text-base mt-16' : 'text-lg'} text-gray-600`}>Carregando receitas...</p>
         </div>
       </div>
     );
@@ -50,26 +52,26 @@ const ReceitasPage = () => {
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-green-50 to-emerald-100">
       <Sidebar />
       
-      <div className="flex-1 p-8">
-        <div className="max-w-7xl mx-auto">
+      <div className={`flex-1 ${isMobile ? 'p-4' : 'p-8'} ${!isMobile ? 'main-content' : ''}`}>
+        <div className={`max-w-7xl mx-auto ${isMobile ? 'mt-16' : ''}`}>
           {/* Header Section */}
-          <div className="mb-8">
+          <div className={isMobile ? 'mb-6' : 'mb-8'}>
             <div className="flex items-center gap-3 mb-4">
               <div className="p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-2xl shadow-lg">
-                <TrendingUp className="h-8 w-8 text-white" />
+                <TrendingUp className={`${isMobile ? 'h-6 w-6' : 'h-8 w-8'} text-white`} />
               </div>
               <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent">
+                <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent`}>
                   Receitas
                 </h1>
-                <p className="text-gray-600 text-lg">Gerencie todas as receitas do negócio</p>
+                <p className={`text-gray-600 ${isMobile ? 'text-base' : 'text-lg'}`}>Gerencie todas as receitas do negócio</p>
               </div>
             </div>
             
             {isAdmin ? (
               <Button 
                 onClick={() => setIsModalOpen(true)}
-                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200 rounded-2xl"
+                className={`bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200 rounded-2xl ${isMobile ? 'w-full h-11' : ''}`}
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Nova Receita
@@ -79,8 +81,8 @@ const ReceitasPage = () => {
                 <div className="flex items-center gap-3">
                   <Shield className="h-5 w-5 text-blue-600" />
                   <div>
-                    <p className="text-blue-800 font-medium">Modo Visualização</p>
-                    <p className="text-blue-600 text-sm">Apenas administradores podem adicionar novas receitas.</p>
+                    <p className={`text-blue-800 font-medium ${isMobile ? 'text-sm' : ''}`}>Modo Visualização</p>
+                    <p className={`text-blue-600 ${isMobile ? 'text-xs' : 'text-sm'}`}>Apenas administradores podem adicionar novas receitas.</p>
                   </div>
                 </div>
               </div>
@@ -88,7 +90,7 @@ const ReceitasPage = () => {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className={`grid grid-cols-1 ${isMobile ? 'gap-4 mb-6' : 'md:grid-cols-4 gap-6 mb-8'}`}>
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                 <CardTitle className="text-sm font-medium text-gray-600">Total de Receitas</CardTitle>
@@ -97,10 +99,10 @@ const ReceitasPage = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
+                <div className={`${isMobile ? 'text-xl' : 'text-3xl'} font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent`}>
                   R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">{receitas?.length || 0} receitas cadastradas</p>
+                <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-500 mt-1`}>{receitas?.length || 0} receitas cadastradas</p>
               </CardContent>
             </Card>
 
@@ -112,10 +114,10 @@ const ReceitasPage = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-800">
+                <div className={`${isMobile ? 'text-xl' : 'text-3xl'} font-bold text-gray-800`}>
                   R$ {valorRecebido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">{receitasRecebidas} receitas recebidas</p>
+                <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-500 mt-1`}>{receitasRecebidas} receitas recebidas</p>
               </CardContent>
             </Card>
 
@@ -127,8 +129,8 @@ const ReceitasPage = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-800">{receitasPendentes}</div>
-                <p className="text-xs text-gray-500 mt-1">Aguardando recebimento</p>
+                <div className={`${isMobile ? 'text-xl' : 'text-3xl'} font-bold text-gray-800`}>{receitasPendentes}</div>
+                <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-500 mt-1`}>Aguardando recebimento</p>
               </CardContent>
             </Card>
 
@@ -140,10 +142,10 @@ const ReceitasPage = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-800">
+                <div className={`${isMobile ? 'text-xl' : 'text-3xl'} font-bold text-gray-800`}>
                   {receitas?.length ? Math.round((receitasRecebidas / receitas.length) * 100) : 0}%
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Receitas já recebidas</p>
+                <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-gray-500 mt-1`}>Receitas já recebidas</p>
               </CardContent>
             </Card>
           </div>
@@ -163,14 +165,14 @@ const ReceitasPage = () => {
             <CardHeader className="border-b border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-xl text-gray-800">Lista de Receitas</CardTitle>
+                  <CardTitle className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-800`}>Lista de Receitas</CardTitle>
                   <CardDescription className="text-gray-600">
                     {filteredReceitas.length} receita(s) encontrada(s)
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-6">
+            <CardContent className={isMobile ? 'p-4' : 'p-6'}>
               <ReceitaTable receitas={filteredReceitas} />
             </CardContent>
           </Card>

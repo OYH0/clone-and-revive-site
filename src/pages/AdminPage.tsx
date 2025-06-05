@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import AdminRoute from '@/components/AdminRoute';
@@ -99,10 +100,10 @@ const AdminPage = () => {
       <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-red-50 to-pink-100">
         <Sidebar />
         
-        <div className={`flex-1 ${isMobile ? 'p-4' : 'p-8'} ${!isMobile ? 'ml-64' : ''}`}>
-          <div className="max-w-6xl mx-auto">
+        <div className={`flex-1 ${isMobile ? 'p-4' : 'p-8'} ${!isMobile ? 'main-content' : ''}`}>
+          <div className={`max-w-6xl mx-auto ${isMobile ? 'mt-16' : ''}`}>
             {/* Header Section */}
-            <div className={`mb-6 ${isMobile ? 'mt-16' : 'mb-8'}`}>
+            <div className={`mb-6 ${!isMobile ? 'mb-8' : ''}`}>
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-3 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl shadow-lg">
                   <Shield className={`${isMobile ? 'h-6 w-6' : 'h-8 w-8'} text-white`} />
@@ -118,7 +119,7 @@ const AdminPage = () => {
 
             {/* Stats Cards */}
             <div className={`grid grid-cols-1 ${isMobile ? 'gap-4 mb-6' : 'md:grid-cols-3 gap-6 mb-8'}`}>
-              <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl">
+              <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium text-gray-600">Total de Usuários</CardTitle>
                 </CardHeader>
@@ -132,7 +133,7 @@ const AdminPage = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl">
+              <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium text-gray-600">Administradores</CardTitle>
                 </CardHeader>
@@ -146,7 +147,7 @@ const AdminPage = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl">
+              <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium text-gray-600">Usuários Comuns</CardTitle>
                 </CardHeader>
@@ -162,9 +163,9 @@ const AdminPage = () => {
             </div>
 
             {/* User Management */}
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl">
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader className="border-b border-gray-100">
-                <CardTitle className="text-gray-800">Gerenciar Usuários</CardTitle>
+                <CardTitle className={`text-gray-800 ${isMobile ? 'text-lg' : ''}`}>Gerenciar Usuários</CardTitle>
                 <CardDescription className="text-gray-600">
                   Visualize e gerencie as permissões dos usuários
                 </CardDescription>
