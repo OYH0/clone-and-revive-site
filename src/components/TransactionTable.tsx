@@ -31,6 +31,12 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
   const { user } = useAuth();
   const { isAdmin } = useAdminAccess();
 
+  // Função para formatar data corretamente
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString + 'T00:00:00');
+    return date.toLocaleDateString('pt-BR');
+  };
+
   const handleEdit = (transaction: Transaction) => {
     // Only allow editing if user is admin or owns the transaction
     if (isAdmin || transaction.user_id === user?.id) {
@@ -186,7 +192,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
             {transactions.map((transaction) => (
               <tr key={transaction.id} className="border-b border-gray-100 hover:bg-gray-50">
                 <td className="py-3 px-4 text-gray-900">
-                  {new Date(transaction.date).toLocaleDateString('pt-BR')}
+                  {formatDate(transaction.date)}
                 </td>
                 <td className="py-3 px-4">
                   <span className="px-2 py-1 rounded text-xs bg-blue-500 text-white">
