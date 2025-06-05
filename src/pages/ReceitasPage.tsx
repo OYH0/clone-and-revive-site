@@ -1,12 +1,12 @@
+
 import React, { useState } from 'react';
-import { Plus, TrendingUp, DollarSign, Calendar, Filter, Shield } from 'lucide-react';
+import { Plus, TrendingUp, DollarSign, Calendar, Shield } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AddReceitaModal from '@/components/AddReceitaModal';
 import ReceitaTable from '@/components/ReceitaTable';
+import ReceitasFilter from '@/components/ReceitasFilter';
 import { useReceitas } from '@/hooks/useReceitas';
 import { useAdminAccess } from '@/hooks/useAdminAccess';
 
@@ -149,52 +149,14 @@ const ReceitasPage = () => {
           </div>
 
           {/* Filters */}
-          <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl mb-6">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <Filter className="h-5 w-5 text-gray-600" />
-                <CardTitle className="text-xl text-gray-800">Filtros</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Input
-                    placeholder="Buscar por descrição ou empresa..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="rounded-xl"
-                  />
-                </div>
-                <div>
-                  <Select value={filterEmpresa} onValueChange={setFilterEmpresa}>
-                    <SelectTrigger className="rounded-xl">
-                      <SelectValue placeholder="Todas as empresas" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todas as empresas</SelectItem>
-                      <SelectItem value="Churrasco">Companhia do Churrasco</SelectItem>
-                      <SelectItem value="Johnny">Johnny Rockets</SelectItem>
-                      <SelectItem value="Outros">Outros</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Select value={filterCategoria} onValueChange={setFilterCategoria}>
-                    <SelectTrigger className="rounded-xl">
-                      <SelectValue placeholder="Todas as categorias" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todas as categorias</SelectItem>
-                      <SelectItem value="VENDAS">Vendas</SelectItem>
-                      <SelectItem value="SERVICOS">Serviços</SelectItem>
-                      <SelectItem value="OUTROS">Outros</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <ReceitasFilter
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            filterEmpresa={filterEmpresa}
+            setFilterEmpresa={setFilterEmpresa}
+            filterCategoria={filterCategoria}
+            setFilterCategoria={setFilterCategoria}
+          />
 
           {/* Main Content Card */}
           <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">

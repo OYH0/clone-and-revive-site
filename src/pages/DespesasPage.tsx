@@ -1,31 +1,25 @@
+
 import React, { useState, useMemo } from 'react';
+import { Plus, TrendingDown, DollarSign, CheckCircle, Clock, AlertTriangle, Shield } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import TransactionTable from '@/components/TransactionTable';
 import AddTransactionModal from '@/components/AddTransactionModal';
-import DespesasHeader from '@/components/DespesasHeader';
-import DespesasStats from '@/components/DespesasStats';
-import DespesasActions from '@/components/DespesasActions';
+import DespesasFilterSimple from '@/components/DespesasFilterSimple';
 import { Button } from '@/components/ui/button';
-import { FileText, Shield } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDespesas } from '@/hooks/useDespesas';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminAccess } from '@/hooks/useAdminAccess';
 import { Transaction } from '@/types/transaction';
 import { getTransactionStatus } from '@/utils/transactionUtils';
 
-interface FilterOptions {
-  empresa?: string;
-  categoria?: string;
-  dataInicio?: Date;
-  dataFim?: Date;
-  valorMin?: number;
-  valorMax?: number;
-  status?: string;
-}
-
 const DespesasPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [filters, setFilters] = useState<FilterOptions>({});
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterEmpresa, setFilterEmpresa] = useState('all');
+  const [filterCategoria, setFilterCategoria] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('all');
+  
   const { data: despesas = [], isLoading, refetch } = useDespesas();
   const { user } = useAuth();
   const { isAdmin } = useAdminAccess();
@@ -33,7 +27,7 @@ const DespesasPage = () => {
   // Verificar se o usuário está autenticado
   if (!user) {
     return (
-      <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
+      <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-red-50 to-red-100">
         <Sidebar />
         <div className="flex-1 p-8">
           <div className="max-w-7xl mx-auto">
@@ -64,54 +58,22 @@ const DespesasPage = () => {
     user_id: despesa.user_id
   }));
 
-  // Aplicar filtros
+  // Filtrar despesas
   const filteredTransactions = useMemo(() => {
     return allTransactions.filter(transaction => {
       const status = getTransactionStatus(transaction);
       
-      // Filtro por empresa
-      if (filters.empresa && transaction.company !== filters.empresa) {
-        return false;
-      }
+      const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           transaction.company.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesEmpresa = filterEmpresa === 'all' || transaction.company === filterEmpresa;
+      const matchesCategoria = filterCategoria === 'all' || transaction.category === filterCategoria;
+      const matchesStatus = filterStatus === 'all' || status === filterStatus;
       
-      // Filtro por categoria
-      if (filters.categoria && transaction.category !== filters.categoria) {
-        return false;
-      }
-      
-      // Filtro por status
-      if (filters.status && status !== filters.status) {
-        return false;
-      }
-      
-      // Filtro por data
-      if (filters.dataInicio) {
-        const transactionDate = new Date(transaction.date);
-        if (transactionDate < filters.dataInicio) {
-          return false;
-        }
-      }
-      
-      if (filters.dataFim) {
-        const transactionDate = new Date(transaction.date);
-        if (transactionDate > filters.dataFim) {
-          return false;
-        }
-      }
-      
-      // Filtro por valor
-      if (filters.valorMin && transaction.valor < filters.valorMin) {
-        return false;
-      }
-      
-      if (filters.valorMax && transaction.valor > filters.valorMax) {
-        return false;
-      }
-      
-      return true;
+      return matchesSearch && matchesEmpresa && matchesCategoria && matchesStatus;
     });
-  }, [allTransactions, filters]);
+  }, [allTransactions, searchTerm, filterEmpresa, filterCategoria, filterStatus]);
 
+  // Calcular estatísticas
   const totalDespesas = filteredTransactions.reduce((sum, transaction) => sum + transaction.valor, 0);
   const despesasPagas = filteredTransactions.filter(t => getTransactionStatus(t) === 'PAGO');
   const despesasPendentes = filteredTransactions.filter(t => getTransactionStatus(t) === 'PENDENTE');
@@ -130,100 +92,160 @@ const DespesasPage = () => {
     refetch();
   };
 
-  const handleFilterChange = (newFilters: FilterOptions) => {
-    setFilters(newFilters);
-  };
-
-  const handleClearFilters = () => {
-    setFilters({});
-  };
-
   if (isLoading) {
     return (
-      <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
+      <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-red-50 to-red-100">
         <Sidebar />
-        <div className="flex-1 p-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent"></div>
-          </div>
+        <div className="flex-1 p-8 flex items-center justify-center">
+          <p className="text-lg text-gray-600">Carregando despesas...</p>
         </div>
       </div>
     );
   }
 
-  const hasActiveFilters = Object.values(filters).some(value => value !== undefined && value !== '');
-
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-red-50 to-red-100">
       <Sidebar />
       
       <div className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
-          <DespesasHeader
-            filteredCount={filteredTransactions.length}
-            totalCount={allTransactions.length}
-            hasActiveFilters={hasActiveFilters}
-          />
-
-          <DespesasStats
-            totalDespesas={totalDespesas}
-            valorPago={valorPago}
-            valorPendente={valorPendente}
-            valorAtrasado={valorAtrasado}
-            despesasPagasCount={despesasPagas.length}
-            despesasPendentesCount={despesasPendentes.length}
-            despesasAtrasadasCount={despesasAtrasadas.length}
-            filteredTransactionsCount={filteredTransactions.length}
-          />
-
-          <DespesasActions
-            onFilterChange={handleFilterChange}
-            onClearFilters={handleClearFilters}
-            onAddTransaction={isAdmin ? () => setIsModalOpen(true) : undefined}
-            filteredTransactions={filteredTransactions}
-            hasActiveFilters={hasActiveFilters}
-          />
-
-          {!isAdmin && (
-            <div className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
-              <div className="flex items-center gap-3">
-                <Shield className="h-5 w-5 text-blue-600" />
-                <div>
-                  <p className="text-blue-800 font-medium">Modo Visualização</p>
-                  <p className="text-blue-600 text-sm">Apenas administradores podem adicionar novas despesas.</p>
+          {/* Header Section */}
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl shadow-lg">
+                <TrendingDown className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent">
+                  Despesas
+                </h1>
+                <p className="text-gray-600 text-lg">Gerencie todas as despesas do negócio</p>
+              </div>
+            </div>
+            
+            {isAdmin ? (
+              <Button 
+                onClick={() => setIsModalOpen(true)}
+                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200 rounded-2xl"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Nova Despesa
+              </Button>
+            ) : (
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <div className="flex items-center gap-3">
+                  <Shield className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <p className="text-blue-800 font-medium">Modo Visualização</p>
+                    <p className="text-blue-600 text-sm">Apenas administradores podem adicionar novas despesas.</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* Transaction Table */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
-            <div className="p-6 border-b border-gray-100">
-              <div className="flex items-center gap-3">
-                <FileText className="h-5 w-5 text-gray-600" />
-                <h2 className="text-xl font-semibold text-gray-800">Lista de Despesas</h2>
-                {hasActiveFilters && (
-                  <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded-lg text-sm">
-                    Filtrado
-                  </span>
-                )}
-              </div>
-            </div>
-            <TransactionTable 
-              transactions={filteredTransactions} 
-              onTransactionUpdated={handleTransactionUpdated}
-            />
+            )}
           </div>
 
-          {isAdmin && (
-            <AddTransactionModal
-              isOpen={isModalOpen}
-              onClose={() => setIsModalOpen(false)}
-              onTransactionAdded={handleTransactionAdded}
-            />
-          )}
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Total de Despesas</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-red-100 to-red-200 rounded-xl">
+                  <TrendingDown className="h-4 w-4 text-red-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold bg-gradient-to-r from-red-600 to-red-700 bg-clip-text text-transparent">
+                  R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">{filteredTransactions.length} despesas cadastradas</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Valor Pago</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-green-100 to-green-200 rounded-xl">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-gray-800">
+                  R$ {valorPago.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">{despesasPagas.length} despesas pagas</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Despesas Pendentes</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-yellow-100 to-yellow-200 rounded-xl">
+                  <Clock className="h-4 w-4 text-yellow-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-gray-800">{despesasPendentes.length}</div>
+                <p className="text-xs text-gray-500 mt-1">Aguardando pagamento</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Despesas Atrasadas</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-red-100 to-red-200 rounded-xl">
+                  <AlertTriangle className="h-4 w-4 text-red-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-red-600">
+                  {despesasAtrasadas.length}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Vencidas</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Filters */}
+          <DespesasFilterSimple
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            filterEmpresa={filterEmpresa}
+            setFilterEmpresa={setFilterEmpresa}
+            filterCategoria={filterCategoria}
+            setFilterCategoria={setFilterCategoria}
+            filterStatus={filterStatus}
+            setFilterStatus={setFilterStatus}
+          />
+
+          {/* Main Content Card */}
+          <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+            <CardHeader className="border-b border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-xl text-gray-800">Lista de Despesas</CardTitle>
+                  <CardDescription className="text-gray-600">
+                    {filteredTransactions.length} despesa(s) encontrada(s)
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6">
+              <TransactionTable 
+                transactions={filteredTransactions} 
+                onTransactionUpdated={handleTransactionUpdated}
+              />
+            </CardContent>
+          </Card>
         </div>
       </div>
+
+      {isAdmin && (
+        <AddTransactionModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onTransactionAdded={handleTransactionAdded}
+        />
+      )}
     </div>
   );
 };
