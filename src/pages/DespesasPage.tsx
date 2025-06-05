@@ -60,7 +60,8 @@ const DespesasPage = () => {
     category: despesa.categoria || 'Sem categoria',
     data_vencimento: despesa.data_vencimento,
     comprovante: despesa.comprovante,
-    status: despesa.status || null // Use the actual status from database
+    status: despesa.status || null,
+    user_id: despesa.user_id
   }));
 
   // Aplicar filtros

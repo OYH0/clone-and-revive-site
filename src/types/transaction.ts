@@ -9,4 +9,5 @@ export interface Transaction {
   data_vencimento?: string;
   status?: string;
   comprovante?: string;
+  user_id?: string;
 }

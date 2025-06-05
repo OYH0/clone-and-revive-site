@@ -73,7 +73,7 @@ const DespesasActions: React.FC<DespesasActionsProps> = ({
 
         {showFilters && (
           <div className="mt-6 p-4 bg-gray-50 rounded-xl border">
-            <DespesasFilter onFilterChange={onFilterChange} />
+            <DespesasFilter onFilterChange={onFilterChange} onClearFilters={onClearFilters} />
           </div>
         )}
 
