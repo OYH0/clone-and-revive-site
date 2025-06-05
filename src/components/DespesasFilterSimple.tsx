@@ -61,7 +61,7 @@ const DespesasFilterSimple: React.FC<DespesasFilterSimpleProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <Input
-              placeholder="Buscar por descrição..."
+              placeholder="Buscar por descrição ou empresa..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="rounded-xl"
@@ -74,10 +74,8 @@ const DespesasFilterSimple: React.FC<DespesasFilterSimpleProps> = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas as empresas</SelectItem>
-                <SelectItem value="Churrasco">Companhia do Churrasco</SelectItem>
-                <SelectItem value="Johnny">Johnny Rockets</SelectItem>
-                <SelectItem value="Camerino">Camerino</SelectItem>
-                <SelectItem value="Outros">Outros</SelectItem>
+                <SelectItem value="Churrasco">Churrasco</SelectItem>
+                <SelectItem value="Johnny">Johnny</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -88,10 +86,10 @@ const DespesasFilterSimple: React.FC<DespesasFilterSimpleProps> = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas as categorias</SelectItem>
-                <SelectItem value="Insumos">Insumos</SelectItem>
-                <SelectItem value="Fixas">Fixas</SelectItem>
-                <SelectItem value="Variáveis">Variáveis</SelectItem>
-                <SelectItem value="Atrasados">Atrasados</SelectItem>
+                <SelectItem value="INSUMOS">Insumos</SelectItem>
+                <SelectItem value="FIXAS">Fixas</SelectItem>
+                <SelectItem value="VARIÁVEIS">Variáveis</SelectItem>
+                <SelectItem value="ATRASADOS">Atrasados</SelectItem>
               </SelectContent>
             </Select>
           </div>
