@@ -49,7 +49,7 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
     
     const receitaData = {
       data: formData.data,
-      valor: parseFloat(formData.valor) * 100, // Convert to cents
+      valor: parseFloat(formData.valor), // Remove multiplication by 100
       data_recebimento: formData.data_recebimento || undefined,
       descricao: formData.descricao,
       empresa: formData.empresa,

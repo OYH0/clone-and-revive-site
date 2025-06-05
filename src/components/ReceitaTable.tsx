@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Edit, Trash2, Lock } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -42,6 +43,7 @@ const ReceitaTable: React.FC<ReceitaTableProps> = ({ receitas }) => {
   const getCategoryBadge = (categoria: string) => {
     const colors = {
       VENDAS: 'bg-green-500',
+      VENDAS_DIARIAS: 'bg-emerald-500',
       SERVICOS: 'bg-blue-500',
       OUTROS: 'bg-gray-500'
     };
@@ -52,9 +54,16 @@ const ReceitaTable: React.FC<ReceitaTableProps> = ({ receitas }) => {
     const colors = {
       Churrasco: 'bg-red-500',
       Johnny: 'bg-blue-600',
+      Camerino: 'bg-purple-500',
       Outros: 'bg-gray-600'
     };
     return colors[empresa as keyof typeof colors] || 'bg-gray-600';
+  };
+
+  // Function to format date correctly
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString + 'T00:00:00');
+    return date.toLocaleDateString('pt-BR');
   };
 
   if (receitas.length === 0) {
@@ -88,7 +97,7 @@ const ReceitaTable: React.FC<ReceitaTableProps> = ({ receitas }) => {
               return (
                 <TableRow key={receita.id}>
                   <TableCell>
-                    {new Date(receita.data).toLocaleDateString('pt-BR')}
+                    {formatDate(receita.data)}
                   </TableCell>
                   <TableCell>
                     <Badge className={`${getEmpresaBadge(receita.empresa)} text-white`}>
@@ -109,7 +118,7 @@ const ReceitaTable: React.FC<ReceitaTableProps> = ({ receitas }) => {
                   <TableCell>
                     {receita.data_recebimento ? (
                       <Badge className="bg-green-500 text-white">
-                        {new Date(receita.data_recebimento).toLocaleDateString('pt-BR')}
+                        {formatDate(receita.data_recebimento)}
                       </Badge>
                     ) : (
                       <Badge className="bg-yellow-500 text-white">Pendente</Badge>
