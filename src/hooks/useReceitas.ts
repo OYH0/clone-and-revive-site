@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useMemo } from 'react';
 
 export interface Receita {
   id: number;
@@ -19,21 +20,59 @@ export interface Receita {
 export const useReceitas = () => {
   const { user } = useAuth();
   
-  return useQuery({
+  const query = useQuery({
     queryKey: ['receitas'],
     queryFn: async () => {
-      console.log('Fetching all receitas from Supabase');
+      console.log('Fetching receitas from Supabase');
       const { data, error } = await supabase
         .from('receitas')
         .select('*')
         .order('data', { ascending: false });
 
-      if (error) throw error;
-      console.log('All receitas fetched:', data);
+      if (error) {
+        console.error('Error fetching receitas:', error);
+        throw error;
+      }
+      
+      console.log('Receitas fetched successfully:', data?.length || 0, 'records');
       return data as Receita[];
     },
-    enabled: true, // Always enabled, not dependent on user
+    enabled: true,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
+
+  // Memoized calculations for better performance
+  const processedData = useMemo(() => {
+    if (!query.data) return { receitas: [], stats: null };
+
+    const receitas = query.data;
+    const totalReceitas = receitas.reduce((sum, r) => sum + (r.valor || 0), 0);
+    const totalRecebidas = receitas
+      .filter(r => r.data_recebimento)
+      .reduce((sum, r) => sum + (r.valor || 0), 0);
+    const totalPendentes = receitas
+      .filter(r => !r.data_recebimento)
+      .reduce((sum, r) => sum + (r.valor || 0), 0);
+
+    return {
+      receitas,
+      stats: {
+        total: totalReceitas,
+        recebidas: totalRecebidas,
+        pendentes: totalPendentes,
+        count: receitas.length,
+        recebidasCount: receitas.filter(r => r.data_recebimento).length,
+        pendentesCount: receitas.filter(r => !r.data_recebimento).length,
+      }
+    };
+  }, [query.data]);
+
+  return {
+    ...query,
+    data: processedData.receitas,
+    stats: processedData.stats,
+  };
 };
 
 export const useCreateReceita = () => {
@@ -45,13 +84,28 @@ export const useCreateReceita = () => {
     mutationFn: async (receita: Omit<Receita, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
       if (!user) throw new Error('Usuário não autenticado');
       
+      // Validate required fields
+      if (!receita.valor || receita.valor <= 0) {
+        throw new Error('Valor deve ser maior que zero');
+      }
+      if (!receita.descricao?.trim()) {
+        throw new Error('Descrição é obrigatória');
+      }
+      if (!receita.empresa?.trim()) {
+        throw new Error('Empresa é obrigatória');
+      }
+      
       const { data, error } = await supabase
         .from('receitas')
         .insert([{ ...receita, user_id: user.id }])
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating receita:', error);
+        throw error;
+      }
+      
       return data;
     },
     onSuccess: () => {
@@ -65,7 +119,7 @@ export const useCreateReceita = () => {
       console.error('Erro ao criar receita:', error);
       toast({
         title: "Erro",
-        description: "Erro ao criar receita. Tente novamente.",
+        description: error instanceof Error ? error.message : "Erro ao criar receita. Tente novamente.",
         variant: "destructive",
       });
     },

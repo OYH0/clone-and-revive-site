@@ -1,6 +1,8 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { getTransactionStatus, getCategoryColor, getStatusColor } from '@/utils/transactionUtils';
+import { formatDate } from '@/utils/dateUtils';
+import { formatCurrency } from '@/utils/formatUtils';
 
 interface RecentTransactionsProps {
   despesas?: any[];
@@ -8,32 +10,31 @@ interface RecentTransactionsProps {
 
 const RecentTransactions: React.FC<RecentTransactionsProps> = ({ despesas }) => {
   
-  // Use filtered data from props
-  const transactions = despesas?.slice(0, 5).map(despesa => ({
-    id: despesa.id,
-    date: despesa.data, // Usar a data diretamente como string
-    company: despesa.empresa,
-    description: despesa.descricao,
-    category: despesa.categoria,
-    value: despesa.valor,
-    status: getTransactionStatus({
+  // Memoize processed transactions for better performance
+  const transactions = useMemo(() => {
+    return despesas?.slice(0, 5).map(despesa => ({
+      id: despesa.id,
       date: despesa.data,
+      company: despesa.empresa,
+      description: despesa.descricao,
       category: despesa.categoria,
-      data_vencimento: despesa.data_vencimento
-    })
-  })) || [];
-
-  // Função para formatar data sem problemas de fuso horário
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) {
-      return 'Não pago';
-    }
-    const [year, month, day] = dateString.split('-');
-    return `${day}/${month}/${year}`;
-  };
+      value: despesa.valor,
+      status: getTransactionStatus({
+        date: despesa.data,
+        category: despesa.categoria,
+        data_vencimento: despesa.data_vencimento
+      })
+    })) || [];
+  }, [despesas]);
 
   const getCompanyColor = (company: string) => {
-    return company === 'Churrasco' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white';
+    const colors = {
+      'Churrasco': 'bg-red-500 text-white',
+      'Johnny': 'bg-blue-500 text-white',
+      'Camerino': 'bg-purple-500 text-white',
+      'default': 'bg-gray-500 text-white'
+    };
+    return colors[company as keyof typeof colors] || colors.default;
   };
 
   if (transactions.length === 0) {
@@ -61,7 +62,9 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ despesas }) => 
         <tbody>
           {transactions.map((transaction) => (
             <tr key={transaction.id} className="border-t border-gray-200">
-              <td className="py-3 text-gray-800 text-sm">{formatDate(transaction.date)}</td>
+              <td className="py-3 text-gray-800 text-sm">
+                {formatDate(transaction.date)}
+              </td>
               <td className="py-3">
                 <span className={`px-2 py-1 rounded-2xl text-xs ${getCompanyColor(transaction.company)}`}>
                   {transaction.company}
@@ -74,7 +77,7 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ despesas }) => 
                 </span>
               </td>
               <td className="py-3 text-gray-800 font-medium">
-                R$ {transaction.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                {formatCurrency(transaction.value)}
               </td>
               <td className="py-3">
                 <span className={`px-2 py-1 rounded-2xl text-xs ${getStatusColor(transaction.status)}`}>
@@ -89,4 +92,4 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ despesas }) => 
   );
 };
 
-export default RecentTransactions;
+export default React.memo(RecentTransactions);

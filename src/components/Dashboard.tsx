@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Sidebar from './Sidebar';
 import DashboardHeader from './dashboard/DashboardHeader';
 import DashboardCards from './dashboard/DashboardCards';
@@ -12,13 +12,15 @@ import { Button } from '@/components/ui/button';
 import { filterDataByPeriod, getPeriodString } from './dashboard/utils';
 
 const Dashboard = () => {
-  const { data: despesas, isLoading: isLoadingDespesas } = useDespesas();
-  const { data: receitas, isLoading: isLoadingReceitas } = useReceitas();
+  const { data: despesas, isLoading: isLoadingDespesas, stats: despesasStats } = useDespesas();
+  const { data: receitas, isLoading: isLoadingReceitas, stats: receitasStats } = useReceitas();
   const { user } = useAuth();
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'year'>('month');
 
-  console.log('Dashboard - despesas data:', despesas);
-  console.log('Dashboard - receitas data:', receitas);
+  console.log('Dashboard - despesas count:', despesas?.length || 0);
+  console.log('Dashboard - receitas count:', receitas?.length || 0);
+  console.log('Dashboard - despesas stats:', despesasStats);
+  console.log('Dashboard - receitas stats:', receitasStats);
 
   // Verificar se o usuário está autenticado
   if (!user) {
@@ -42,11 +44,13 @@ const Dashboard = () => {
 
   const isLoading = isLoadingDespesas || isLoadingReceitas;
 
-  const filteredDespesas = filterDataByPeriod(despesas || [], selectedPeriod);
-  const filteredReceitas = filterDataByPeriod(receitas || [], selectedPeriod);
-
-  console.log('Dashboard - filtered despesas:', filteredDespesas);
-  console.log('Dashboard - filtered receitas:', filteredReceitas);
+  // Memoize filtered data for better performance
+  const { filteredDespesas, filteredReceitas } = useMemo(() => {
+    return {
+      filteredDespesas: filterDataByPeriod(despesas || [], selectedPeriod),
+      filteredReceitas: filterDataByPeriod(receitas || [], selectedPeriod)
+    };
+  }, [despesas, receitas, selectedPeriod]);
 
   const period = getPeriodString(selectedPeriod);
 
@@ -63,13 +67,23 @@ const Dashboard = () => {
 
           {isLoading ? (
             <div className="grid place-items-center h-64">
-              <p className="text-lg text-gray-600">Carregando dados...</p>
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                <p className="text-lg text-gray-600">Carregando dados...</p>
+              </div>
             </div>
           ) : (
             <>
-              <DashboardCards despesas={filteredDespesas} period={period} />
+              <DashboardCards 
+                despesas={filteredDespesas} 
+                period={period} 
+                stats={despesasStats}
+              />
               <DashboardTransactions despesas={despesas || []} />
-              <DashboardCharts despesas={despesas || []} selectedPeriod={selectedPeriod} />
+              <DashboardCharts 
+                despesas={despesas || []} 
+                selectedPeriod={selectedPeriod} 
+              />
             </>
           )}
         </div>
@@ -78,4 +92,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default React.memo(Dashboard);
