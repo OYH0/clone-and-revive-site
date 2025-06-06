@@ -24,7 +24,10 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ despesas }) => 
   })) || [];
 
   // Função para formatar data sem problemas de fuso horário
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) {
+      return 'Não pago';
+    }
     const [year, month, day] = dateString.split('-');
     return `${day}/${month}/${year}`;
   };
