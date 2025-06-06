@@ -11,7 +11,7 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ despesas }) => 
   // Use filtered data from props
   const transactions = despesas?.slice(0, 5).map(despesa => ({
     id: despesa.id,
-    date: new Date(despesa.data).toLocaleDateString('pt-BR'),
+    date: despesa.data, // Usar a data diretamente como string
     company: despesa.empresa,
     description: despesa.descricao,
     category: despesa.categoria,
@@ -22,6 +22,12 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ despesas }) => 
       data_vencimento: despesa.data_vencimento
     })
   })) || [];
+
+  // Função para formatar data sem problemas de fuso horário
+  const formatDate = (dateString: string) => {
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
+  };
 
   const getCompanyColor = (company: string) => {
     return company === 'Churrasco' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white';
@@ -52,7 +58,7 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ despesas }) => 
         <tbody>
           {transactions.map((transaction) => (
             <tr key={transaction.id} className="border-t border-gray-200">
-              <td className="py-3 text-gray-800 text-sm">{transaction.date}</td>
+              <td className="py-3 text-gray-800 text-sm">{formatDate(transaction.date)}</td>
               <td className="py-3">
                 <span className={`px-2 py-1 rounded-2xl text-xs ${getCompanyColor(transaction.company)}`}>
                   {transaction.company}
