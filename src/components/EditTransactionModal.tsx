@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -37,19 +36,10 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
   const { toast } = useToast();
   const { user } = useAuth();
 
-  // Função para obter a data atual no formato correto (YYYY-MM-DD)
-  const getCurrentDate = () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
   useEffect(() => {
     if (transaction) {
       setFormData({
-        data: transaction.date,
+        data: transaction.date || '', // Don't fill with current date, use existing date or empty
         valor: transaction.valor.toString(),
         empresa: transaction.company,
         categoria: transaction.category,
@@ -78,7 +68,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
       const { error } = await supabase
         .from('despesas')
         .update({
-          data: formData.data || getCurrentDate(), // Usar a função correta para data atual
+          data: formData.data || null, // Don't use current date, leave empty if not provided
           valor: parseFloat(formData.valor),
           empresa: formData.empresa,
           categoria: formData.categoria,
@@ -123,7 +113,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="data">Data</Label>
+            <Label htmlFor="data">Data de Pagamento</Label>
             <Input
               id="data"
               type="date"
@@ -131,7 +121,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
               onChange={(e) => handleInputChange('data', e.target.value)}
               className="rounded-full"
             />
-            <p className="text-xs text-gray-500 mt-1">Se não informada, será usada a data atual</p>
+            <p className="text-xs text-gray-500 mt-1">Deixe vazio se ainda não foi paga. Será preenchida automaticamente ao marcar como paga.</p>
           </div>
 
           <div>
