@@ -37,6 +37,15 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
   const { toast } = useToast();
   const { user } = useAuth();
 
+  // Função para obter a data atual no formato correto (YYYY-MM-DD)
+  const getCurrentDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   useEffect(() => {
     if (transaction) {
       setFormData({
@@ -69,7 +78,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
       const { error } = await supabase
         .from('despesas')
         .update({
-          data: formData.data || new Date().toISOString().split('T')[0],
+          data: formData.data || getCurrentDate(), // Usar a função correta para data atual
           valor: parseFloat(formData.valor),
           empresa: formData.empresa,
           categoria: formData.categoria,

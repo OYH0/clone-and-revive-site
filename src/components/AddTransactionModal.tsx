@@ -38,6 +38,15 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   const categories = ['INSUMOS', 'FIXAS', 'VARIÁVEIS', 'ATRASADOS'];
   const companies = ['Churrasco', 'Johnny', 'Camerino'];
 
+  // Função para obter a data atual no formato correto (YYYY-MM-DD)
+  const getCurrentDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   // Set default empresa when modal opens
   useEffect(() => {
     if (defaultEmpresa && isOpen) {
@@ -70,7 +79,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     
     try {
       const insertData: any = {
-        data: formData.data || new Date().toISOString().split('T')[0], // Use today if no date provided
+        data: formData.data || getCurrentDate(), // Usar a função correta para data atual
         valor: parseFloat(formData.valor),
         empresa: formData.empresa,
         descricao: formData.descricao || 'Sem descrição',
