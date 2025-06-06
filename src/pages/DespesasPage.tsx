@@ -127,6 +127,18 @@ const DespesasPage = () => {
             )}
           </div>
 
+          {/* Filters */}
+          <DespesasFilterSimple
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            filterEmpresa={filterEmpresa}
+            setFilterEmpresa={setFilterEmpresa}
+            filterCategoria={filterCategoria}
+            setFilterCategoria={setFilterCategoria}
+            filterStatus={filterStatus}
+            setFilterStatus={setFilterStatus}
+          />
+
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
@@ -202,18 +214,6 @@ const DespesasPage = () => {
               </CardContent>
             </Card>
           </div>
-
-          {/* Filters */}
-          <DespesasFilterSimple
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            filterEmpresa={filterEmpresa}
-            setFilterEmpresa={setFilterEmpresa}
-            filterCategoria={filterCategoria}
-            setFilterCategoria={setFilterCategoria}
-            filterStatus={filterStatus}
-            setFilterStatus={setFilterStatus}
-          />
 
           {/* Main Content Card */}
           <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
