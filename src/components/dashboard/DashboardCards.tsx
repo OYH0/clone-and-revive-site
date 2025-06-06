@@ -1,4 +1,3 @@
-
 import React from 'react';
 import CompanyCard from '../CompanyCard';
 import { Despesa } from '@/hooks/useDespesas';
@@ -6,11 +5,20 @@ import { Despesa } from '@/hooks/useDespesas';
 interface DashboardCardsProps {
   despesas: Despesa[];
   period: string;
+  stats?: {
+    total: number;
+    pagas: number;
+    pendentes: number;
+    count: number;
+    pagasCount: number;
+    pendentesCount: number;
+  };
 }
 
-const DashboardCards: React.FC<DashboardCardsProps> = ({ despesas, period }) => {
+const DashboardCards: React.FC<DashboardCardsProps> = ({ despesas, period, stats }) => {
   console.log('DashboardCards - todas as despesas:', despesas);
   console.log('DashboardCards - período:', period);
+  console.log('DashboardCards - stats:', stats);
 
   // Calculate values for all companies - normalizar nomes das empresas
   const churrascoDespesas = despesas.filter(d => {

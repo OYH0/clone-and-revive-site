@@ -30,8 +30,8 @@ export const useDespesas = () => {
       const { data, error } = await supabase
         .from('despesas')
         .select('*')
-        .order('data_vencimento', { ascending: true, nullsLast: true })
-        .order('data', { ascending: false, nullsLast: true });
+        .order('data_vencimento', { ascending: true, nullsFirst: false })
+        .order('data', { ascending: false, nullsFirst: false });
       
       if (error) {
         console.error('Error fetching despesas:', error);
