@@ -13,7 +13,7 @@ export type Database = {
         Row: {
           categoria: string | null
           comprovante: string | null
-          data: string
+          data: string | null
           data_vencimento: string | null
           descricao: string | null
           empresa: string | null
@@ -27,7 +27,7 @@ export type Database = {
         Insert: {
           categoria?: string | null
           comprovante?: string | null
-          data: string
+          data?: string | null
           data_vencimento?: string | null
           descricao?: string | null
           empresa?: string | null
@@ -41,7 +41,7 @@ export type Database = {
         Update: {
           categoria?: string | null
           comprovante?: string | null
-          data?: string
+          data?: string | null
           data_vencimento?: string | null
           descricao?: string | null
           empresa?: string | null
