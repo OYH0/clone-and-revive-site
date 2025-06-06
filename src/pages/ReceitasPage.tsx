@@ -19,12 +19,6 @@ const ReceitasPage = () => {
   const { data: receitas, isLoading } = useReceitas();
   const { isAdmin } = useAdminAccess();
 
-  // Calcular estatísticas
-  const totalReceitas = receitas?.reduce((sum, receita) => sum + receita.valor, 0) || 0;
-  const receitasRecebidas = receitas?.filter(r => r.data_recebimento).length || 0;
-  const receitasPendentes = receitas?.filter(r => !r.data_recebimento).length || 0;
-  const valorRecebido = receitas?.filter(r => r.data_recebimento).reduce((sum, receita) => sum + receita.valor, 0) || 0;
-
   // Filtrar receitas
   const filteredReceitas = receitas?.filter(receita => {
     const matchesSearch = receita.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -34,6 +28,12 @@ const ReceitasPage = () => {
     
     return matchesSearch && matchesEmpresa && matchesCategoria;
   }) || [];
+
+  // Calcular estatísticas baseadas nas receitas filtradas
+  const totalReceitas = filteredReceitas.reduce((sum, receita) => sum + receita.valor, 0);
+  const receitasRecebidas = filteredReceitas.filter(r => r.data_recebimento).length;
+  const receitasPendentes = filteredReceitas.filter(r => !r.data_recebimento).length;
+  const valorRecebido = filteredReceitas.filter(r => r.data_recebimento).reduce((sum, receita) => sum + receita.valor, 0);
 
   if (isLoading) {
     return (
@@ -87,6 +87,16 @@ const ReceitasPage = () => {
             )}
           </div>
 
+          {/* Filters */}
+          <ReceitasFilter
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            filterEmpresa={filterEmpresa}
+            setFilterEmpresa={setFilterEmpresa}
+            filterCategoria={filterCategoria}
+            setFilterCategoria={setFilterCategoria}
+          />
+
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
@@ -100,7 +110,7 @@ const ReceitasPage = () => {
                 <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
                   R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">{receitas?.length || 0} receitas cadastradas</p>
+                <p className="text-xs text-gray-500 mt-1">{filteredReceitas.length} receitas encontradas</p>
               </CardContent>
             </Card>
 
@@ -141,22 +151,12 @@ const ReceitasPage = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-gray-800">
-                  {receitas?.length ? Math.round((receitasRecebidas / receitas.length) * 100) : 0}%
+                  {filteredReceitas.length ? Math.round((receitasRecebidas / filteredReceitas.length) * 100) : 0}%
                 </div>
                 <p className="text-xs text-gray-500 mt-1">Receitas já recebidas</p>
               </CardContent>
             </Card>
           </div>
-
-          {/* Filters */}
-          <ReceitasFilter
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            filterEmpresa={filterEmpresa}
-            setFilterEmpresa={setFilterEmpresa}
-            filterCategoria={filterCategoria}
-            setFilterCategoria={setFilterCategoria}
-          />
 
           {/* Main Content Card */}
           <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
