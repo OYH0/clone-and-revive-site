@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Transaction } from '@/types/transaction';
 import EditTransactionModal from './EditTransactionModal';
@@ -32,6 +33,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
 
   // Função para formatar data corretamente
   const formatDate = (dateString: string) => {
+    if (!dateString) return '-';
     const date = new Date(dateString + 'T00:00:00');
     return date.toLocaleDateString('pt-BR');
   };
@@ -79,10 +81,10 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
     try {
       const today = getCurrentDate();
       
-      console.log('Marking transaction as paid:', transaction.id, 'Setting date to:', today);
+      console.log('Marking transaction as paid:', transaction.id, 'Setting payment date to:', today);
       
       const updateData: any = {
-        data: today,
+        data: today, // Now this represents the payment date
         categoria: transaction.category === 'ATRASADOS' ? 'FIXAS' : transaction.category,
         status: 'PAGO'
       };
@@ -189,7 +191,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
         <table className="w-full table-fixed">
           <thead>
             <tr className="border-b border-gray-200">
-              <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Data</th>
+              <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Data de Pagamento</th>
               <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Vencimento</th>
               <th className="text-left text-gray-700 py-3 px-4 font-medium w-28">Empresa</th>
               <th className="text-left text-gray-700 py-3 px-4 font-medium w-32">Descrição</th>
@@ -205,7 +207,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
             {transactions.map((transaction) => (
               <tr key={transaction.id} className="border-b border-gray-100 hover:bg-gray-50">
                 <td className="py-3 px-4 text-gray-900 text-sm">
-                  {formatDate(transaction.date)}
+                  {transaction.status === 'PAGO' ? formatDate(transaction.date) : '-'}
                 </td>
                 <td className="py-3 px-4 text-gray-900 text-sm">
                   {transaction.data_vencimento ? formatDate(transaction.data_vencimento) : '-'}
