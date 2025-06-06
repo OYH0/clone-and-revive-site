@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Transaction } from '@/types/transaction';
 import EditTransactionModal from './EditTransactionModal';
@@ -37,6 +36,15 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
     return date.toLocaleDateString('pt-BR');
   };
 
+  // Função para obter a data atual no formato correto (YYYY-MM-DD)
+  const getCurrentDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const handleEdit = (transaction: Transaction) => {
     // Only allow editing if user is admin or owns the transaction
     if (isAdmin || transaction.user_id === user?.id) {
@@ -69,7 +77,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
     }
 
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getCurrentDate();
       
       console.log('Marking transaction as paid:', transaction.id, 'Setting date to:', today);
       
@@ -92,9 +100,11 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
 
       console.log('Transaction updated successfully:', data);
 
+      const formattedDate = new Date(today).toLocaleDateString('pt-BR');
+
       toast({
         title: "Sucesso",
-        description: "Despesa marcada como paga!",
+        description: `Despesa marcada como paga em ${formattedDate}!`,
       });
 
       onTransactionUpdated();
