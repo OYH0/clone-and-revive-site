@@ -9,28 +9,93 @@ interface DashboardCardsProps {
 }
 
 const DashboardCards: React.FC<DashboardCardsProps> = ({ despesas, period }) => {
-  // Calculate values for all companies
-  const churrascoDespesas = despesas.filter(d => d.empresa === 'Churrasco').reduce((sum, despesa) => sum + despesa.valor, 0);
-  const johnnyDespesas = despesas.filter(d => d.empresa === 'Johnny').reduce((sum, despesa) => sum + despesa.valor, 0);
-  const camerinoDespesas = despesas.filter(d => d.empresa === 'Camerino').reduce((sum, despesa) => sum + despesa.valor, 0);
+  console.log('DashboardCards - todas as despesas:', despesas);
+  console.log('DashboardCards - período:', period);
+
+  // Calculate values for all companies - normalizar nomes das empresas
+  const churrascoDespesas = despesas.filter(d => {
+    const empresa = d.empresa?.toLowerCase();
+    return empresa === 'churrasco' || empresa === 'companhia do churrasco';
+  }).reduce((sum, despesa) => sum + despesa.valor, 0);
+  
+  const johnnyDespesas = despesas.filter(d => {
+    const empresa = d.empresa?.toLowerCase();
+    return empresa === 'johnny' || empresa === 'johnny rockets';
+  }).reduce((sum, despesa) => sum + despesa.valor, 0);
+  
+  const camerinoDespesas = despesas.filter(d => {
+    const empresa = d.empresa?.toLowerCase();
+    return empresa === 'camerino';
+  }).reduce((sum, despesa) => sum + despesa.valor, 0);
+
+  console.log('DashboardCards - Despesas por empresa:', {
+    churrasco: churrascoDespesas,
+    johnny: johnnyDespesas,
+    camerino: camerinoDespesas
+  });
 
   // Extract categories for Churrasco
-  const churrascoInsumos = despesas.filter(d => d.empresa === 'Churrasco' && d.categoria === 'INSUMOS').reduce((sum, despesa) => sum + despesa.valor, 0);
-  const churrascoVariaveis = despesas.filter(d => d.empresa === 'Churrasco' && d.categoria === 'VARIAVEIS').reduce((sum, despesa) => sum + despesa.valor, 0);
-  const churrascoFixas = despesas.filter(d => d.empresa === 'Churrasco' && d.categoria === 'FIXAS').reduce((sum, despesa) => sum + despesa.valor, 0);
-  const churrascoAtrasados = despesas.filter(d => d.empresa === 'Churrasco' && d.categoria === 'ATRASADOS').reduce((sum, despesa) => sum + despesa.valor, 0);
+  const churrascoInsumos = despesas.filter(d => {
+    const empresa = d.empresa?.toLowerCase();
+    return (empresa === 'churrasco' || empresa === 'companhia do churrasco') && d.categoria === 'INSUMOS';
+  }).reduce((sum, despesa) => sum + despesa.valor, 0);
+  
+  const churrascoVariaveis = despesas.filter(d => {
+    const empresa = d.empresa?.toLowerCase();
+    return (empresa === 'churrasco' || empresa === 'companhia do churrasco') && d.categoria === 'VARIAVEIS';
+  }).reduce((sum, despesa) => sum + despesa.valor, 0);
+  
+  const churrascoFixas = despesas.filter(d => {
+    const empresa = d.empresa?.toLowerCase();
+    return (empresa === 'churrasco' || empresa === 'companhia do churrasco') && d.categoria === 'FIXAS';
+  }).reduce((sum, despesa) => sum + despesa.valor, 0);
+  
+  const churrascoAtrasados = despesas.filter(d => {
+    const empresa = d.empresa?.toLowerCase();
+    return (empresa === 'churrasco' || empresa === 'companhia do churrasco') && d.categoria === 'ATRASADOS';
+  }).reduce((sum, despesa) => sum + despesa.valor, 0);
   
   // Extract categories for Johnny
-  const johnnyFixas = despesas.filter(d => d.empresa === 'Johnny' && d.categoria === 'FIXAS').reduce((sum, despesa) => sum + despesa.valor, 0);
-  const johnnyInsumos = despesas.filter(d => d.empresa === 'Johnny' && d.categoria === 'INSUMOS').reduce((sum, despesa) => sum + despesa.valor, 0);
-  const johnnyVariaveis = despesas.filter(d => d.empresa === 'Johnny' && d.categoria === 'VARIAVEIS').reduce((sum, despesa) => sum + despesa.valor, 0);
-  const johnnyAtrasados = despesas.filter(d => d.empresa === 'Johnny' && d.categoria === 'ATRASADOS').reduce((sum, despesa) => sum + despesa.valor, 0);
+  const johnnyFixas = despesas.filter(d => {
+    const empresa = d.empresa?.toLowerCase();
+    return (empresa === 'johnny' || empresa === 'johnny rockets') && d.categoria === 'FIXAS';
+  }).reduce((sum, despesa) => sum + despesa.valor, 0);
+  
+  const johnnyInsumos = despesas.filter(d => {
+    const empresa = d.empresa?.toLowerCase();
+    return (empresa === 'johnny' || empresa === 'johnny rockets') && d.categoria === 'INSUMOS';
+  }).reduce((sum, despesa) => sum + despesa.valor, 0);
+  
+  const johnnyVariaveis = despesas.filter(d => {
+    const empresa = d.empresa?.toLowerCase();
+    return (empresa === 'johnny' || empresa === 'johnny rockets') && d.categoria === 'VARIAVEIS';
+  }).reduce((sum, despesa) => sum + despesa.valor, 0);
+  
+  const johnnyAtrasados = despesas.filter(d => {
+    const empresa = d.empresa?.toLowerCase();
+    return (empresa === 'johnny' || empresa === 'johnny rockets') && d.categoria === 'ATRASADOS';
+  }).reduce((sum, despesa) => sum + despesa.valor, 0);
 
   // Extract categories for Camerino
-  const camerinoFixas = despesas.filter(d => d.empresa === 'Camerino' && d.categoria === 'FIXAS').reduce((sum, despesa) => sum + despesa.valor, 0);
-  const camerinoInsumos = despesas.filter(d => d.empresa === 'Camerino' && d.categoria === 'INSUMOS').reduce((sum, despesa) => sum + despesa.valor, 0);
-  const camerinoVariaveis = despesas.filter(d => d.empresa === 'Camerino' && d.categoria === 'VARIAVEIS').reduce((sum, despesa) => sum + despesa.valor, 0);
-  const camerinoAtrasados = despesas.filter(d => d.empresa === 'Camerino' && d.categoria === 'ATRASADOS').reduce((sum, despesa) => sum + despesa.valor, 0);
+  const camerinoFixas = despesas.filter(d => {
+    const empresa = d.empresa?.toLowerCase();
+    return empresa === 'camerino' && d.categoria === 'FIXAS';
+  }).reduce((sum, despesa) => sum + despesa.valor, 0);
+  
+  const camerinoInsumos = despesas.filter(d => {
+    const empresa = d.empresa?.toLowerCase();
+    return empresa === 'camerino' && d.categoria === 'INSUMOS';
+  }).reduce((sum, despesa) => sum + despesa.valor, 0);
+  
+  const camerinoVariaveis = despesas.filter(d => {
+    const empresa = d.empresa?.toLowerCase();
+    return empresa === 'camerino' && d.categoria === 'VARIAVEIS';
+  }).reduce((sum, despesa) => sum + despesa.valor, 0);
+  
+  const camerinoAtrasados = despesas.filter(d => {
+    const empresa = d.empresa?.toLowerCase();
+    return empresa === 'camerino' && d.categoria === 'ATRASADOS';
+  }).reduce((sum, despesa) => sum + despesa.valor, 0);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
