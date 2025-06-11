@@ -18,30 +18,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshInProgress, setRefreshInProgress] = useState(false);
 
   useEffect(() => {
     let mounted = true;
-
-    // Set up auth state listener with a limited set of actions
+    
+    // Set initial throttle time between refreshes (in milliseconds)
+    const refreshThrottleTime = 5000; // 5 seconds minimum between refreshes
+    let lastRefreshTime = 0;
+    
+    // Set up auth state listener with throttling
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      (event, newSession) => {
         if (!mounted) return;
         
-        // Only update state, don't do additional operations here
-        console.log('Auth state changed:', event, session?.user?.email);
-        setSession(session);
-        setUser(session?.user ?? null);
+        console.log('Auth state changed:', event, newSession?.user?.email);
+
+        // Only update state, don't do additional operations for most events
+        if (event !== 'TOKEN_REFRESHED' && event !== 'SIGNED_OUT') {
+          setSession(newSession);
+          setUser(newSession?.user ?? null);
+          setLoading(false);
+          return;
+        }
+        
+        // For token refreshes, implement throttling
+        if (event === 'TOKEN_REFRESHED') {
+          const now = Date.now();
+          if (now - lastRefreshTime < refreshThrottleTime) {
+            console.log('Throttling token refresh event - too frequent');
+            return;
+          }
+          lastRefreshTime = now;
+        }
+        
+        // Update state for allowed events
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
         setLoading(false);
       }
     );
 
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Get initial session (once)
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
       if (!mounted) return;
       
-      console.log('Initial session:', session?.user?.email);
-      setSession(session);
-      setUser(session?.user ?? null);
+      console.log('Initial session:', initialSession?.user?.email);
+      setSession(initialSession);
+      setUser(initialSession?.user ?? null);
       setLoading(false);
     });
 
