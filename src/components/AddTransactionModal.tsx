@@ -34,7 +34,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const categories = ['INSUMOS', 'FIXAS', 'VARIÁVEIS', 'ATRASADOS'];
+  const categories = ['INSUMOS', 'FIXAS', 'VARIÁVEIS', 'ATRASADOS', 'RETIRADAS'];
   const companies = ['Churrasco', 'Johnny', 'Camerino'];
 
   // Set default empresa when modal opens

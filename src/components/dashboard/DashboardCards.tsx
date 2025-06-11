@@ -63,6 +63,11 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ despesas, period, stats
     return (empresa === 'churrasco' || empresa === 'companhia do churrasco') && d.categoria === 'ATRASADOS';
   }).reduce((sum, despesa) => sum + despesa.valor, 0);
   
+  const churrascoRetiradas = despesas.filter(d => {
+    const empresa = d.empresa?.toLowerCase();
+    return (empresa === 'churrasco' || empresa === 'companhia do churrasco') && d.categoria === 'RETIRADAS';
+  }).reduce((sum, despesa) => sum + despesa.valor, 0);
+  
   // Extract categories for Johnny
   const johnnyFixas = despesas.filter(d => {
     const empresa = d.empresa?.toLowerCase();
@@ -82,6 +87,11 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ despesas, period, stats
   const johnnyAtrasados = despesas.filter(d => {
     const empresa = d.empresa?.toLowerCase();
     return (empresa === 'johnny' || empresa === 'johnny rockets') && d.categoria === 'ATRASADOS';
+  }).reduce((sum, despesa) => sum + despesa.valor, 0);
+
+  const johnnyRetiradas = despesas.filter(d => {
+    const empresa = d.empresa?.toLowerCase();
+    return (empresa === 'johnny' || empresa === 'johnny rockets') && d.categoria === 'RETIRADAS';
   }).reduce((sum, despesa) => sum + despesa.valor, 0);
 
   // Extract categories for Camerino
@@ -105,6 +115,11 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ despesas, period, stats
     return empresa === 'camerino' && d.categoria === 'ATRASADOS';
   }).reduce((sum, despesa) => sum + despesa.valor, 0);
 
+  const camerinoRetiradas = despesas.filter(d => {
+    const empresa = d.empresa?.toLowerCase();
+    return empresa === 'camerino' && d.categoria === 'RETIRADAS';
+  }).reduce((sum, despesa) => sum + despesa.valor, 0);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
       <CompanyCard
@@ -117,6 +132,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ despesas, period, stats
         insumos={camerinoInsumos > 0 ? camerinoInsumos : undefined}
         variaveis={camerinoVariaveis > 0 ? camerinoVariaveis : undefined}
         atrasados={camerinoAtrasados > 0 ? camerinoAtrasados : undefined}
+        retiradas={camerinoRetiradas > 0 ? camerinoRetiradas : undefined}
         chartData={[
           { value: camerinoDespesas > 0 ? camerinoDespesas * 0.8 : 0 }, 
           { value: camerinoDespesas > 0 ? camerinoDespesas * 0.85 : 0 }, 
@@ -137,6 +153,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ despesas, period, stats
         variaveis={churrascoVariaveis > 0 ? churrascoVariaveis : undefined}
         fixas={churrascoFixas > 0 ? churrascoFixas : undefined}
         atrasados={churrascoAtrasados > 0 ? churrascoAtrasados : undefined}
+        retiradas={churrascoRetiradas > 0 ? churrascoRetiradas : undefined}
         chartData={[
           { value: churrascoDespesas > 0 ? churrascoDespesas * 0.8 : 0 }, 
           { value: churrascoDespesas > 0 ? churrascoDespesas * 0.9 : 0 }, 
@@ -157,6 +174,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ despesas, period, stats
         insumos={johnnyInsumos > 0 ? johnnyInsumos : undefined}
         variaveis={johnnyVariaveis > 0 ? johnnyVariaveis : undefined}
         atrasados={johnnyAtrasados > 0 ? johnnyAtrasados : undefined}
+        retiradas={johnnyRetiradas > 0 ? johnnyRetiradas : undefined}
         chartData={[
           { value: johnnyDespesas > 0 ? johnnyDespesas * 0.8 : 0 }, 
           { value: johnnyDespesas > 0 ? johnnyDespesas * 0.85 : 0 }, 

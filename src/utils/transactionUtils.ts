@@ -1,3 +1,5 @@
+import { isAfter, parseISO } from 'date-fns';
+
 export const getTransactionStatus = (transaction: any) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -51,15 +53,17 @@ export const getStatusColor = (status: string) => {
 export const getCategoryColor = (category: string) => {
   switch (category) {
     case 'INSUMOS':
-      return 'bg-blue-500 text-white';
+      return 'bg-blue-100 text-blue-800';
     case 'FIXAS':
-      return 'bg-purple-500 text-white';
+      return 'bg-green-100 text-green-800';
     case 'VARIÁVEIS':
-      return 'bg-orange-500 text-white';
+      return 'bg-orange-100 text-orange-800';
     case 'ATRASADOS':
-      return 'bg-red-500 text-white';
+      return 'bg-red-100 text-red-800';
+    case 'RETIRADAS':
+      return 'bg-purple-100 text-purple-800';
     default:
-      return 'bg-gray-500 text-white';
+      return 'bg-gray-100 text-gray-800';
   }
 };
 
