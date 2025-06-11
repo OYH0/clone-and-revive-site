@@ -12,6 +12,7 @@ interface CompanyCardProps {
   variaveis?: number;
   fixas?: number;
   atrasados?: number;
+  retiradas?: number;
   chartData: Array<{ value: number }>;
   chartColor: string;
 }
@@ -26,6 +27,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({
   variaveis,
   fixas,
   atrasados,
+  retiradas,
   chartData,
   chartColor
 }) => {
@@ -76,6 +78,12 @@ const CompanyCard: React.FC<CompanyCardProps> = ({
               <p className="text-sm">
                 <span className="text-gray-600">Atrasados:</span>{' '}
                 <span className="font-medium">R$ {atrasados.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              </p>
+            )}
+            {retiradas !== undefined && (
+              <p className="text-sm">
+                <span className="text-gray-600">Retiradas:</span>{' '}
+                <span className="font-medium">R$ {retiradas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
               </p>
             )}
           </div>
