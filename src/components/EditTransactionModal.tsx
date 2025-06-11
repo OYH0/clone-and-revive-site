@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -183,6 +184,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                 <SelectItem value="FIXAS">Fixas</SelectItem>
                 <SelectItem value="VARIAVEIS">Variáveis</SelectItem>
                 <SelectItem value="ATRASADOS">Atrasados</SelectItem>
+                <SelectItem value="RETIRADAS">Retiradas</SelectItem>
               </SelectContent>
             </Select>
           </div>
