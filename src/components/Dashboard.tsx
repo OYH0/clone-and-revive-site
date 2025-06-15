@@ -27,7 +27,7 @@ const Dashboard = () => {
     return (
       <div className="flex min-h-screen bg-gray-100">
         <Sidebar />
-        <div className="flex-1 p-6 main-content auth-page">
+        <div className="flex-1 p-6">
           <div className="max-w-7xl mx-auto">
             <div className="text-center py-16">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Acesso Restrito</h2>
@@ -58,7 +58,7 @@ const Dashboard = () => {
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar />
       
-      <div className="flex-1 p-4 md:p-6 main-content">
+      <div className="flex-1 p-6">
         <div className="max-w-7xl mx-auto">
           <DashboardHeader 
             selectedPeriod={selectedPeriod} 
