@@ -25,14 +25,17 @@ const Dashboard = () => {
   // Verificar se o usuário está autenticado
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-100 p-4">
-        <div className="max-w-md mx-auto pt-16">
-          <div className="bg-white rounded-lg shadow-md p-8 text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Acesso Restrito</h2>
-            <p className="text-gray-600 mb-8">Você precisa estar logado para acessar o dashboard.</p>
-            <Button onClick={() => window.location.href = '/auth'} className="w-full">
-              Fazer Login
-            </Button>
+      <div className="flex min-h-screen bg-gray-100">
+        <Sidebar />
+        <div className="flex-1 p-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center py-16">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Acesso Restrito</h2>
+              <p className="text-gray-600 mb-8">Você precisa estar logado para acessar o dashboard.</p>
+              <Button onClick={() => window.location.href = '/auth'}>
+                Fazer Login
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -52,10 +55,10 @@ const Dashboard = () => {
   const period = getPeriodString(selectedPeriod);
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-gray-100">
       <Sidebar />
       
-      <div className="main-content">
+      <div className="flex-1 p-6">
         <div className="max-w-7xl mx-auto">
           <DashboardHeader 
             selectedPeriod={selectedPeriod} 
@@ -70,7 +73,7 @@ const Dashboard = () => {
               </div>
             </div>
           ) : (
-            <div className="space-y-6">
+            <>
               <DashboardCards 
                 despesas={filteredDespesas} 
                 period={period} 
@@ -81,7 +84,7 @@ const Dashboard = () => {
                 despesas={despesas || []} 
                 selectedPeriod={selectedPeriod} 
               />
-            </div>
+            </>
           )}
         </div>
       </div>

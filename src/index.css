@@ -26,57 +26,19 @@ body {
   @apply bg-yellow-500 text-white;
 }
 
-/* Layout responsivo para o conteúdo principal */
+/* Ajuste para conteúdo principal com sidebar fixa - exceto páginas de auth */
 .main-content {
   margin-left: 0;
-  padding: 1rem;
 }
 
-/* Desktop: sidebar fixa */
-@media (min-width: 1024px) {
+/* Ajuste responsivo */
+@media (min-width: 768px) {
   .main-content {
     margin-left: 16rem;
-    padding: 1.5rem;
   }
 }
 
 /* Página de auth não deve ter margem da sidebar */
 .auth-page {
   margin-left: 0 !important;
-}
-
-/* Responsividade para tabelas */
-@media (max-width: 768px) {
-  .table-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  .table-container table {
-    min-width: 800px;
-  }
-  
-  /* Ajustes para textos em mobile */
-  .mobile-text-sm {
-    font-size: 0.875rem;
-  }
-  
-  .mobile-hidden {
-    display: none;
-  }
-}
-
-/* Melhorar scrollbars em mobile */
-.table-container::-webkit-scrollbar {
-  height: 6px;
-}
-
-.table-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
-}
-
-.table-container::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 3px;
 }

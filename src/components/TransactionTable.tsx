@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Transaction } from '@/types/transaction';
 import EditTransactionModal from './EditTransactionModal';
@@ -186,60 +187,60 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
 
   return (
     <>
-      <div className="table-container">
-        <table className="w-full table-fixed min-w-full">
+      <div className="overflow-x-auto">
+        <table className="w-full table-fixed">
           <thead>
             <tr className="border-b border-gray-200">
-              <th className="text-left text-gray-700 py-3 px-2 md:px-4 font-medium text-xs md:text-sm w-20 md:w-24">Data Pgto</th>
-              <th className="text-left text-gray-700 py-3 px-2 md:px-4 font-medium text-xs md:text-sm w-20 md:w-24">Vencimento</th>
-              <th className="text-left text-gray-700 py-3 px-2 md:px-4 font-medium text-xs md:text-sm w-20 md:w-28">Empresa</th>
-              <th className="text-left text-gray-700 py-3 px-2 md:px-4 font-medium text-xs md:text-sm w-24 md:w-32">Descrição</th>
-              <th className="text-left text-gray-700 py-3 px-2 md:px-4 font-medium text-xs md:text-sm w-20 md:w-24 mobile-hidden">Categoria</th>
-              <th className="text-left text-gray-700 py-3 px-2 md:px-4 font-medium text-xs md:text-sm w-16 md:w-24">Valor</th>
-              <th className="text-left text-gray-700 py-3 px-2 md:px-4 font-medium text-xs md:text-sm w-16 md:w-24 mobile-hidden">Juros</th>
-              <th className="text-left text-gray-700 py-3 px-2 md:px-4 font-medium text-xs md:text-sm w-16 md:w-24">Total</th>
-              <th className="text-left text-gray-700 py-3 px-2 md:px-4 font-medium text-xs md:text-sm w-16 md:w-20">Status</th>
-              <th className="text-left text-gray-700 py-3 px-2 md:px-4 font-medium text-xs md:text-sm w-20 md:w-36">Ações</th>
+              <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Data de Pagamento</th>
+              <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Vencimento</th>
+              <th className="text-left text-gray-700 py-3 px-4 font-medium w-28">Empresa</th>
+              <th className="text-left text-gray-700 py-3 px-4 font-medium w-32">Descrição</th>
+              <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Categoria</th>
+              <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Valor</th>
+              <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Juros</th>
+              <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Total</th>
+              <th className="text-left text-gray-700 py-3 px-4 font-medium w-20">Status</th>
+              <th className="text-left text-gray-700 py-3 px-4 font-medium w-36">Ações</th>
             </tr>
           </thead>
           <tbody>
             {transactions.map((transaction) => (
               <tr key={transaction.id} className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="py-2 md:py-3 px-2 md:px-4 text-gray-900 text-xs md:text-sm">
+                <td className="py-3 px-4 text-gray-900 text-sm">
                   {transaction.status === 'PAGO' ? formatDate(transaction.date) : '-'}
                 </td>
-                <td className="py-2 md:py-3 px-2 md:px-4 text-gray-900 text-xs md:text-sm">
+                <td className="py-3 px-4 text-gray-900 text-sm">
                   {transaction.data_vencimento ? formatDate(transaction.data_vencimento) : '-'}
                 </td>
-                <td className="py-2 md:py-3 px-2 md:px-4">
-                  <span className="px-1 md:px-2 py-1 rounded text-xs bg-blue-500 text-white">
+                <td className="py-3 px-4">
+                  <span className="px-2 py-1 rounded text-xs bg-blue-500 text-white">
                     {transaction.company}
                   </span>
                 </td>
-                <td className="py-2 md:py-3 px-2 md:px-4">
+                <td className="py-3 px-4">
                   <div className="max-w-full overflow-hidden">
                     <DescriptionCell description={transaction.description} />
                   </div>
                 </td>
-                <td className="py-2 md:py-3 px-2 md:px-4 mobile-hidden">
+                <td className="py-3 px-4">
                   <CategoryCell category={transaction.category} />
                 </td>
-                <td className="py-2 md:py-3 px-2 md:px-4 text-gray-900 font-medium text-xs md:text-sm">
+                <td className="py-3 px-4 text-gray-900 font-medium text-sm">
                   R$ {transaction.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </td>
-                <td className="py-2 md:py-3 px-2 md:px-4 text-gray-900 text-xs md:text-sm mobile-hidden">
+                <td className="py-3 px-4 text-gray-900 text-sm">
                   {transaction.valor_juros && transaction.valor_juros > 0 ? 
                     `R$ ${transaction.valor_juros.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : 
                     '-'
                   }
                 </td>
-                <td className="py-2 md:py-3 px-2 md:px-4 text-gray-900 font-medium text-xs md:text-sm">
+                <td className="py-3 px-4 text-gray-900 font-medium text-sm">
                   R$ {(transaction.valor_total || transaction.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </td>
-                <td className="py-2 md:py-3 px-2 md:px-4">
+                <td className="py-3 px-4">
                   <StatusCell transaction={transaction} />
                 </td>
-                <td className="py-2 md:py-3 px-2 md:px-4">
+                <td className="py-3 px-4">
                   <ActionsCell
                     transaction={transaction}
                     onEdit={handleEdit}
