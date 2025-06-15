@@ -8,135 +8,37 @@ body {
   font-family: "Inter", sans-serif;
   margin: 0;
   padding: 0;
-  background: #f8fafc;
 }
 
-/* Categorias */
 .category-insumos {
   @apply bg-blue-500 text-white;
 }
+
 .category-fixas {
   @apply bg-purple-500 text-white;
 }
+
 .status-paid {
   @apply bg-green-500 text-white;
 }
+
 .status-pending {
   @apply bg-yellow-500 text-white;
 }
 
-/* Layout principal responsivo */
+/* Ajuste para conteúdo principal com sidebar fixa - exceto páginas de auth */
 .main-content {
   margin-left: 0;
-  padding: 1rem 0.5rem;
 }
 
-/* Sidebar só adiciona margin em telas médias */
+/* Ajuste responsivo */
 @media (min-width: 768px) {
   .main-content {
     margin-left: 16rem;
-    padding: 2rem;
   }
 }
 
 /* Página de auth não deve ter margem da sidebar */
 .auth-page {
   margin-left: 0 !important;
-}
-
-/* MELHORIAS MOBILE */
-html {
-  font-size: 16px;
-}
-@media (max-width: 480px) {
-  html {
-    font-size: 15px;
-  }
-  .main-content {
-    padding: 0.5rem 0.1rem;
-  }
-  .rounded-2xl, .rounded-3xl, .rounded-full {
-    border-radius: 1rem !important;
-  }
-  .rounded-xl {
-    border-radius: 0.75rem !important;
-  }
-}
-/* Make buttons and inputs bigger on mobile */
-button, .btn, .shadcn-ui-button {
-  min-height: 2.75rem;
-  min-width: 2.5rem;
-  font-size: 1rem;
-}
-
-/* Tabelas rolagem lateral, cabeçalhos sticky em mobile, textos menores */
-table {
-  width: 100%;
-  font-size: 0.96rem;
-}
-@media (max-width: 640px) {
-  table {
-    font-size: 0.86rem;
-  }
-  th, td {
-    padding-left: 0.45rem;
-    padding-right: 0.45rem;
-    word-break: break-word;
-  }
-  thead tr {
-    position: sticky;
-    top: 0;
-    background: #f8fafc;
-    z-index: 2;
-  }
-  .max-w-full,
-  [class*="max-w"] {
-    max-width: 99vw !important;
-  }
-}
-
-/* Modais adaptativos */
-@media (max-width: 640px) {
-  .shadcn-ui-dialog-content, .DialogContent, .modal, .dialog-modal {
-    width: 99vw !important;
-    min-width: unset !important;
-    max-width: 99vw !important;
-    padding: 1rem !important;
-    border-radius: 1rem !important;
-  }
-}
-
-/* Melhora do z-index para dropdowns/tabelas/modais popup */
-.z-10, .shadcn-ui-select-content, .SelectContent {
-  z-index: 40 !important;
-}
-.z-20, .DialogOverlay {
-  z-index: 50 !important;
-}
-.z-30, .modal {
-  z-index: 60 !important;
-}
-
-/* Facilita o clique nos botões principais em mobile */
-@media (max-width: 640px) {
-  button, .btn, .shadcn-ui-button {
-    font-size: 1.05rem;
-    padding: 0.8rem 1.1rem !important;
-    min-height: 2.8rem;
-  }
-}
-
-/* Input fields touch-friendly */
-input, select, textarea {
-  font-size: 1rem;
-  padding: 0.6rem 1rem;
-  border-radius: 0.9rem;
-}
-
-/* Ícones maiores em mobile */
-@media (max-width: 640px) {
-  svg {
-    min-width: 1.3em;
-    min-height: 1.3em;
-  }
 }
