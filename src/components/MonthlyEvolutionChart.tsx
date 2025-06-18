@@ -7,6 +7,24 @@ interface MonthlyEvolutionChartProps {
   selectedPeriod: 'today' | 'week' | 'month' | 'year';
 }
 
+// Função para normalizar nomes das empresas
+const normalizeCompanyName = (empresa: string | undefined): string => {
+  if (!empresa) return '';
+  const normalized = empresa.toLowerCase().trim();
+  
+  if (normalized.includes('churrasco') || normalized === 'companhia do churrasco') {
+    return 'churrasco';
+  }
+  if (normalized.includes('johnny') || normalized === 'johnny rockets') {
+    return 'johnny';
+  }
+  if (normalized === 'camerino') {
+    return 'camerino';
+  }
+  
+  return normalized;
+};
+
 const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas, selectedPeriod }) => {
   
   // Generate data based on selected period
@@ -22,15 +40,25 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
           return date.getHours() === hour;
         });
         
-        const churrasco = hourData.filter(d => d.empresa === 'Churrasco').reduce((sum, d) => sum + d.valor, 0);
-        const johnny = hourData.filter(d => d.empresa === 'Johnny').reduce((sum, d) => sum + d.valor, 0);
+        const churrasco = hourData
+          .filter(d => normalizeCompanyName(d.empresa) === 'churrasco')
+          .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
+        
+        const johnny = hourData
+          .filter(d => normalizeCompanyName(d.empresa) === 'johnny')
+          .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
+        
+        const camerino = hourData
+          .filter(d => normalizeCompanyName(d.empresa) === 'camerino')
+          .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
         
         return {
           period: `${hour}h`,
           churrasco,
-          johnny
+          johnny,
+          camerino
         };
-      }).filter(item => item.churrasco > 0 || item.johnny > 0);
+      }).filter(item => item.churrasco > 0 || item.johnny > 0 || item.camerino > 0);
     }
 
     if (selectedPeriod === 'week') {
@@ -42,13 +70,23 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
           return date.getDay() === index;
         });
         
-        const churrasco = dayData.filter(d => d.empresa === 'Churrasco').reduce((sum, d) => sum + d.valor, 0);
-        const johnny = dayData.filter(d => d.empresa === 'Johnny').reduce((sum, d) => sum + d.valor, 0);
+        const churrasco = dayData
+          .filter(d => normalizeCompanyName(d.empresa) === 'churrasco')
+          .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
+        
+        const johnny = dayData
+          .filter(d => normalizeCompanyName(d.empresa) === 'johnny')
+          .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
+        
+        const camerino = dayData
+          .filter(d => normalizeCompanyName(d.empresa) === 'camerino')
+          .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
         
         return {
           period: day,
           churrasco,
-          johnny
+          johnny,
+          camerino
         };
       });
     }
@@ -66,13 +104,23 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
           return date.getMonth() === index;
         });
         
-        const churrasco = monthData.filter(d => d.empresa === 'Churrasco').reduce((sum, d) => sum + d.valor, 0);
-        const johnny = monthData.filter(d => d.empresa === 'Johnny').reduce((sum, d) => sum + d.valor, 0);
+        const churrasco = monthData
+          .filter(d => normalizeCompanyName(d.empresa) === 'churrasco')
+          .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
+        
+        const johnny = monthData
+          .filter(d => normalizeCompanyName(d.empresa) === 'johnny')
+          .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
+        
+        const camerino = monthData
+          .filter(d => normalizeCompanyName(d.empresa) === 'camerino')
+          .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
         
         return {
           period: month,
           churrasco,
-          johnny
+          johnny,
+          camerino
         };
       });
     }
@@ -87,17 +135,22 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
       period: month,
       index,
       churrasco: 0,
-      johnny: 0
+      johnny: 0,
+      camerino: 0
     }));
     
     despesas.forEach(despesa => {
       const date = new Date(despesa.data);
       const monthIndex = date.getMonth();
+      const valor = despesa.valor_total || despesa.valor || 0;
+      const empresa = normalizeCompanyName(despesa.empresa);
       
-      if (despesa.empresa === 'Churrasco') {
-        data[monthIndex].churrasco += despesa.valor;
-      } else if (despesa.empresa === 'Johnny') {
-        data[monthIndex].johnny += despesa.valor;
+      if (empresa === 'churrasco') {
+        data[monthIndex].churrasco += valor;
+      } else if (empresa === 'johnny') {
+        data[monthIndex].johnny += valor;
+      } else if (empresa === 'camerino') {
+        data[monthIndex].camerino += valor;
       }
     });
     
@@ -115,7 +168,9 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
           <p className="font-medium text-gray-800">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
-              {entry.name}: R$ {entry.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              {entry.name === 'churrasco' ? 'Companhia do Churrasco' : 
+               entry.name === 'johnny' ? 'Johnny Rockets' : 
+               entry.name === 'camerino' ? 'Camerino' : entry.name}: R$ {entry.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </p>
           ))}
         </div>
@@ -150,7 +205,11 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend 
-            formatter={(value) => <span className="text-sm">{value === 'churrasco' ? 'Companhia do Churrasco' : 'Johnny Rockets'}</span>}
+            formatter={(value) => 
+              value === 'churrasco' ? 'Companhia do Churrasco' : 
+              value === 'johnny' ? 'Johnny Rockets' : 
+              value === 'camerino' ? 'Camerino' : value
+            }
           />
           <Bar 
             name="churrasco"
@@ -162,6 +221,12 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
             name="johnny"
             dataKey="johnny" 
             fill="#3b82f6" 
+            radius={[4, 4, 0, 0]}
+          />
+          <Bar 
+            name="camerino"
+            dataKey="camerino" 
+            fill="#10b981" 
             radius={[4, 4, 0, 0]}
           />
         </BarChart>

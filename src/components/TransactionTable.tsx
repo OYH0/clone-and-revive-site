@@ -4,6 +4,7 @@ import { Transaction } from '@/types/transaction';
 import EditTransactionModal from './EditTransactionModal';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import ViewReceiptModal from './ViewReceiptModal';
+import MarkAsPaidModal from './MarkAsPaidModal';
 import DescriptionCell from './table/DescriptionCell';
 import StatusCell from './table/StatusCell';
 import CategoryCell from './table/CategoryCell';
@@ -27,6 +28,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
   const [viewingReceipt, setViewingReceipt] = useState<Transaction | null>(null);
+  const [markingAsPaidTransaction, setMarkingAsPaidTransaction] = useState<Transaction | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
   const { isAdmin } = useAdminAccess();
@@ -65,7 +67,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
     setViewingReceipt(transaction);
   };
 
-  const handleMarkAsPaid = async (transaction: Transaction) => {
+  const handleMarkAsPaidRequest = (transaction: Transaction) => {
     if (!user) return;
     
     // Only allow marking as paid if user is admin or owns the transaction
@@ -77,6 +79,12 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
       });
       return;
     }
+
+    setMarkingAsPaidTransaction(transaction);
+  };
+
+  const handleMarkAsPaidConfirm = async (transaction: Transaction) => {
+    if (!user) return;
 
     try {
       const today = getCurrentDate();
@@ -245,7 +253,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
                     transaction={transaction}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
-                    onMarkAsPaid={handleMarkAsPaid}
+                    onMarkAsPaid={handleMarkAsPaidRequest}
                     onAttachReceipt={handleAttachReceipt}
                     onViewReceipt={handleViewReceipt}
                     canEdit={isAdmin || transaction.user_id === user?.id}
@@ -278,6 +286,13 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
         onClose={() => setViewingReceipt(null)}
         receiptPath={viewingReceipt?.comprovante || ''}
         transactionDescription={viewingReceipt?.description || ''}
+      />
+
+      <MarkAsPaidModal
+        isOpen={!!markingAsPaidTransaction}
+        onClose={() => setMarkingAsPaidTransaction(null)}
+        transaction={markingAsPaidTransaction}
+        onConfirm={handleMarkAsPaidConfirm}
       />
     </>
   );

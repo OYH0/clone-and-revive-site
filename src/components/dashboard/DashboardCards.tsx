@@ -1,3 +1,4 @@
+
 import React from 'react';
 import CompanyCard from '../CompanyCard';
 import { Despesa } from '@/hooks/useDespesas';
@@ -20,167 +21,156 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ despesas, period, stats
   console.log('DashboardCards - período:', period);
   console.log('DashboardCards - stats:', stats);
 
-  // Calculate values for all companies - normalizar nomes das empresas
-  const churrascoDespesas = despesas.filter(d => {
-    const empresa = d.empresa?.toLowerCase();
-    return empresa === 'churrasco' || empresa === 'companhia do churrasco';
-  }).reduce((sum, despesa) => sum + despesa.valor, 0);
-  
-  const johnnyDespesas = despesas.filter(d => {
-    const empresa = d.empresa?.toLowerCase();
-    return empresa === 'johnny' || empresa === 'johnny rockets';
-  }).reduce((sum, despesa) => sum + despesa.valor, 0);
-  
-  const camerinoDespesas = despesas.filter(d => {
-    const empresa = d.empresa?.toLowerCase();
-    return empresa === 'camerino';
-  }).reduce((sum, despesa) => sum + despesa.valor, 0);
+  // Normalizar nomes das empresas para garantir consistência
+  const normalizeCompanyName = (empresa: string | undefined): string => {
+    if (!empresa) return '';
+    const normalized = empresa.toLowerCase().trim();
+    
+    // Mapear variações dos nomes das empresas
+    if (normalized.includes('churrasco') || normalized === 'companhia do churrasco') {
+      return 'churrasco';
+    }
+    if (normalized.includes('johnny') || normalized === 'johnny rockets') {
+      return 'johnny';
+    }
+    if (normalized === 'camerino') {
+      return 'camerino';
+    }
+    
+    return normalized;
+  };
 
-  console.log('DashboardCards - Despesas por empresa:', {
-    churrasco: churrascoDespesas,
-    johnny: johnnyDespesas,
-    camerino: camerinoDespesas
+  // Filtrar despesas por empresa usando normalização
+  const churrascoDespesas = despesas.filter(d => 
+    normalizeCompanyName(d.empresa) === 'churrasco'
+  );
+  
+  const johnnyDespesas = despesas.filter(d => 
+    normalizeCompanyName(d.empresa) === 'johnny'
+  );
+  
+  const camerinoDespesas = despesas.filter(d => 
+    normalizeCompanyName(d.empresa) === 'camerino'
+  );
+
+  // Calcular totais usando valor_total quando disponível, senão valor
+  const churrascoDespesasTotal = churrascoDespesas.reduce((sum, despesa) => 
+    sum + (despesa.valor_total || despesa.valor || 0), 0
+  );
+  
+  const johnnyDespesasTotal = johnnyDespesas.reduce((sum, despesa) => 
+    sum + (despesa.valor_total || despesa.valor || 0), 0
+  );
+  
+  const camerinoDespesasTotal = camerinoDespesas.reduce((sum, despesa) => 
+    sum + (despesa.valor_total || despesa.valor || 0), 0
+  );
+
+  console.log('DashboardCards - Despesas por empresa (corrigido):', {
+    churrasco: { count: churrascoDespesas.length, total: churrascoDespesasTotal },
+    johnny: { count: johnnyDespesas.length, total: johnnyDespesasTotal },
+    camerino: { count: camerinoDespesas.length, total: camerinoDespesasTotal }
   });
 
-  // Extract categories for Churrasco
-  const churrascoInsumos = despesas.filter(d => {
-    const empresa = d.empresa?.toLowerCase();
-    return (empresa === 'churrasco' || empresa === 'companhia do churrasco') && d.categoria === 'INSUMOS';
-  }).reduce((sum, despesa) => sum + despesa.valor, 0);
-  
-  const churrascoVariaveis = despesas.filter(d => {
-    const empresa = d.empresa?.toLowerCase();
-    return (empresa === 'churrasco' || empresa === 'companhia do churrasco') && d.categoria === 'VARIAVEIS';
-  }).reduce((sum, despesa) => sum + despesa.valor, 0);
-  
-  const churrascoFixas = despesas.filter(d => {
-    const empresa = d.empresa?.toLowerCase();
-    return (empresa === 'churrasco' || empresa === 'companhia do churrasco') && d.categoria === 'FIXAS';
-  }).reduce((sum, despesa) => sum + despesa.valor, 0);
-  
-  const churrascoAtrasados = despesas.filter(d => {
-    const empresa = d.empresa?.toLowerCase();
-    return (empresa === 'churrasco' || empresa === 'companhia do churrasco') && d.categoria === 'ATRASADOS';
-  }).reduce((sum, despesa) => sum + despesa.valor, 0);
-  
-  const churrascoRetiradas = despesas.filter(d => {
-    const empresa = d.empresa?.toLowerCase();
-    return (empresa === 'churrasco' || empresa === 'companhia do churrasco') && d.categoria === 'RETIRADAS';
-  }).reduce((sum, despesa) => sum + despesa.valor, 0);
-  
-  // Extract categories for Johnny
-  const johnnyFixas = despesas.filter(d => {
-    const empresa = d.empresa?.toLowerCase();
-    return (empresa === 'johnny' || empresa === 'johnny rockets') && d.categoria === 'FIXAS';
-  }).reduce((sum, despesa) => sum + despesa.valor, 0);
-  
-  const johnnyInsumos = despesas.filter(d => {
-    const empresa = d.empresa?.toLowerCase();
-    return (empresa === 'johnny' || empresa === 'johnny rockets') && d.categoria === 'INSUMOS';
-  }).reduce((sum, despesa) => sum + despesa.valor, 0);
-  
-  const johnnyVariaveis = despesas.filter(d => {
-    const empresa = d.empresa?.toLowerCase();
-    return (empresa === 'johnny' || empresa === 'johnny rockets') && d.categoria === 'VARIAVEIS';
-  }).reduce((sum, despesa) => sum + despesa.valor, 0);
-  
-  const johnnyAtrasados = despesas.filter(d => {
-    const empresa = d.empresa?.toLowerCase();
-    return (empresa === 'johnny' || empresa === 'johnny rockets') && d.categoria === 'ATRASADOS';
-  }).reduce((sum, despesa) => sum + despesa.valor, 0);
+  // Função para calcular despesas por categoria
+  const calculateCategoryTotal = (empresaDespesas: Despesa[], categoria: string): number => {
+    return empresaDespesas
+      .filter(d => d.categoria === categoria)
+      .reduce((sum, despesa) => sum + (despesa.valor_total || despesa.valor || 0), 0);
+  };
 
-  const johnnyRetiradas = despesas.filter(d => {
-    const empresa = d.empresa?.toLowerCase();
-    return (empresa === 'johnny' || empresa === 'johnny rockets') && d.categoria === 'RETIRADAS';
-  }).reduce((sum, despesa) => sum + despesa.valor, 0);
+  // Categorias para cada empresa
+  const churrascoCategories = {
+    insumos: calculateCategoryTotal(churrascoDespesas, 'INSUMOS'),
+    variaveis: calculateCategoryTotal(churrascoDespesas, 'VARIAVEIS'),
+    fixas: calculateCategoryTotal(churrascoDespesas, 'FIXAS'),
+    atrasados: calculateCategoryTotal(churrascoDespesas, 'ATRASADOS'),
+    retiradas: calculateCategoryTotal(churrascoDespesas, 'RETIRADAS')
+  };
 
-  // Extract categories for Camerino
-  const camerinoFixas = despesas.filter(d => {
-    const empresa = d.empresa?.toLowerCase();
-    return empresa === 'camerino' && d.categoria === 'FIXAS';
-  }).reduce((sum, despesa) => sum + despesa.valor, 0);
-  
-  const camerinoInsumos = despesas.filter(d => {
-    const empresa = d.empresa?.toLowerCase();
-    return empresa === 'camerino' && d.categoria === 'INSUMOS';
-  }).reduce((sum, despesa) => sum + despesa.valor, 0);
-  
-  const camerinoVariaveis = despesas.filter(d => {
-    const empresa = d.empresa?.toLowerCase();
-    return empresa === 'camerino' && d.categoria === 'VARIAVEIS';
-  }).reduce((sum, despesa) => sum + despesa.valor, 0);
-  
-  const camerinoAtrasados = despesas.filter(d => {
-    const empresa = d.empresa?.toLowerCase();
-    return empresa === 'camerino' && d.categoria === 'ATRASADOS';
-  }).reduce((sum, despesa) => sum + despesa.valor, 0);
+  const johnnyCategories = {
+    fixas: calculateCategoryTotal(johnnyDespesas, 'FIXAS'),
+    insumos: calculateCategoryTotal(johnnyDespesas, 'INSUMOS'),
+    variaveis: calculateCategoryTotal(johnnyDespesas, 'VARIAVEIS'),
+    atrasados: calculateCategoryTotal(johnnyDespesas, 'ATRASADOS'),
+    retiradas: calculateCategoryTotal(johnnyDespesas, 'RETIRADAS')
+  };
 
-  const camerinoRetiradas = despesas.filter(d => {
-    const empresa = d.empresa?.toLowerCase();
-    return empresa === 'camerino' && d.categoria === 'RETIRADAS';
-  }).reduce((sum, despesa) => sum + despesa.valor, 0);
+  const camerinoCategories = {
+    fixas: calculateCategoryTotal(camerinoDespesas, 'FIXAS'),
+    insumos: calculateCategoryTotal(camerinoDespesas, 'INSUMOS'),
+    variaveis: calculateCategoryTotal(camerinoDespesas, 'VARIAVEIS'),
+    atrasados: calculateCategoryTotal(camerinoDespesas, 'ATRASADOS'),
+    retiradas: calculateCategoryTotal(camerinoDespesas, 'RETIRADAS')
+  };
+
+  console.log('DashboardCards - Categorias detalhadas:', {
+    churrasco: churrascoCategories,
+    johnny: johnnyCategories,
+    camerino: camerinoCategories
+  });
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
       <CompanyCard
         name="Camerino"
-        totalDespesas={camerinoDespesas}
+        totalDespesas={camerinoDespesasTotal}
         status={despesas && despesas.length > 0 ? "Atualizado" : "Sem dados"}
         statusColor={despesas && despesas.length > 0 ? "green" : "yellow"}
         periodo={period}
-        fixas={camerinoFixas > 0 ? camerinoFixas : undefined}
-        insumos={camerinoInsumos > 0 ? camerinoInsumos : undefined}
-        variaveis={camerinoVariaveis > 0 ? camerinoVariaveis : undefined}
-        atrasados={camerinoAtrasados > 0 ? camerinoAtrasados : undefined}
-        retiradas={camerinoRetiradas > 0 ? camerinoRetiradas : undefined}
+        fixas={camerinoCategories.fixas > 0 ? camerinoCategories.fixas : undefined}
+        insumos={camerinoCategories.insumos > 0 ? camerinoCategories.insumos : undefined}
+        variaveis={camerinoCategories.variaveis > 0 ? camerinoCategories.variaveis : undefined}
+        atrasados={camerinoCategories.atrasados > 0 ? camerinoCategories.atrasados : undefined}
+        retiradas={camerinoCategories.retiradas > 0 ? camerinoCategories.retiradas : undefined}
         chartData={[
-          { value: camerinoDespesas > 0 ? camerinoDespesas * 0.8 : 0 }, 
-          { value: camerinoDespesas > 0 ? camerinoDespesas * 0.85 : 0 }, 
-          { value: camerinoDespesas > 0 ? camerinoDespesas * 0.9 : 0 }, 
-          { value: camerinoDespesas > 0 ? camerinoDespesas * 0.95 : 0 },
-          { value: camerinoDespesas }
+          { value: camerinoDespesasTotal > 0 ? camerinoDespesasTotal * 0.8 : 0 }, 
+          { value: camerinoDespesasTotal > 0 ? camerinoDespesasTotal * 0.85 : 0 }, 
+          { value: camerinoDespesasTotal > 0 ? camerinoDespesasTotal * 0.9 : 0 }, 
+          { value: camerinoDespesasTotal > 0 ? camerinoDespesasTotal * 0.95 : 0 },
+          { value: camerinoDespesasTotal }
         ]}
         chartColor="#10b981"
       />
       
       <CompanyCard
         name="Companhia do Churrasco"
-        totalDespesas={churrascoDespesas}
+        totalDespesas={churrascoDespesasTotal}
         status={despesas && despesas.length > 0 ? "Atualizado" : "Sem dados"}
         statusColor={despesas && despesas.length > 0 ? "green" : "yellow"}
         periodo={period}
-        insumos={churrascoInsumos > 0 ? churrascoInsumos : undefined}
-        variaveis={churrascoVariaveis > 0 ? churrascoVariaveis : undefined}
-        fixas={churrascoFixas > 0 ? churrascoFixas : undefined}
-        atrasados={churrascoAtrasados > 0 ? churrascoAtrasados : undefined}
-        retiradas={churrascoRetiradas > 0 ? churrascoRetiradas : undefined}
+        insumos={churrascoCategories.insumos > 0 ? churrascoCategories.insumos : undefined}
+        variaveis={churrascoCategories.variaveis > 0 ? churrascoCategories.variaveis : undefined}
+        fixas={churrascoCategories.fixas > 0 ? churrascoCategories.fixas : undefined}
+        atrasados={churrascoCategories.atrasados > 0 ? churrascoCategories.atrasados : undefined}
+        retiradas={churrascoCategories.retiradas > 0 ? churrascoCategories.retiradas : undefined}
         chartData={[
-          { value: churrascoDespesas > 0 ? churrascoDespesas * 0.8 : 0 }, 
-          { value: churrascoDespesas > 0 ? churrascoDespesas * 0.9 : 0 }, 
-          { value: churrascoDespesas > 0 ? churrascoDespesas * 0.95 : 0 }, 
-          { value: churrascoDespesas > 0 ? churrascoDespesas * 0.98 : 0 },
-          { value: churrascoDespesas }
+          { value: churrascoDespesasTotal > 0 ? churrascoDespesasTotal * 0.8 : 0 }, 
+          { value: churrascoDespesasTotal > 0 ? churrascoDespesasTotal * 0.9 : 0 }, 
+          { value: churrascoDespesasTotal > 0 ? churrascoDespesasTotal * 0.95 : 0 }, 
+          { value: churrascoDespesasTotal > 0 ? churrascoDespesasTotal * 0.98 : 0 },
+          { value: churrascoDespesasTotal }
         ]}
         chartColor="#ef4444"
       />
       
       <CompanyCard
         name="Johnny Rockets"
-        totalDespesas={johnnyDespesas}
+        totalDespesas={johnnyDespesasTotal}
         status={despesas && despesas.length > 0 ? "Atualizado" : "Sem dados"}
         statusColor={despesas && despesas.length > 0 ? "green" : "yellow"}
         periodo={period}
-        fixas={johnnyFixas > 0 ? johnnyFixas : undefined}
-        insumos={johnnyInsumos > 0 ? johnnyInsumos : undefined}
-        variaveis={johnnyVariaveis > 0 ? johnnyVariaveis : undefined}
-        atrasados={johnnyAtrasados > 0 ? johnnyAtrasados : undefined}
-        retiradas={johnnyRetiradas > 0 ? johnnyRetiradas : undefined}
+        fixas={johnnyCategories.fixas > 0 ? johnnyCategories.fixas : undefined}
+        insumos={johnnyCategories.insumos > 0 ? johnnyCategories.insumos : undefined}
+        variaveis={johnnyCategories.variaveis > 0 ? johnnyCategories.variaveis : undefined}
+        atrasados={johnnyCategories.atrasados > 0 ? johnnyCategories.atrasados : undefined}
+        retiradas={johnnyCategories.retiradas > 0 ? johnnyCategories.retiradas : undefined}
         chartData={[
-          { value: johnnyDespesas > 0 ? johnnyDespesas * 0.8 : 0 }, 
-          { value: johnnyDespesas > 0 ? johnnyDespesas * 0.85 : 0 }, 
-          { value: johnnyDespesas > 0 ? johnnyDespesas * 0.9 : 0 }, 
-          { value: johnnyDespesas > 0 ? johnnyDespesas * 0.95 : 0 },
-          { value: johnnyDespesas }
+          { value: johnnyDespesasTotal > 0 ? johnnyDespesasTotal * 0.8 : 0 }, 
+          { value: johnnyDespesasTotal > 0 ? johnnyDespesasTotal * 0.85 : 0 }, 
+          { value: johnnyDespesasTotal > 0 ? johnnyDespesasTotal * 0.9 : 0 }, 
+          { value: johnnyDespesasTotal > 0 ? johnnyDespesasTotal * 0.95 : 0 },
+          { value: johnnyDespesasTotal }
         ]}
         chartColor="#3b82f6"
       />
