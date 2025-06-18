@@ -1,29 +1,12 @@
 
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { normalizeCompanyName, getTransactionValue } from '@/utils/dashboardCalculations';
 
 interface MonthlyEvolutionChartProps {
   despesas?: any[];
   selectedPeriod: 'today' | 'week' | 'month' | 'year';
 }
-
-// Função para normalizar nomes das empresas
-const normalizeCompanyName = (empresa: string | undefined): string => {
-  if (!empresa) return '';
-  const normalized = empresa.toLowerCase().trim();
-  
-  if (normalized.includes('churrasco') || normalized === 'companhia do churrasco') {
-    return 'churrasco';
-  }
-  if (normalized.includes('johnny') || normalized === 'johnny rockets') {
-    return 'johnny';
-  }
-  if (normalized === 'camerino') {
-    return 'camerino';
-  }
-  
-  return normalized;
-};
 
 const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas, selectedPeriod }) => {
   
@@ -42,15 +25,15 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
         
         const churrasco = hourData
           .filter(d => normalizeCompanyName(d.empresa) === 'churrasco')
-          .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
+          .reduce((sum, d) => sum + getTransactionValue(d), 0);
         
         const johnny = hourData
           .filter(d => normalizeCompanyName(d.empresa) === 'johnny')
-          .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
+          .reduce((sum, d) => sum + getTransactionValue(d), 0);
         
         const camerino = hourData
           .filter(d => normalizeCompanyName(d.empresa) === 'camerino')
-          .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
+          .reduce((sum, d) => sum + getTransactionValue(d), 0);
         
         return {
           period: `${hour}h`,
@@ -72,15 +55,15 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
         
         const churrasco = dayData
           .filter(d => normalizeCompanyName(d.empresa) === 'churrasco')
-          .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
+          .reduce((sum, d) => sum + getTransactionValue(d), 0);
         
         const johnny = dayData
           .filter(d => normalizeCompanyName(d.empresa) === 'johnny')
-          .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
+          .reduce((sum, d) => sum + getTransactionValue(d), 0);
         
         const camerino = dayData
           .filter(d => normalizeCompanyName(d.empresa) === 'camerino')
-          .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
+          .reduce((sum, d) => sum + getTransactionValue(d), 0);
         
         return {
           period: day,
@@ -106,15 +89,15 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
         
         const churrasco = monthData
           .filter(d => normalizeCompanyName(d.empresa) === 'churrasco')
-          .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
+          .reduce((sum, d) => sum + getTransactionValue(d), 0);
         
         const johnny = monthData
           .filter(d => normalizeCompanyName(d.empresa) === 'johnny')
-          .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
+          .reduce((sum, d) => sum + getTransactionValue(d), 0);
         
         const camerino = monthData
           .filter(d => normalizeCompanyName(d.empresa) === 'camerino')
-          .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
+          .reduce((sum, d) => sum + getTransactionValue(d), 0);
         
         return {
           period: month,
@@ -142,7 +125,7 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
     despesas.forEach(despesa => {
       const date = new Date(despesa.data);
       const monthIndex = date.getMonth();
-      const valor = despesa.valor_total || despesa.valor || 0;
+      const valor = getTransactionValue(despesa);
       const empresa = normalizeCompanyName(despesa.empresa);
       
       if (empresa === 'churrasco') {

@@ -1,35 +1,17 @@
 
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { calculateDistributionData } from '@/utils/dashboardCalculations';
 
 interface ExpenseDistributionChartProps {
   despesas?: any[];
 }
 
 const ExpenseDistributionChart: React.FC<ExpenseDistributionChartProps> = ({ despesas }) => {
-  // Define categories and colors
-  const categories = [
-    { name: 'INSUMOS', label: 'Insumos', color: '#0ea5e9' },
-    { name: 'FIXAS', label: 'Fixas', color: '#1e293b' },
-    { name: 'VARIAVEIS', label: 'Variáveis', color: '#f59e0b' },
-    { name: 'ATRASADOS', label: 'Atrasados', color: '#ef4444' },
-    { name: 'RETIRADAS', label: 'Retiradas', color: '#8b5cf6' }
-  ];
+  // Usar função centralizada para calcular dados
+  const data = calculateDistributionData(despesas || []);
 
-  // Calculate values based on filtered data using valor_total when available
-  const data = categories.map(category => {
-    const value = despesas
-      ?.filter(d => d.categoria === category.name)
-      .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0) || 0;
-    
-    return {
-      name: category.label,
-      value,
-      color: category.color
-    };
-  }).filter(item => item.value > 0);
-
-  console.log('ExpenseDistributionChart - dados calculados:', data);
+  console.log('ExpenseDistributionChart - dados calculados centralizadamente:', data);
 
   // If there's no data with values, show placeholder
   if (!data.length) {
