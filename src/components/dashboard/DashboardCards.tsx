@@ -2,7 +2,7 @@
 import React from 'react';
 import CompanyCard from '../CompanyCard';
 import { Despesa } from '@/hooks/useDespesas';
-import { calculateCompanyTotals, debugCompanies } from '@/utils/dashboardCalculations';
+import { calculateCompanyTotals, debugCompanies, verifyDataIntegrity } from '@/utils/dashboardCalculations';
 
 interface DashboardCardsProps {
   despesas: Despesa[];
@@ -18,10 +18,16 @@ interface DashboardCardsProps {
 }
 
 const DashboardCards: React.FC<DashboardCardsProps> = ({ despesas, period, stats }) => {
-  console.log('=== DASHBOARD CARDS DEBUG ===');
+  console.log('\n🎯 =========================');
+  console.log('🎯 DASHBOARD CARDS DEBUG');
+  console.log('🎯 =========================');
   console.log('Total de despesas recebidas:', despesas.length);
   console.log('Período:', period);
   console.log('Stats:', stats);
+
+  // Verificar integridade dos dados
+  const integrity = verifyDataIntegrity(despesas);
+  console.log('Integridade dos dados:', integrity);
 
   // Debug das empresas
   debugCompanies(despesas);
@@ -29,10 +35,22 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ despesas, period, stats
   // Usar função centralizada para calcular dados
   const companyTotals = calculateCompanyTotals(despesas);
 
-  console.log('=== TOTAIS CALCULADOS ===');
-  console.log('Camerino:', companyTotals.camerino);
-  console.log('Churrasco:', companyTotals.churrasco);
-  console.log('Johnny:', companyTotals.johnny);
+  console.log('\n🎯 === TOTAIS FINAIS CALCULADOS ===');
+  console.log('Camerino:', {
+    total: companyTotals.camerino?.total || 0,
+    despesas: companyTotals.camerino?.expenses?.length || 0,
+    categorias: companyTotals.camerino?.categories
+  });
+  console.log('Churrasco:', {
+    total: companyTotals.churrasco?.total || 0,
+    despesas: companyTotals.churrasco?.expenses?.length || 0,
+    categorias: companyTotals.churrasco?.categories
+  });
+  console.log('Johnny:', {
+    total: companyTotals.johnny?.total || 0,
+    despesas: companyTotals.johnny?.expenses?.length || 0,
+    categorias: companyTotals.johnny?.categories
+  });
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
