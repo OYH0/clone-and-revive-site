@@ -9,10 +9,15 @@ interface MonthlyEvolutionChartProps {
 }
 
 const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas, selectedPeriod }) => {
+  console.log('=== MONTHLY EVOLUTION CHART ===');
+  console.log('Despesas recebidas:', despesas?.length || 0);
+  console.log('Período selecionado:', selectedPeriod);
   
   // Generate data based on selected period
   const chartData = React.useMemo(() => {
     if (!despesas) return [];
+
+    console.log('Gerando dados do gráfico para período:', selectedPeriod);
 
     if (selectedPeriod === 'today') {
       // Show hourly data for today
@@ -138,9 +143,12 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
     });
     
     const currentMonth = new Date().getMonth();
-    return data
+    const result = data
       .filter((_, i) => i <= currentMonth && i >= currentMonth - 5)
       .sort((a, b) => a.index - b.index);
+      
+    console.log('Dados finais do gráfico mensal:', result);
+    return result;
   }, [despesas, selectedPeriod]);
   
   // Custom tooltip for the chart

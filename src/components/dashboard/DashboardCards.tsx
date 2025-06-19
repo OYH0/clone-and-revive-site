@@ -2,7 +2,7 @@
 import React from 'react';
 import CompanyCard from '../CompanyCard';
 import { Despesa } from '@/hooks/useDespesas';
-import { calculateCompanyTotals } from '@/utils/dashboardCalculations';
+import { calculateCompanyTotals, debugCompanies } from '@/utils/dashboardCalculations';
 
 interface DashboardCardsProps {
   despesas: Despesa[];
@@ -18,14 +18,21 @@ interface DashboardCardsProps {
 }
 
 const DashboardCards: React.FC<DashboardCardsProps> = ({ despesas, period, stats }) => {
-  console.log('DashboardCards - todas as despesas:', despesas);
-  console.log('DashboardCards - período:', period);
-  console.log('DashboardCards - stats:', stats);
+  console.log('=== DASHBOARD CARDS DEBUG ===');
+  console.log('Total de despesas recebidas:', despesas.length);
+  console.log('Período:', period);
+  console.log('Stats:', stats);
+
+  // Debug das empresas
+  debugCompanies(despesas);
 
   // Usar função centralizada para calcular dados
   const companyTotals = calculateCompanyTotals(despesas);
 
-  console.log('DashboardCards - Dados calculados centralizadamente:', companyTotals);
+  console.log('=== TOTAIS CALCULADOS ===');
+  console.log('Camerino:', companyTotals.camerino);
+  console.log('Churrasco:', companyTotals.churrasco);
+  console.log('Johnny:', companyTotals.johnny);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
