@@ -48,7 +48,7 @@ export const getTransactionValue = (despesa: Despesa): number => {
 // Função para filtrar despesas por empresa
 export const filterExpensesByCompany = (despesas: Despesa[], companyKey: string): Despesa[] => {
   console.log('\n=== FILTERING EXPENSES BY COMPANY ===');
-  console.log('Total despesas:', despesas.length);
+  console.log('Total despesas recebidas:', despesas.length);
   console.log('Filtrando por empresa:', companyKey);
   
   // Debug: listar todas as empresas únicas
@@ -69,7 +69,9 @@ export const filterExpensesByCompany = (despesas: Despesa[], companyKey: string)
     id: d.id,
     empresa: d.empresa,
     categoria: d.categoria,
-    valor: getTransactionValue(d)
+    valor: getTransactionValue(d),
+    data_vencimento: d.data_vencimento,
+    data: d.data
   })));
   
   return filtered;
@@ -116,13 +118,15 @@ export const calculateCompanyTotals = (despesas: Despesa[]) => {
   console.log('Total de despesas recebidas:', despesas.length);
   
   // Debug: listar todas as despesas
-  console.log('Todas as despesas:', despesas.map(d => ({
+  console.log('Todas as despesas para cálculo:', despesas.map(d => ({
     id: d.id,
     empresa: d.empresa,
     categoria: d.categoria,
     valor: d.valor,
     valor_total: d.valor_total,
-    valor_usado: getTransactionValue(d)
+    valor_usado: getTransactionValue(d),
+    data_vencimento: d.data_vencimento,
+    data: d.data
   })));
   
   const companies = ['churrasco', 'johnny', 'camerino'];
@@ -202,7 +206,8 @@ export const debugCompanies = (despesas: Despesa[]) => {
     console.log('Despesas desta empresa:', empresaDespesas.map(d => ({
       id: d.id,
       categoria: d.categoria,
-      valor: getTransactionValue(d)
+      valor: getTransactionValue(d),
+      data_vencimento: d.data_vencimento
     })));
   });
 };
@@ -229,6 +234,12 @@ export const verifyDataIntegrity = (despesas: Despesa[]) => {
     console.log('ALERTA: Despesas com valores inválidos:', valoresInvalidos);
   }
   
+  // Verificar se há despesas sem data de vencimento
+  const semDataVencimento = despesas.filter(d => !d.data_vencimento);
+  if (semDataVencimento.length > 0) {
+    console.log('ALERTA: Despesas sem data de vencimento (usando data normal):', semDataVencimento.length);
+  }
+  
   // Verificar total geral
   const totalGeral = despesas.reduce((sum, d) => sum + getTransactionValue(d), 0);
   console.log('Total geral de todas as despesas:', totalGeral);
@@ -238,6 +249,7 @@ export const verifyDataIntegrity = (despesas: Despesa[]) => {
     semEmpresa: semEmpresa.length,
     semCategoria: semCategoria.length,
     valoresInvalidos: valoresInvalidos.length,
+    semDataVencimento: semDataVencimento.length,
     totalGeral
   };
 };
