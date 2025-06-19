@@ -128,9 +128,9 @@ const Dashboard = () => {
                 period={period} 
                 stats={despesasStats}
               />
-              <DashboardTransactions despesas={despesas || []} />
+              <DashboardTransactions despesas={filteredDespesas} />
               <DashboardCharts 
-                despesas={despesas || []} 
+                despesas={filteredDespesas} 
                 selectedPeriod="custom"
               />
             </>
