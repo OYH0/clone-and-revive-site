@@ -7,7 +7,7 @@ import { Despesa } from '@/hooks/useDespesas';
 
 interface DashboardChartsProps {
   despesas: Despesa[];
-  selectedPeriod: 'today' | 'week' | 'month' | 'year';
+  selectedPeriod: 'today' | 'week' | 'month' | 'year' | 'custom';
 }
 
 const DashboardCharts: React.FC<DashboardChartsProps> = ({ despesas, selectedPeriod }) => {
