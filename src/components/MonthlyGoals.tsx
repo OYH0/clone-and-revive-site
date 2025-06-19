@@ -51,7 +51,7 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
     setEditingMeta(meta);
     setFormData({
       nome_meta: meta.nome_meta,
-      valor_meta: (meta.valor_meta / 100).toString(),
+      valor_meta: (meta.valor_meta).toString(),
       categoria_receita: meta.categoria_receita || 'VENDAS',
       cor: meta.cor
     });
@@ -64,7 +64,7 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
       
       const metaData = {
         nome_meta: formData.nome_meta,
-        valor_meta: parseFloat(formData.valor_meta) * 100, // Convert to cents
+        valor_meta: parseFloat(formData.valor_meta),
         valor_atual: valorAtual,
         categoria_receita: formData.categoria_receita,
         cor: formData.cor,
@@ -160,7 +160,7 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">{progress.toFixed(1)}%</span>
+                    <span className="text-sm text-gray-600">{progress.toFixed(2)}%</span>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -183,7 +183,7 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
                   <Progress value={progress} className="h-2" />
                   <div className="flex justify-between text-xs text-gray-500">
                     <span>R$ {valorAtual.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                    <span>Meta: R$ {(meta.valor_meta / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    <span>Meta: R$ {meta.valor_meta.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </div>
                 </div>
               </div>

@@ -65,6 +65,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ despesas, period, stats
         variaveis={companyTotals.camerino?.categories.variaveis > 0 ? companyTotals.camerino.categories.variaveis : undefined}
         atrasados={companyTotals.camerino?.categories.atrasados > 0 ? companyTotals.camerino.categories.atrasados : undefined}
         retiradas={companyTotals.camerino?.categories.retiradas > 0 ? companyTotals.camerino.categories.retiradas : undefined}
+        sem_categoria={companyTotals.camerino?.categories.sem_categoria > 0 ? companyTotals.camerino.categories.sem_categoria : undefined}
         chartData={[
           { value: (companyTotals.camerino?.total || 0) > 0 ? (companyTotals.camerino?.total || 0) * 0.8 : 0 }, 
           { value: (companyTotals.camerino?.total || 0) > 0 ? (companyTotals.camerino?.total || 0) * 0.85 : 0 }, 
@@ -86,6 +87,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ despesas, period, stats
         fixas={companyTotals.churrasco?.categories.fixas > 0 ? companyTotals.churrasco.categories.fixas : undefined}
         atrasados={companyTotals.churrasco?.categories.atrasados > 0 ? companyTotals.churrasco.categories.atrasados : undefined}
         retiradas={companyTotals.churrasco?.categories.retiradas > 0 ? companyTotals.churrasco.categories.retiradas : undefined}
+        sem_categoria={companyTotals.churrasco?.categories.sem_categoria > 0 ? companyTotals.churrasco.categories.sem_categoria : undefined}
         chartData={[
           { value: (companyTotals.churrasco?.total || 0) > 0 ? (companyTotals.churrasco?.total || 0) * 0.8 : 0 }, 
           { value: (companyTotals.churrasco?.total || 0) > 0 ? (companyTotals.churrasco?.total || 0) * 0.9 : 0 }, 
@@ -107,6 +109,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ despesas, period, stats
         variaveis={companyTotals.johnny?.categories.variaveis > 0 ? companyTotals.johnny.categories.variaveis : undefined}
         atrasados={companyTotals.johnny?.categories.atrasados > 0 ? companyTotals.johnny.categories.atrasados : undefined}
         retiradas={companyTotals.johnny?.categories.retiradas > 0 ? companyTotals.johnny.categories.retiradas : undefined}
+        sem_categoria={companyTotals.johnny?.categories.sem_categoria > 0 ? companyTotals.johnny.categories.sem_categoria : undefined}
         chartData={[
           { value: (companyTotals.johnny?.total || 0) > 0 ? (companyTotals.johnny?.total || 0) * 0.8 : 0 }, 
           { value: (companyTotals.johnny?.total || 0) > 0 ? (companyTotals.johnny?.total || 0) * 0.85 : 0 }, 

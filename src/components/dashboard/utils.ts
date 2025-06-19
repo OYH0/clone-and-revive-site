@@ -1,5 +1,9 @@
+
 export const filterDataByPeriod = (data: any[], period: string) => {
   if (!data || data.length === 0) return [];
+  
+  console.log(`\n=== FILTRO DE PERÍODO: ${period.toUpperCase()} ===`);
+  console.log('Total de dados para filtrar:', data.length);
   
   const now = new Date();
   let startDate: Date;
@@ -11,84 +15,85 @@ export const filterDataByPeriod = (data: any[], period: string) => {
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       startDate = today;
       endDate = new Date(today.getTime() + 24 * 60 * 60 * 1000); // Fim do dia
+      console.log('Filtro HOJE - Data:', today.toLocaleDateString('pt-BR'));
       break;
     case 'week':
+      // Semana atual (domingo a sábado)
       const startOfWeek = new Date(now);
       startOfWeek.setDate(now.getDate() - now.getDay());
       startOfWeek.setHours(0, 0, 0, 0);
       startDate = startOfWeek;
-      endDate = new Date();
+      endDate = new Date(now);
+      endDate.setHours(23, 59, 59, 999);
+      console.log('Filtro SEMANA - De:', startOfWeek.toLocaleDateString('pt-BR'), 'até:', endDate.toLocaleDateString('pt-BR'));
       break;
     case 'month':
+      // Mês atual
       startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-      endDate = new Date();
+      endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+      console.log('Filtro MÊS - De:', startDate.toLocaleDateString('pt-BR'), 'até:', endDate.toLocaleDateString('pt-BR'));
       break;
     case 'year':
+      // Ano atual
       startDate = new Date(now.getFullYear(), 0, 1);
-      endDate = new Date();
+      endDate = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
+      console.log('Filtro ANO - De:', startDate.toLocaleDateString('pt-BR'), 'até:', endDate.toLocaleDateString('pt-BR'));
       break;
     default:
+      console.log('Período não reconhecido, retornando todos os dados');
       return data; // Return all data if period is not recognized
   }
 
-  console.log('\n=== FILTER DEBUG ===');
-  console.log('Período selecionado:', period);
-  console.log('Data início:', startDate);
-  console.log('Data fim:', endDate);
-  console.log('Total de itens antes do filtro:', data.length);
-
-  const filteredData = data.filter(item => {
-    // Usar data_vencimento se disponível, caso contrário usar data
-    const dateToUse = item.data_vencimento || item.data;
+  const filtered = data.filter(item => {
+    // Parse da data - suporta formatos YYYY-MM-DD e DD/MM/YYYY
+    let itemDate: Date;
     
-    if (!dateToUse) {
+    if (item.data) {
+      if (item.data.includes('/')) {
+        // Formato DD/MM/YYYY
+        const [dia, mes, ano] = item.data.split('/');
+        itemDate = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
+      } else {
+        // Formato YYYY-MM-DD
+        itemDate = new Date(item.data + 'T00:00:00');
+      }
+    } else if (item.data_pagamento) {
+      // Usar data_pagamento se data não existir
+      if (item.data_pagamento.includes('/')) {
+        const [dia, mes, ano] = item.data_pagamento.split('/');
+        itemDate = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
+      } else {
+        itemDate = new Date(item.data_pagamento + 'T00:00:00');
+      }
+    } else {
       console.log('Item sem data válida:', item);
       return false;
     }
-    
-    // Parse da data no formato YYYY-MM-DD
-    const itemDate = new Date(dateToUse + 'T00:00:00');
-    
-    console.log('Verificando item:', {
-      id: item.id,
-      empresa: item.empresa,
-      data_vencimento: item.data_vencimento,
-      data: item.data,
-      dateToUse,
-      itemDate,
-      inRange: itemDate >= startDate && itemDate <= endDate
-    });
     
     if (period === 'today') {
       // Para hoje, comparar apenas a data (ano, mês, dia)
       const itemDateOnly = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate());
       const todayOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const isToday = itemDateOnly.getTime() === todayOnly.getTime();
+      const match = itemDateOnly.getTime() === todayOnly.getTime();
       
-      console.log('Verificação "hoje":', {
-        itemDateOnly,
-        todayOnly,
-        isToday
-      });
+      if (match) {
+        console.log('Item de HOJE encontrado:', item.data || item.data_pagamento, item.descricao || item.empresa);
+      }
       
-      return isToday;
+      return match;
     }
     
-    const inRange = itemDate >= startDate && itemDate <= endDate;
-    return inRange;
+    const match = itemDate >= startDate && itemDate <= endDate;
+    
+    if (match) {
+      console.log(`Item do período ${period} encontrado:`, item.data || item.data_pagamento, item.descricao || item.empresa);
+    }
+    
+    return match;
   });
-
-  console.log('Total de itens após o filtro:', filteredData.length);
-  console.log('Itens filtrados:', filteredData.map(item => ({
-    id: item.id,
-    empresa: item.empresa,
-    valor: item.valor,
-    valor_total: item.valor_total,
-    data_vencimento: item.data_vencimento,
-    data: item.data
-  })));
-
-  return filteredData;
+  
+  console.log(`Dados filtrados para ${period}:`, filtered.length, 'de', data.length);
+  return filtered;
 };
 
 export const getPeriodString = (selectedPeriod: string) => {

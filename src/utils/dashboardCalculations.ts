@@ -1,6 +1,22 @@
 
 import { Despesa } from '@/hooks/useDespesas';
 
+// Função para normalizar nomes das categorias
+export const normalizeCategoryName = (categoria: string | undefined): string => {
+  if (!categoria) return '';
+  const normalized = categoria.toUpperCase().trim();
+  
+  // Mapear variações das categorias
+  if (normalized === 'VARIÁVEIS' || normalized === 'VARIAVEIS') {
+    return 'VARIAVEIS';
+  }
+  if (normalized === 'SEM CATEGORIA' || normalized === 'SEM_CATEGORIA' || normalized === '') {
+    return 'SEM_CATEGORIA';
+  }
+  
+  return normalized;
+};
+
 // Função centralizada para normalizar nomes das empresas
 export const normalizeCompanyName = (empresa: string | undefined): string => {
   if (!empresa) return '';
@@ -48,7 +64,7 @@ export const getTransactionValue = (despesa: Despesa): number => {
 // Função para filtrar despesas por empresa
 export const filterExpensesByCompany = (despesas: Despesa[], companyKey: string): Despesa[] => {
   console.log('\n=== FILTERING EXPENSES BY COMPANY ===');
-  console.log('Total despesas recebidas:', despesas.length);
+  console.log('Total despesas:', despesas.length);
   console.log('Filtrando por empresa:', companyKey);
   
   // Debug: listar todas as empresas únicas
@@ -69,9 +85,7 @@ export const filterExpensesByCompany = (despesas: Despesa[], companyKey: string)
     id: d.id,
     empresa: d.empresa,
     categoria: d.categoria,
-    valor: getTransactionValue(d),
-    data_vencimento: d.data_vencimento,
-    data: d.data
+    valor: getTransactionValue(d)
   })));
   
   return filtered;
@@ -84,12 +98,16 @@ export const calculateCategoryTotal = (despesas: Despesa[], categoria: string): 
   console.log('Total despesas para análise:', despesas.length);
   
   const categoryExpenses = despesas.filter(d => {
-    const match = d.categoria === categoria;
+    const normalizedDespesaCategoria = normalizeCategoryName(d.categoria);
+    const normalizedTargetCategoria = normalizeCategoryName(categoria);
+    const match = normalizedDespesaCategoria === normalizedTargetCategoria;
+    
     if (match) {
       console.log('Despesa da categoria encontrada:', {
         id: d.id,
         empresa: d.empresa,
-        categoria: d.categoria,
+        categoria_original: d.categoria,
+        categoria_normalizada: normalizedDespesaCategoria,
         valor: getTransactionValue(d)
       });
     }
@@ -118,15 +136,13 @@ export const calculateCompanyTotals = (despesas: Despesa[]) => {
   console.log('Total de despesas recebidas:', despesas.length);
   
   // Debug: listar todas as despesas
-  console.log('Todas as despesas para cálculo:', despesas.map(d => ({
+  console.log('Todas as despesas:', despesas.map(d => ({
     id: d.id,
     empresa: d.empresa,
     categoria: d.categoria,
     valor: d.valor,
     valor_total: d.valor_total,
-    valor_usado: getTransactionValue(d),
-    data_vencimento: d.data_vencimento,
-    data: d.data
+    valor_usado: getTransactionValue(d)
   })));
   
   const companies = ['churrasco', 'johnny', 'camerino'];
@@ -145,7 +161,8 @@ export const calculateCompanyTotals = (despesas: Despesa[]) => {
       variaveis: calculateCategoryTotal(companyExpenses, 'VARIAVEIS'),
       fixas: calculateCategoryTotal(companyExpenses, 'FIXAS'),
       atrasados: calculateCategoryTotal(companyExpenses, 'ATRASADOS'),
-      retiradas: calculateCategoryTotal(companyExpenses, 'RETIRADAS')
+      retiradas: calculateCategoryTotal(companyExpenses, 'RETIRADAS'),
+      sem_categoria: calculateCategoryTotal(companyExpenses, 'SEM_CATEGORIA')
     };
     
     console.log(`Categorias para ${company}:`, categories);
@@ -171,7 +188,8 @@ export const calculateDistributionData = (despesas: Despesa[]) => {
     { name: 'FIXAS', label: 'Fixas', color: '#1e293b' },
     { name: 'VARIAVEIS', label: 'Variáveis', color: '#f59e0b' },
     { name: 'ATRASADOS', label: 'Atrasados', color: '#ef4444' },
-    { name: 'RETIRADAS', label: 'Retiradas', color: '#8b5cf6' }
+    { name: 'RETIRADAS', label: 'Retiradas', color: '#8b5cf6' },
+    { name: 'SEM_CATEGORIA', label: 'Sem Categoria', color: '#6b7280' }
   ];
 
   const data = categories.map(category => {
@@ -206,8 +224,7 @@ export const debugCompanies = (despesas: Despesa[]) => {
     console.log('Despesas desta empresa:', empresaDespesas.map(d => ({
       id: d.id,
       categoria: d.categoria,
-      valor: getTransactionValue(d),
-      data_vencimento: d.data_vencimento
+      valor: getTransactionValue(d)
     })));
   });
 };
@@ -234,12 +251,6 @@ export const verifyDataIntegrity = (despesas: Despesa[]) => {
     console.log('ALERTA: Despesas com valores inválidos:', valoresInvalidos);
   }
   
-  // Verificar se há despesas sem data de vencimento
-  const semDataVencimento = despesas.filter(d => !d.data_vencimento);
-  if (semDataVencimento.length > 0) {
-    console.log('ALERTA: Despesas sem data de vencimento (usando data normal):', semDataVencimento.length);
-  }
-  
   // Verificar total geral
   const totalGeral = despesas.reduce((sum, d) => sum + getTransactionValue(d), 0);
   console.log('Total geral de todas as despesas:', totalGeral);
@@ -249,7 +260,6 @@ export const verifyDataIntegrity = (despesas: Despesa[]) => {
     semEmpresa: semEmpresa.length,
     semCategoria: semCategoria.length,
     valoresInvalidos: valoresInvalidos.length,
-    semDataVencimento: semDataVencimento.length,
     totalGeral
   };
 };

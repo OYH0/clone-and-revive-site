@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Plus, TrendingUp, DollarSign, Calendar, Shield } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import { Button } from '@/components/ui/button';
@@ -15,40 +15,19 @@ const ReceitasPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterEmpresa, setFilterEmpresa] = useState('all');
   const [filterCategoria, setFilterCategoria] = useState('all');
-  const [dataInicio, setDataInicio] = useState<Date | undefined>();
-  const [dataFim, setDataFim] = useState<Date | undefined>();
   
   const { data: receitas, isLoading } = useReceitas();
   const { isAdmin } = useAdminAccess();
 
   // Filtrar receitas
-  const filteredReceitas = useMemo(() => {
-    if (!receitas) return [];
+  const filteredReceitas = receitas?.filter(receita => {
+    const matchesSearch = receita.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         receita.empresa.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesEmpresa = filterEmpresa === 'all' || receita.empresa === filterEmpresa;
+    const matchesCategoria = filterCategoria === 'all' || receita.categoria === filterCategoria;
     
-    return receitas.filter(receita => {
-      const matchesSearch = receita.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           receita.empresa.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesEmpresa = filterEmpresa === 'all' || receita.empresa === filterEmpresa;
-      const matchesCategoria = filterCategoria === 'all' || receita.categoria === filterCategoria;
-      
-      // Filtro por data
-      let matchesDate = true;
-      if (dataInicio || dataFim) {
-        const receitaDate = new Date(receita.data + 'T00:00:00');
-        
-        if (dataInicio) {
-          const startDate = new Date(dataInicio.getFullYear(), dataInicio.getMonth(), dataInicio.getDate());
-          matchesDate = matchesDate && receitaDate >= startDate;
-        }
-        if (dataFim) {
-          const endDate = new Date(dataFim.getFullYear(), dataFim.getMonth(), dataFim.getDate(), 23, 59, 59);
-          matchesDate = matchesDate && receitaDate <= endDate;
-        }
-      }
-      
-      return matchesSearch && matchesEmpresa && matchesCategoria && matchesDate;
-    });
-  }, [receitas, searchTerm, filterEmpresa, filterCategoria, dataInicio, dataFim]);
+    return matchesSearch && matchesEmpresa && matchesCategoria;
+  }) || [];
 
   // Calcular estatísticas baseadas nas receitas filtradas
   const totalReceitas = filteredReceitas.reduce((sum, receita) => sum + receita.valor, 0);
@@ -116,10 +95,6 @@ const ReceitasPage = () => {
             setFilterEmpresa={setFilterEmpresa}
             filterCategoria={filterCategoria}
             setFilterCategoria={setFilterCategoria}
-            dataInicio={dataInicio}
-            setDataInicio={setDataInicio}
-            dataFim={dataFim}
-            setDataFim={setDataFim}
           />
 
           {/* Stats Cards */}

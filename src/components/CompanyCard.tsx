@@ -13,6 +13,7 @@ interface CompanyCardProps {
   fixas?: number;
   atrasados?: number;
   retiradas?: number;
+  sem_categoria?: number;
   chartData: Array<{ value: number }>;
   chartColor: string;
 }
@@ -28,6 +29,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({
   fixas,
   atrasados,
   retiradas,
+  sem_categoria,
   chartData,
   chartColor
 }) => {
@@ -84,6 +86,12 @@ const CompanyCard: React.FC<CompanyCardProps> = ({
               <p className="text-sm">
                 <span className="text-gray-600">Retiradas:</span>{' '}
                 <span className="font-medium">R$ {retiradas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              </p>
+            )}
+            {sem_categoria !== undefined && (
+              <p className="text-sm">
+                <span className="text-gray-600">Sem Categoria:</span>{' '}
+                <span className="font-medium">R$ {sem_categoria.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
               </p>
             )}
           </div>

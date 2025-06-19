@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Plus, TrendingDown, DollarSign, CheckCircle, Clock, AlertTriangle, Shield } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -18,8 +19,6 @@ const DespesasPage = () => {
   const [filterEmpresa, setFilterEmpresa] = useState('all');
   const [filterCategoria, setFilterCategoria] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
-  const [dataInicio, setDataInicio] = useState<Date | undefined>();
-  const [dataFim, setDataFim] = useState<Date | undefined>();
   
   const { data: despesas = [], isLoading, refetch } = useDespesas();
   const { user } = useAuth();
@@ -52,29 +51,9 @@ const DespesasPage = () => {
       const matchesCategoria = filterCategoria === 'all' || transaction.category === filterCategoria;
       const matchesStatus = filterStatus === 'all' || status === filterStatus;
       
-      // Filtro por data de vencimento
-      let matchesDate = true;
-      if (dataInicio || dataFim) {
-        const transactionDate = transaction.data_vencimento ? new Date(transaction.data_vencimento + 'T00:00:00') : null;
-        
-        if (transactionDate) {
-          if (dataInicio) {
-            const startDate = new Date(dataInicio.getFullYear(), dataInicio.getMonth(), dataInicio.getDate());
-            matchesDate = matchesDate && transactionDate >= startDate;
-          }
-          if (dataFim) {
-            const endDate = new Date(dataFim.getFullYear(), dataFim.getMonth(), dataFim.getDate(), 23, 59, 59);
-            matchesDate = matchesDate && transactionDate <= endDate;
-          }
-        } else {
-          // Se não tem data de vencimento, não incluir nos filtros de data
-          matchesDate = false;
-        }
-      }
-      
-      return matchesSearch && matchesEmpresa && matchesCategoria && matchesStatus && matchesDate;
+      return matchesSearch && matchesEmpresa && matchesCategoria && matchesStatus;
     });
-  }, [allTransactions, searchTerm, filterEmpresa, filterCategoria, filterStatus, dataInicio, dataFim]);
+  }, [allTransactions, searchTerm, filterEmpresa, filterCategoria, filterStatus]);
 
   // Calcular estatísticas usando valor_total
   const totalDespesas = filteredTransactions.reduce((sum, transaction) => sum + (transaction.valor_total || transaction.valor), 0);
@@ -158,10 +137,6 @@ const DespesasPage = () => {
             setFilterCategoria={setFilterCategoria}
             filterStatus={filterStatus}
             setFilterStatus={setFilterStatus}
-            dataInicio={dataInicio}
-            setDataInicio={setDataInicio}
-            dataFim={dataFim}
-            setDataFim={setDataFim}
           />
 
           {/* Stats Cards */}
