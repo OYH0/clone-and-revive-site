@@ -1,10 +1,15 @@
 
 import React from 'react';
-import { Filter, X } from 'lucide-react';
+import { Filter, X, CalendarIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
 interface DespesasFilterSimpleProps {
   searchTerm: string;
@@ -15,6 +20,10 @@ interface DespesasFilterSimpleProps {
   setFilterCategoria: (value: string) => void;
   filterStatus: string;
   setFilterStatus: (value: string) => void;
+  dataInicio?: Date;
+  setDataInicio: (value: Date | undefined) => void;
+  dataFim?: Date;
+  setDataFim: (value: Date | undefined) => void;
 }
 
 const DespesasFilterSimple: React.FC<DespesasFilterSimpleProps> = ({
@@ -25,15 +34,21 @@ const DespesasFilterSimple: React.FC<DespesasFilterSimpleProps> = ({
   filterCategoria,
   setFilterCategoria,
   filterStatus,
-  setFilterStatus
+  setFilterStatus,
+  dataInicio,
+  setDataInicio,
+  dataFim,
+  setDataFim
 }) => {
-  const hasActiveFilters = searchTerm !== '' || filterEmpresa !== 'all' || filterCategoria !== 'all' || filterStatus !== 'all';
+  const hasActiveFilters = searchTerm !== '' || filterEmpresa !== 'all' || filterCategoria !== 'all' || filterStatus !== 'all' || dataInicio || dataFim;
 
   const clearFilters = () => {
     setSearchTerm('');
     setFilterEmpresa('all');
     setFilterCategoria('all');
     setFilterStatus('all');
+    setDataInicio(undefined);
+    setDataFim(undefined);
   };
 
   return (
@@ -58,7 +73,7 @@ const DespesasFilterSimple: React.FC<DespesasFilterSimpleProps> = ({
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
           <div>
             <Input
               placeholder="Buscar por descrição ou empresa..."
@@ -107,6 +122,56 @@ const DespesasFilterSimple: React.FC<DespesasFilterSimpleProps> = ({
                 <SelectItem value="ATRASADO">Atrasado</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  className={cn(
+                    "w-full justify-start text-left font-normal rounded-xl",
+                    !dataInicio && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dataInicio ? format(dataInicio, 'dd/MM/yyyy', { locale: ptBR }) : 'Data início'}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={dataInicio}
+                  onSelect={setDataInicio}
+                  initialFocus
+                  className="p-3 pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  className={cn(
+                    "w-full justify-start text-left font-normal rounded-xl",
+                    !dataFim && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dataFim ? format(dataFim, 'dd/MM/yyyy', { locale: ptBR }) : 'Data fim'}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={dataFim}
+                  onSelect={setDataFim}
+                  initialFocus
+                  className="p-3 pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       </CardContent>
