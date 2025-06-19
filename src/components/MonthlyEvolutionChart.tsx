@@ -5,7 +5,7 @@ import { normalizeCompanyName, getTransactionValue } from '@/utils/dashboardCalc
 
 interface MonthlyEvolutionChartProps {
   despesas?: any[];
-  selectedPeriod: 'today' | 'week' | 'month' | 'year';
+  selectedPeriod: 'today' | 'week' | 'month' | 'year' | 'custom';
 }
 
 const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas, selectedPeriod }) => {
@@ -113,7 +113,7 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
       });
     }
 
-    // Default: show last 6 months including current month
+    // Default (month, custom): show last 6 months including current month
     const months = [
       'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 
       'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
