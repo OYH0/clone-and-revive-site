@@ -1,56 +1,80 @@
 
 import React from 'react';
+import { CalendarIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
 interface DashboardHeaderProps {
-  selectedPeriod: 'today' | 'week' | 'month' | 'year';
-  onPeriodChange: (period: 'today' | 'week' | 'month' | 'year') => void;
+  dataInicio?: Date;
+  setDataInicio: (date: Date | undefined) => void;
+  dataFim?: Date;
+  setDataFim: (date: Date | undefined) => void;
 }
 
-const DashboardHeader: React.FC<DashboardHeaderProps> = ({ selectedPeriod, onPeriodChange }) => {
+const DashboardHeader: React.FC<DashboardHeaderProps> = ({ 
+  dataInicio, 
+  setDataInicio, 
+  dataFim, 
+  setDataFim 
+}) => {
   return (
     <div className="flex justify-between items-center mb-8">
       <h1 className="text-3xl font-bold text-gray-900">Dashboard Financeiro</h1>
-      <div className="flex gap-2">
-        <button 
-          className={`px-4 py-2 text-sm rounded-2xl ${
-            selectedPeriod === 'today' 
-              ? 'bg-black text-white' 
-              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-          }`}
-          onClick={() => onPeriodChange('today')}
-        >
-          Hoje
-        </button>
-        <button 
-          className={`px-4 py-2 text-sm rounded-2xl ${
-            selectedPeriod === 'week' 
-              ? 'bg-black text-white' 
-              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-          }`}
-          onClick={() => onPeriodChange('week')}
-        >
-          Semana
-        </button>
-        <button 
-          className={`px-4 py-2 text-sm rounded-2xl ${
-            selectedPeriod === 'month' 
-              ? 'bg-black text-white' 
-              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-          }`}
-          onClick={() => onPeriodChange('month')}
-        >
-          Mês
-        </button>
-        <button 
-          className={`px-4 py-2 text-sm rounded-2xl ${
-            selectedPeriod === 'year' 
-              ? 'bg-black text-white' 
-              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-          }`}
-          onClick={() => onPeriodChange('year')}
-        >
-          Ano
-        </button>
+      <div className="flex gap-4">
+        <div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="outline" 
+                className={cn(
+                  "w-full justify-start text-left font-normal rounded-xl",
+                  !dataInicio && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {dataInicio ? format(dataInicio, 'dd/MM/yyyy', { locale: ptBR }) : 'Data início'}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={dataInicio}
+                onSelect={setDataInicio}
+                initialFocus
+                className="p-3 pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+        <div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="outline" 
+                className={cn(
+                  "w-full justify-start text-left font-normal rounded-xl",
+                  !dataFim && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {dataFim ? format(dataFim, 'dd/MM/yyyy', { locale: ptBR }) : 'Data fim'}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={dataFim}
+                onSelect={setDataFim}
+                initialFocus
+                className="p-3 pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
       </div>
     </div>
   );
