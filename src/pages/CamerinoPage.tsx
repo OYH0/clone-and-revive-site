@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Building2, TrendingUp, DollarSign, Users, BarChart3 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -18,9 +17,23 @@ const CamerinoPage = () => {
   const { data: receitas } = useReceitas();
   const [activeModal, setActiveModal] = useState<string | null>(null);
 
-  // Filtrar dados do Camerino
-  const camerinoDespesas = despesas?.filter(d => d.empresa === 'Camerino') || [];
-  const camerinoReceitas = receitas?.filter(r => r.empresa === 'Camerino') || [];
+  // Filtrar dados do Camerino - usando várias variações possíveis do nome
+  const camerinoDespesas = despesas?.filter(d => {
+    const empresa = d.empresa?.toLowerCase().trim() || '';
+    return empresa === 'camerino' || empresa.includes('camerino');
+  }) || [];
+  
+  const camerinoReceitas = receitas?.filter(r => {
+    const empresa = r.empresa?.toLowerCase().trim() || '';
+    return empresa === 'camerino' || empresa.includes('camerino');
+  }) || [];
+
+  console.log('Camerino - Despesas filtradas:', camerinoDespesas.length);
+  console.log('Camerino - Despesas por categoria:', camerinoDespesas.reduce((acc, d) => {
+    const cat = d.categoria || 'SEM_CATEGORIA';
+    acc[cat] = (acc[cat] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>));
 
   // Calcular estatísticas - removendo divisão por 100
   const totalDespesas = camerinoDespesas.reduce((sum, d) => sum + d.valor, 0);

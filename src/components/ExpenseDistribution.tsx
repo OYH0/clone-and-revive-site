@@ -2,6 +2,7 @@
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { Despesa } from '@/hooks/useDespesas';
+import { calculateDistributionData } from '@/utils/dashboardCalculations';
 
 interface ExpenseDistributionProps {
   despesas: Despesa[];
@@ -9,31 +10,14 @@ interface ExpenseDistributionProps {
 }
 
 const ExpenseDistribution: React.FC<ExpenseDistributionProps> = ({ despesas, empresa }) => {
-  const categorias = [
-    { name: 'INSUMOS', color: '#3b82f6' },
-    { name: 'FIXAS', color: '#8b5cf6' },
-    { name: 'VARIAVEIS', color: '#f59e0b' },
-    { name: 'ATRASADOS', color: '#ef4444' }
-  ];
+  console.log('=== EXPENSE DISTRIBUTION ===');
+  console.log('Empresa:', empresa);
+  console.log('Despesas recebidas:', despesas?.length || 0);
 
-  const data = categorias.map(categoria => {
-    const valor = despesas
-      .filter(d => d.categoria === categoria.name)
-      .reduce((sum, d) => sum + d.valor, 0);
-    
-    return {
-      name: categoria.name,
-      value: valor,
-      color: categoria.color,
-      percentage: 0 // Will be calculated below
-    };
-  }).filter(item => item.value > 0);
+  // Usar função centralizada para calcular dados
+  const data = calculateDistributionData(despesas || []);
 
-  // Calculate percentages
-  const total = data.reduce((sum, item) => sum + item.value, 0);
-  data.forEach(item => {
-    item.percentage = total > 0 ? (item.value / total) * 100 : 0;
-  });
+  console.log('Dados do gráfico de distribuição:', data);
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -45,7 +29,7 @@ const ExpenseDistribution: React.FC<ExpenseDistributionProps> = ({ despesas, emp
             R$ {data.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
           <p className="text-sm text-gray-600">
-            {data.payload.percentage.toFixed(1)}%
+            {((data.value / data.payload.total) * 100).toFixed(1)}%
           </p>
         </div>
       );
@@ -61,19 +45,23 @@ const ExpenseDistribution: React.FC<ExpenseDistributionProps> = ({ despesas, emp
     );
   }
 
+  // Calcular total para percentuais
+  const total = data.reduce((sum, item) => sum + item.value, 0);
+  const dataWithTotal = data.map(item => ({ ...item, total }));
+
   return (
     <div className="h-80">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
-            data={data}
+            data={dataWithTotal}
             cx="50%"
             cy="50%"
             innerRadius={60}
             outerRadius={120}
             dataKey="value"
           >
-            {data.map((entry, index) => (
+            {dataWithTotal.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.color} />
             ))}
           </Pie>

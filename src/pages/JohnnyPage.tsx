@@ -16,9 +16,29 @@ const JohnnyPage = () => {
   const { data: receitas } = useReceitas();
   const [activeModal, setActiveModal] = useState<string | null>(null);
 
-  // Filtrar dados do Johnny Rockets
-  const johnnyDespesas = despesas?.filter(d => d.empresa === 'Johnny') || [];
-  const johnnyReceitas = receitas?.filter(r => r.empresa === 'Johnny') || [];
+  // Filtrar dados do Johnny Rockets - usando várias variações possíveis do nome
+  const johnnyDespesas = despesas?.filter(d => {
+    const empresa = d.empresa?.toLowerCase().trim() || '';
+    return empresa === 'johnny' || 
+           empresa === 'johnny rockets' || 
+           empresa === 'johnny rocket' ||
+           empresa.includes('johnny');
+  }) || [];
+  
+  const johnnyReceitas = receitas?.filter(r => {
+    const empresa = r.empresa?.toLowerCase().trim() || '';
+    return empresa === 'johnny' || 
+           empresa === 'johnny rockets' || 
+           empresa === 'johnny rocket' ||
+           empresa.includes('johnny');
+  }) || [];
+
+  console.log('Johnny - Despesas filtradas:', johnnyDespesas.length);
+  console.log('Johnny - Despesas por categoria:', johnnyDespesas.reduce((acc, d) => {
+    const cat = d.categoria || 'SEM_CATEGORIA';
+    acc[cat] = (acc[cat] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>));
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">

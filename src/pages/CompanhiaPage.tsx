@@ -18,9 +18,29 @@ const CompanhiaPage = () => {
   const { data: receitas } = useReceitas();
   const [activeModal, setActiveModal] = useState<string | null>(null);
 
-  // Filtrar dados da Companhia do Churrasco
-  const companhiaDespesas = despesas?.filter(d => d.empresa === 'Churrasco') || [];
-  const companhiaReceitas = receitas?.filter(r => r.empresa === 'Churrasco') || [];
+  // Filtrar dados da Companhia do Churrasco - usando várias variações possíveis do nome
+  const companhiaDespesas = despesas?.filter(d => {
+    const empresa = d.empresa?.toLowerCase().trim() || '';
+    return empresa === 'churrasco' || 
+           empresa === 'companhia do churrasco' || 
+           empresa === 'cia do churrasco' ||
+           empresa.includes('churrasco');
+  }) || [];
+  
+  const companhiaReceitas = receitas?.filter(r => {
+    const empresa = r.empresa?.toLowerCase().trim() || '';
+    return empresa === 'churrasco' || 
+           empresa === 'companhia do churrasco' || 
+           empresa === 'cia do churrasco' ||
+           empresa.includes('churrasco');
+  }) || [];
+
+  console.log('Churrasco - Despesas filtradas:', companhiaDespesas.length);
+  console.log('Churrasco - Despesas por categoria:', companhiaDespesas.reduce((acc, d) => {
+    const cat = d.categoria || 'SEM_CATEGORIA';
+    acc[cat] = (acc[cat] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>));
 
   // Calcular estatísticas - removendo divisão por 100
   const totalDespesas = companhiaDespesas.reduce((sum, d) => sum + d.valor, 0);
