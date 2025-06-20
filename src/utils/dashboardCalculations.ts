@@ -1,20 +1,34 @@
-
 import { Despesa } from '@/hooks/useDespesas';
 
 // Função para normalizar nomes das categorias
 export const normalizeCategoryName = (categoria: string | undefined): string => {
-  if (!categoria) return '';
+  if (!categoria) return 'SEM_CATEGORIA';
   const normalized = categoria.toUpperCase().trim();
+  
+  console.log('Normalizando categoria:', categoria, '-> normalized:', normalized);
   
   // Mapear variações das categorias
   if (normalized === 'VARIÁVEIS' || normalized === 'VARIAVEIS') {
-    return 'VARIAVEIS';
+    return 'VARIÁVEIS';
+  }
+  if (normalized === 'FIXAS') {
+    return 'FIXAS';
+  }
+  if (normalized === 'INSUMOS') {
+    return 'INSUMOS';
+  }
+  if (normalized === 'ATRASADOS') {
+    return 'ATRASADOS';
+  }
+  if (normalized === 'RETIRADAS') {
+    return 'RETIRADAS';
   }
   if (normalized === 'SEM CATEGORIA' || normalized === 'SEM_CATEGORIA' || normalized === '') {
     return 'SEM_CATEGORIA';
   }
   
-  return normalized;
+  console.log('Categoria não mapeada:', normalized);
+  return 'SEM_CATEGORIA';
 };
 
 // Função centralizada para normalizar nomes das empresas
@@ -94,12 +108,12 @@ export const filterExpensesByCompany = (despesas: Despesa[], companyKey: string)
 // Função para calcular total por categoria
 export const calculateCategoryTotal = (despesas: Despesa[], categoria: string): number => {
   console.log('\n=== CALCULATING CATEGORY TOTAL ===');
-  console.log('Categoria:', categoria);
+  console.log('Categoria solicitada:', categoria);
   console.log('Total despesas para análise:', despesas.length);
   
   const categoryExpenses = despesas.filter(d => {
     const normalizedDespesaCategoria = normalizeCategoryName(d.categoria);
-    const normalizedTargetCategoria = normalizeCategoryName(categoria);
+    const normalizedTargetCategoria = categoria;
     const match = normalizedDespesaCategoria === normalizedTargetCategoria;
     
     if (match) {
@@ -155,10 +169,10 @@ export const calculateCompanyTotals = (despesas: Despesa[]) => {
     
     console.log(`Empresa ${company} - Total de despesas:`, companyExpenses.length, 'Total valor:', total);
     
-    // Calcular por categoria
+    // Calcular por categoria usando os nomes corretos
     const categories = {
       insumos: calculateCategoryTotal(companyExpenses, 'INSUMOS'),
-      variaveis: calculateCategoryTotal(companyExpenses, 'VARIAVEIS'),
+      variaveis: calculateCategoryTotal(companyExpenses, 'VARIÁVEIS'),
       fixas: calculateCategoryTotal(companyExpenses, 'FIXAS'),
       atrasados: calculateCategoryTotal(companyExpenses, 'ATRASADOS'),
       retiradas: calculateCategoryTotal(companyExpenses, 'RETIRADAS'),
@@ -186,7 +200,7 @@ export const calculateDistributionData = (despesas: Despesa[]) => {
   const categories = [
     { name: 'INSUMOS', label: 'Insumos', color: '#0ea5e9' },
     { name: 'FIXAS', label: 'Fixas', color: '#1e293b' },
-    { name: 'VARIAVEIS', label: 'Variáveis', color: '#f59e0b' },
+    { name: 'VARIÁVEIS', label: 'Variáveis', color: '#f59e0b' },
     { name: 'ATRASADOS', label: 'Atrasados', color: '#ef4444' },
     { name: 'RETIRADAS', label: 'Retiradas', color: '#8b5cf6' },
     { name: 'SEM_CATEGORIA', label: 'Sem Categoria', color: '#6b7280' }
