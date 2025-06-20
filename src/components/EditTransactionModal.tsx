@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -36,6 +35,15 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
+
+  // Categorias com valores corretos (com acentos)
+  const categories = [
+    { value: 'INSUMOS', label: 'Insumos' },
+    { value: 'FIXAS', label: 'Fixas' },
+    { value: 'VARIÁVEIS', label: 'Variáveis' },
+    { value: 'ATRASADOS', label: 'Atrasados' },
+    { value: 'RETIRADAS', label: 'Retiradas' }
+  ];
 
   useEffect(() => {
     if (transaction) {
@@ -180,11 +188,11 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                 <SelectValue placeholder="Selecione uma categoria" />
               </SelectTrigger>
               <SelectContent className="rounded-2xl">
-                <SelectItem value="INSUMOS">Insumos</SelectItem>
-                <SelectItem value="FIXAS">Fixas</SelectItem>
-                <SelectItem value="VARIAVEIS">Variáveis</SelectItem>
-                <SelectItem value="ATRASADOS">Atrasados</SelectItem>
-                <SelectItem value="RETIRADAS">Retiradas</SelectItem>
+                {categories.map(category => (
+                  <SelectItem key={category.value} value={category.value}>
+                    {category.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
