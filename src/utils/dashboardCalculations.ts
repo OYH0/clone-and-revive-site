@@ -5,36 +5,32 @@ import { Despesa } from '@/hooks/useDespesas';
 export const normalizeCategoryName = (categoria: string | undefined): string => {
   if (!categoria) return 'SEM_CATEGORIA';
   
-  // Remover acentos e normalizar para comparação
-  const normalized = categoria
-    .toUpperCase()
-    .trim()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, ''); // Remove acentos
+  // Normalizar string removendo espaços extras e convertendo para maiúscula
+  const trimmed = categoria.trim().toUpperCase();
   
-  console.log('Normalizando categoria:', categoria, '-> normalized:', normalized);
+  console.log('Normalizando categoria:', categoria, '-> trimmed:', trimmed);
   
-  // Mapear variações das categorias (sem acentos para comparação)
-  if (normalized === 'VARIAVEIS') {
+  // Mapear todas as variações possíveis das categorias
+  if (trimmed === 'VARIÁVEIS' || trimmed === 'VARIAVEIS' || trimmed === 'VARIAVEL' || trimmed === 'VARIÁVEL') {
     return 'VARIÁVEIS';
   }
-  if (normalized === 'FIXAS') {
+  if (trimmed === 'FIXAS' || trimmed === 'FIXA') {
     return 'FIXAS';
   }
-  if (normalized === 'INSUMOS') {
+  if (trimmed === 'INSUMOS' || trimmed === 'INSUMO') {
     return 'INSUMOS';
   }
-  if (normalized === 'ATRASADOS') {
+  if (trimmed === 'ATRASADOS' || trimmed === 'ATRASADO') {
     return 'ATRASADOS';
   }
-  if (normalized === 'RETIRADAS') {
+  if (trimmed === 'RETIRADAS' || trimmed === 'RETIRADA') {
     return 'RETIRADAS';
   }
-  if (normalized === 'SEM CATEGORIA' || normalized === 'SEM_CATEGORIA' || normalized === '') {
+  if (trimmed === 'SEM CATEGORIA' || trimmed === 'SEM_CATEGORIA' || trimmed === '' || trimmed === 'UNDEFINED') {
     return 'SEM_CATEGORIA';
   }
   
-  console.log('Categoria não mapeada:', normalized);
+  console.log('Categoria não mapeada:', trimmed);
   return 'SEM_CATEGORIA';
 };
 
@@ -71,10 +67,19 @@ export const normalizeCompanyName = (empresa: string | undefined): string => {
 
 // Função para obter o valor correto (prioriza valor_total, depois valor)
 export const getTransactionValue = (despesa: Despesa): number => {
-  const valor = despesa.valor_total || despesa.valor || 0;
+  let valor = 0;
+  
+  // Priorizar valor_total se existir e for maior que 0
+  if (despesa.valor_total && despesa.valor_total > 0) {
+    valor = despesa.valor_total;
+  } else if (despesa.valor && despesa.valor > 0) {
+    valor = despesa.valor;
+  }
+  
   console.log('Valor da transação:', { 
     id: despesa.id, 
-    empresa: despesa.empresa, 
+    empresa: despesa.empresa,
+    categoria: despesa.categoria,
     valor_total: despesa.valor_total, 
     valor: despesa.valor, 
     valor_usado: valor 
@@ -132,7 +137,9 @@ export const calculateCategoryTotal = (despesas: Despesa[], categoria: string): 
         empresa: d.empresa,
         categoria_original: d.categoria,
         categoria_normalizada: normalizedDespesaCategoria,
-        valor: getTransactionValue(d)
+        valor_total: d.valor_total,
+        valor: d.valor,
+        valor_usado: getTransactionValue(d)
       });
     }
     return match;
@@ -147,7 +154,9 @@ export const calculateCategoryTotal = (despesas: Despesa[], categoria: string): 
       id: d.id,
       empresa: d.empresa,
       categoria: d.categoria,
-      valor: getTransactionValue(d)
+      valor_total: d.valor_total,
+      valor: d.valor,
+      valor_usado: getTransactionValue(d)
     }))
   });
   
