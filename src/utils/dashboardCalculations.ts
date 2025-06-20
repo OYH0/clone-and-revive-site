@@ -1,14 +1,21 @@
+
 import { Despesa } from '@/hooks/useDespesas';
 
 // Função para normalizar nomes das categorias
 export const normalizeCategoryName = (categoria: string | undefined): string => {
   if (!categoria) return 'SEM_CATEGORIA';
-  const normalized = categoria.toUpperCase().trim();
+  
+  // Remover acentos e normalizar para comparação
+  const normalized = categoria
+    .toUpperCase()
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, ''); // Remove acentos
   
   console.log('Normalizando categoria:', categoria, '-> normalized:', normalized);
   
-  // Mapear variações das categorias
-  if (normalized === 'VARIÁVEIS' || normalized === 'VARIAVEIS') {
+  // Mapear variações das categorias (sem acentos para comparação)
+  if (normalized === 'VARIAVEIS') {
     return 'VARIÁVEIS';
   }
   if (normalized === 'FIXAS') {
@@ -111,10 +118,13 @@ export const calculateCategoryTotal = (despesas: Despesa[], categoria: string): 
   console.log('Categoria solicitada:', categoria);
   console.log('Total despesas para análise:', despesas.length);
   
+  // Debug: listar todas as categorias únicas
+  const uniqueCategories = Array.from(new Set(despesas.map(d => d.categoria)));
+  console.log('Categorias únicas encontradas:', uniqueCategories);
+  
   const categoryExpenses = despesas.filter(d => {
     const normalizedDespesaCategoria = normalizeCategoryName(d.categoria);
-    const normalizedTargetCategoria = categoria;
-    const match = normalizedDespesaCategoria === normalizedTargetCategoria;
+    const match = normalizedDespesaCategoria === categoria;
     
     if (match) {
       console.log('Despesa da categoria encontrada:', {
