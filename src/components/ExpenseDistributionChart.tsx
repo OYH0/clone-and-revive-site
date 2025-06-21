@@ -40,7 +40,7 @@ const ExpenseDistributionChart: React.FC<ExpenseDistributionChartProps> = ({ des
   };
 
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center gap-8">
       <div className="w-48 h-48">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
@@ -61,22 +61,19 @@ const ExpenseDistributionChart: React.FC<ExpenseDistributionChartProps> = ({ des
         </ResponsiveContainer>
       </div>
       
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-4 min-w-[200px]">
         {data.map((item, index) => (
-          <div key={index} className="flex items-center gap-3">
-            <div 
-              className="w-3 h-3 rounded-full" 
-              style={{ backgroundColor: item.color }}
-            ></div>
-            <span className="text-gray-700 text-sm">{item.name}</span>
-          </div>
-        ))}
-      </div>
-      
-      <div className="flex flex-col gap-1 text-xs text-gray-500">
-        {data.map((item, index) => (
-          <div key={index} className="text-right">
-            R$ {item.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          <div key={index} className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div 
+                className="w-3 h-3 rounded-full flex-shrink-0" 
+                style={{ backgroundColor: item.color }}
+              ></div>
+              <span className="text-gray-700 text-sm font-medium">{item.name}</span>
+            </div>
+            <span className="text-gray-900 text-sm font-semibold text-right">
+              R$ {item.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </span>
           </div>
         ))}
       </div>

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Filter, X } from 'lucide-react';
+import { Filter, X, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -15,6 +15,10 @@ interface DespesasFilterSimpleProps {
   setFilterCategoria: (value: string) => void;
   filterStatus: string;
   setFilterStatus: (value: string) => void;
+  dateFrom?: string;
+  setDateFrom?: (value: string) => void;
+  dateTo?: string;
+  setDateTo?: (value: string) => void;
 }
 
 const DespesasFilterSimple: React.FC<DespesasFilterSimpleProps> = ({
@@ -25,15 +29,26 @@ const DespesasFilterSimple: React.FC<DespesasFilterSimpleProps> = ({
   filterCategoria,
   setFilterCategoria,
   filterStatus,
-  setFilterStatus
+  setFilterStatus,
+  dateFrom,
+  setDateFrom,
+  dateTo,
+  setDateTo
 }) => {
-  const hasActiveFilters = searchTerm !== '' || filterEmpresa !== 'all' || filterCategoria !== 'all' || filterStatus !== 'all';
+  const hasActiveFilters = searchTerm !== '' || 
+    filterEmpresa !== 'all' || 
+    filterCategoria !== 'all' || 
+    filterStatus !== 'all' ||
+    (dateFrom && dateFrom !== '') ||
+    (dateTo && dateTo !== '');
 
   const clearFilters = () => {
     setSearchTerm('');
     setFilterEmpresa('all');
     setFilterCategoria('all');
     setFilterStatus('all');
+    if (setDateFrom) setDateFrom('');
+    if (setDateTo) setDateTo('');
   };
 
   return (
@@ -58,8 +73,8 @@ const DespesasFilterSimple: React.FC<DespesasFilterSimpleProps> = ({
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="md:col-span-2">
             <Input
               placeholder="Buscar por descrição ou empresa..."
               value={searchTerm}
@@ -108,6 +123,36 @@ const DespesasFilterSimple: React.FC<DespesasFilterSimpleProps> = ({
               </SelectContent>
             </Select>
           </div>
+          
+          {/* Filtros de Data */}
+          {setDateFrom && setDateTo && (
+            <>
+              <div className="md:col-span-3 lg:col-span-1">
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    type="date"
+                    placeholder="Data inicial"
+                    value={dateFrom || ''}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                    className="rounded-xl pl-10"
+                  />
+                </div>
+              </div>
+              <div className="md:col-span-3 lg:col-span-1">
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    type="date"
+                    placeholder="Data final"
+                    value={dateTo || ''}
+                    onChange={(e) => setDateTo(e.target.value)}
+                    className="rounded-xl pl-10"
+                  />
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </CardContent>
     </Card>
