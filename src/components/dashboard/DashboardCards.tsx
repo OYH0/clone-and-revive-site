@@ -17,6 +17,19 @@ interface DashboardCardsProps {
   };
 }
 
+// Função para gerar dados de gráfico baseados nas categorias
+const generateChartData = (categories: Record<string, number>) => {
+  const values = Object.values(categories).filter(v => v > 0);
+  if (values.length === 0) return [{ value: 0 }];
+  
+  const maxValue = Math.max(...values);
+  
+  // Gerar 6 pontos de dados simulando evolução mensal
+  return Array.from({ length: 6 }, (_, i) => ({
+    value: Math.max(0, maxValue * (0.6 + (i * 0.08) + Math.random() * 0.1))
+  }));
+};
+
 const DashboardCards: React.FC<DashboardCardsProps> = ({ despesas, period, stats }) => {
   console.log('\n🎯 =========================');
   console.log('🎯 DASHBOARD CARDS DEBUG');
@@ -66,13 +79,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ despesas, period, stats
         atrasados={companyTotals.camerino?.categories.atrasados > 0 ? companyTotals.camerino.categories.atrasados : undefined}
         retiradas={companyTotals.camerino?.categories.retiradas > 0 ? companyTotals.camerino.categories.retiradas : undefined}
         sem_categoria={companyTotals.camerino?.categories.sem_categoria > 0 ? companyTotals.camerino.categories.sem_categoria : undefined}
-        chartData={[
-          { value: (companyTotals.camerino?.total || 0) > 0 ? (companyTotals.camerino?.total || 0) * 0.8 : 0 }, 
-          { value: (companyTotals.camerino?.total || 0) > 0 ? (companyTotals.camerino?.total || 0) * 0.85 : 0 }, 
-          { value: (companyTotals.camerino?.total || 0) > 0 ? (companyTotals.camerino?.total || 0) * 0.9 : 0 }, 
-          { value: (companyTotals.camerino?.total || 0) > 0 ? (companyTotals.camerino?.total || 0) * 0.95 : 0 },
-          { value: companyTotals.camerino?.total || 0 }
-        ]}
+        chartData={generateChartData(companyTotals.camerino?.categories || {})}
         chartColor="#10b981"
       />
       
@@ -88,13 +95,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ despesas, period, stats
         atrasados={companyTotals.churrasco?.categories.atrasados > 0 ? companyTotals.churrasco.categories.atrasados : undefined}
         retiradas={companyTotals.churrasco?.categories.retiradas > 0 ? companyTotals.churrasco.categories.retiradas : undefined}
         sem_categoria={companyTotals.churrasco?.categories.sem_categoria > 0 ? companyTotals.churrasco.categories.sem_categoria : undefined}
-        chartData={[
-          { value: (companyTotals.churrasco?.total || 0) > 0 ? (companyTotals.churrasco?.total || 0) * 0.8 : 0 }, 
-          { value: (companyTotals.churrasco?.total || 0) > 0 ? (companyTotals.churrasco?.total || 0) * 0.9 : 0 }, 
-          { value: (companyTotals.churrasco?.total || 0) > 0 ? (companyTotals.churrasco?.total || 0) * 0.95 : 0 }, 
-          { value: (companyTotals.churrasco?.total || 0) > 0 ? (companyTotals.churrasco?.total || 0) * 0.98 : 0 },
-          { value: companyTotals.churrasco?.total || 0 }
-        ]}
+        chartData={generateChartData(companyTotals.churrasco?.categories || {})}
         chartColor="#ef4444"
       />
       
@@ -110,13 +111,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ despesas, period, stats
         atrasados={companyTotals.johnny?.categories.atrasados > 0 ? companyTotals.johnny.categories.atrasados : undefined}
         retiradas={companyTotals.johnny?.categories.retiradas > 0 ? companyTotals.johnny.categories.retiradas : undefined}
         sem_categoria={companyTotals.johnny?.categories.sem_categoria > 0 ? companyTotals.johnny.categories.sem_categoria : undefined}
-        chartData={[
-          { value: (companyTotals.johnny?.total || 0) > 0 ? (companyTotals.johnny?.total || 0) * 0.8 : 0 }, 
-          { value: (companyTotals.johnny?.total || 0) > 0 ? (companyTotals.johnny?.total || 0) * 0.85 : 0 }, 
-          { value: (companyTotals.johnny?.total || 0) > 0 ? (companyTotals.johnny?.total || 0) * 0.9 : 0 }, 
-          { value: (companyTotals.johnny?.total || 0) > 0 ? (companyTotals.johnny?.total || 0) * 0.95 : 0 },
-          { value: companyTotals.johnny?.total || 0 }
-        ]}
+        chartData={generateChartData(companyTotals.johnny?.categories || {})}
         chartColor="#3b82f6"
       />
     </div>
