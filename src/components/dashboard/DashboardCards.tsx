@@ -37,6 +37,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ despesas, period, stats
   console.log('Total de despesas recebidas:', despesas.length);
   console.log('Período:', period);
   console.log('Stats:', stats);
+  console.log('🎯 FILTRO: Usando DATA DE VENCIMENTO para filtrar despesas');
 
   // Verificar integridade dos dados
   const integrity = verifyDataIntegrity(despesas);
@@ -48,7 +49,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ despesas, period, stats
   // Usar função centralizada para calcular dados
   const companyTotals = calculateCompanyTotals(despesas);
 
-  console.log('\n🎯 === TOTAIS FINAIS CALCULADOS ===');
+  console.log('\n🎯 === TOTAIS FINAIS CALCULADOS (POR DATA DE VENCIMENTO) ===');
   console.log('Camerino:', {
     total: companyTotals.camerino?.total || 0,
     despesas: companyTotals.camerino?.expenses?.length || 0,

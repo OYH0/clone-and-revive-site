@@ -26,7 +26,7 @@ export const useDespesas = () => {
   const query = useQuery({
     queryKey: ['despesas'],
     queryFn: async () => {
-      console.log('Fetching despesas from Supabase');
+      console.log('Fetching despesas from Supabase - ordenando por data_vencimento');
       const { data, error } = await supabase
         .from('despesas')
         .select('*')
@@ -39,6 +39,14 @@ export const useDespesas = () => {
       }
       
       console.log('Despesas fetched successfully:', data?.length || 0, 'records');
+      console.log('Primeiras 5 despesas com data_vencimento:', data?.slice(0, 5).map(d => ({
+        id: d.id,
+        empresa: d.empresa,
+        data_vencimento: d.data_vencimento,
+        data: d.data,
+        valor: d.valor
+      })));
+      
       return data as Despesa[];
     },
     enabled: true,
