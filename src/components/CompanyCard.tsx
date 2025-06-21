@@ -45,8 +45,11 @@ const CompanyCard: React.FC<CompanyCardProps> = ({
   ].filter(item => item.value > 0);
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-      <div className="border-l-4 border-red-500 p-6">
+    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm relative">
+      {/* Borda lateral vermelha que se estende por toda a altura */}
+      <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-500"></div>
+      
+      <div className="p-6 ml-3">
         <div className="flex justify-between items-start mb-4">
           <div>
             <h3 className="text-lg font-semibold text-gray-800">{name}</h3>
