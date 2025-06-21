@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { calculateDistributionData } from '@/utils/dashboardCalculations';
 
 interface ExpenseDistributionChartProps {
@@ -19,27 +19,19 @@ const ExpenseDistributionChart: React.FC<ExpenseDistributionChartProps> = ({ des
   // If there's no data with values, show placeholder
   if (!data.length) {
     return (
-      <div className="flex items-center justify-center h-80 text-gray-500">
+      <div className="flex items-center justify-center h-48 text-gray-500">
         <p>Não há dados para mostrar</p>
       </div>
     );
   }
-
-  // Calcular o total para percentuais
-  const total = data.reduce((sum, item) => sum + item.value, 0);
   
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
-      const data = payload[0];
-      const percentage = total > 0 ? ((data.value / total) * 100).toFixed(1) : '0';
       return (
-        <div className="bg-white p-4 border border-gray-200 rounded-lg shadow-lg">
-          <p className="font-medium text-gray-800">{data.payload.name}</p>
-          <p className="text-lg font-bold text-gray-900">
-            R$ {data.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-          </p>
+        <div className="bg-white p-2 border border-gray-200 rounded-lg shadow-md">
+          <p className="font-medium">{payload[0].name}</p>
           <p className="text-sm text-gray-600">
-            {percentage}% do total
+            R$ {payload[0].value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
         </div>
       );
@@ -47,59 +39,47 @@ const ExpenseDistributionChart: React.FC<ExpenseDistributionChartProps> = ({ des
     return null;
   };
 
-  const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
-    if (percent < 0.05) return null; // Não mostrar label se for menos de 5%
-    
-    const RADIAN = Math.PI / 180;
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-    return (
-      <text 
-        x={x} 
-        y={y} 
-        fill="white" 
-        textAnchor={x > cx ? 'start' : 'end'} 
-        dominantBaseline="central"
-        fontSize="12"
-        fontWeight="bold"
-      >
-        {`${(percent * 100).toFixed(0)}%`}
-      </text>
-    );
-  };
-
   return (
-    <div className="h-80 w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
-          <Pie
-            data={data}
-            cx="50%"
-            cy="50%"
-            labelLine={false}
-            label={renderCustomLabel}
-            outerRadius={120}
-            fill="#8884d8"
-            dataKey="value"
-          >
-            {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
-            ))}
-          </Pie>
-          <Tooltip content={<CustomTooltip />} />
-          <Legend 
-            verticalAlign="bottom"
-            height={36}
-            formatter={(value, entry) => (
-              <span className="text-sm font-medium" style={{ color: entry.color }}>
-                {value}: R$ {entry.payload?.value?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
-              </span>
-            )}
-          />
-        </PieChart>
-      </ResponsiveContainer>
+    <div className="flex items-center justify-between">
+      <div className="w-48 h-48">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              innerRadius={60}
+              outerRadius={90}
+              dataKey="value"
+            >
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip content={<CustomTooltip />} />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+      
+      <div className="flex flex-col gap-3">
+        {data.map((item, index) => (
+          <div key={index} className="flex items-center gap-3">
+            <div 
+              className="w-3 h-3 rounded-full" 
+              style={{ backgroundColor: item.color }}
+            ></div>
+            <span className="text-gray-700 text-sm">{item.name}</span>
+          </div>
+        ))}
+      </div>
+      
+      <div className="flex flex-col gap-1 text-xs text-gray-500">
+        {data.map((item, index) => (
+          <div key={index} className="text-right">
+            R$ {item.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

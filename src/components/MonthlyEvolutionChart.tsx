@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Legend, Tooltip, CartesianGrid } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { normalizeCompanyName, getTransactionValue } from '@/utils/dashboardCalculations';
 
 interface MonthlyEvolutionChartProps {
@@ -44,10 +44,9 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
           period: `${hour}h`,
           churrasco,
           johnny,
-          camerino,
-          total: churrasco + johnny + camerino
+          camerino
         };
-      }).filter(item => item.total > 0);
+      }).filter(item => item.churrasco > 0 || item.johnny > 0 || item.camerino > 0);
     }
 
     if (selectedPeriod === 'week') {
@@ -75,8 +74,7 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
           period: day,
           churrasco,
           johnny,
-          camerino,
-          total: churrasco + johnny + camerino
+          camerino
         };
       });
     }
@@ -110,8 +108,7 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
           period: month,
           churrasco,
           johnny,
-          camerino,
-          total: churrasco + johnny + camerino
+          camerino
         };
       });
     }
@@ -127,8 +124,7 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
       index,
       churrasco: 0,
       johnny: 0,
-      camerino: 0,
-      total: 0
+      camerino: 0
     }));
     
     despesas.forEach(despesa => {
@@ -144,7 +140,6 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
       } else if (empresa === 'camerino') {
         data[monthIndex].camerino += valor;
       }
-      data[monthIndex].total += valor;
     });
     
     const currentMonth = new Date().getMonth();
@@ -159,29 +154,16 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
   // Custom tooltip for the chart
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
-      const total = payload.reduce((sum: number, entry: any) => sum + entry.value, 0);
-      
       return (
-        <div className="bg-white p-4 border border-gray-200 rounded-lg shadow-lg">
-          <p className="font-medium text-gray-800 mb-2">{label}</p>
+        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
+          <p className="font-medium text-gray-800">{label}</p>
           {payload.map((entry: any, index: number) => (
-            <p key={index} className="text-sm flex justify-between items-center mb-1" style={{ color: entry.color }}>
-              <span className="mr-4">
-                {entry.name === 'churrasco' ? 'Companhia do Churrasco' : 
-                 entry.name === 'johnny' ? 'Johnny Rockets' : 
-                 entry.name === 'camerino' ? 'Camerino' : entry.name}:
-              </span>
-              <span className="font-medium">
-                R$ {entry.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-              </span>
+            <p key={index} className="text-sm" style={{ color: entry.color }}>
+              {entry.name === 'churrasco' ? 'Companhia do Churrasco' : 
+               entry.name === 'johnny' ? 'Johnny Rockets' : 
+               entry.name === 'camerino' ? 'Camerino' : entry.name}: R$ {entry.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </p>
           ))}
-          <div className="border-t pt-2 mt-2">
-            <p className="text-sm font-bold text-gray-800 flex justify-between">
-              <span>Total:</span>
-              <span>R$ {total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-            </p>
-          </div>
         </div>
       );
     }
@@ -190,17 +172,16 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
 
   if (!chartData.length) {
     return (
-      <div className="flex items-center justify-center h-80 text-gray-500">
+      <div className="flex items-center justify-center h-48 text-gray-500">
         <p>Não há dados para mostrar</p>
       </div>
     );
   }
 
   return (
-    <div className="h-80 w-full">
+    <div className="h-48 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+        <BarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
           <XAxis 
             dataKey="period" 
             axisLine={false} 
@@ -211,39 +192,33 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
             axisLine={false} 
             tickLine={false} 
             tick={{ fill: '#4B5563', fontSize: 12 }} 
-            tickFormatter={(value) => `R$ ${value.toLocaleString('pt-BR', { notation: 'compact' })}`}
+            tickFormatter={(value) => `${value.toLocaleString('pt-BR', { notation: 'compact' })}`}
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend 
-            wrapperStyle={{ paddingTop: '20px' }}
-            formatter={(value) => (
-              <span className="text-sm font-medium">
-                {value === 'churrasco' ? 'Companhia do Churrasco' : 
-                 value === 'johnny' ? 'Johnny Rockets' : 
-                 value === 'camerino' ? 'Camerino' : value}
-              </span>
-            )}
-          />
-          <Bar 
-            name="camerino"
-            dataKey="camerino" 
-            fill="#10b981" 
-            radius={[2, 2, 0, 0]}
-            stackId="stack"
+            formatter={(value) => 
+              value === 'churrasco' ? 'Companhia do Churrasco' : 
+              value === 'johnny' ? 'Johnny Rockets' : 
+              value === 'camerino' ? 'Camerino' : value
+            }
           />
           <Bar 
             name="churrasco"
             dataKey="churrasco" 
             fill="#ef4444" 
-            radius={[2, 2, 0, 0]}
-            stackId="stack"
+            radius={[4, 4, 0, 0]}
           />
           <Bar 
             name="johnny"
             dataKey="johnny" 
             fill="#3b82f6" 
-            radius={[2, 2, 0, 0]}
-            stackId="stack"
+            radius={[4, 4, 0, 0]}
+          />
+          <Bar 
+            name="camerino"
+            dataKey="camerino" 
+            fill="#10b981" 
+            radius={[4, 4, 0, 0]}
           />
         </BarChart>
       </ResponsiveContainer>
