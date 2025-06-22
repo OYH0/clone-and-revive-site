@@ -11,13 +11,8 @@ interface DashboardTransactionsProps {
 const DashboardTransactions: React.FC<DashboardTransactionsProps> = ({ despesas }) => {
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-8 shadow-sm">
-      <div className="flex justify-between items-center mb-6">
+      <div className="mb-6">
         <h3 className="text-lg font-semibold text-gray-800">Últimas Transações</h3>
-        <select className="border border-gray-300 bg-white text-gray-700 rounded-2xl px-3 py-1 text-sm">
-          <option>Todas Empresas</option>
-          <option>Companhia do Churrasco</option>
-          <option>Johnny Rockets</option>
-        </select>
       </div>
       {despesas && despesas.length > 0 ? (
         <RecentTransactions despesas={despesas} />
