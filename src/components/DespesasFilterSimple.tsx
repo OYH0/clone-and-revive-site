@@ -53,7 +53,7 @@ const DespesasFilterSimple: React.FC<DespesasFilterSimpleProps> = ({
 
   return (
     <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl mb-6">
-      <CardHeader>
+      <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Filter className="h-5 w-5 text-gray-600" />
@@ -72,20 +72,20 @@ const DespesasFilterSimple: React.FC<DespesasFilterSimpleProps> = ({
           )}
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          <div className="md:col-span-2">
+      <CardContent className="pt-0">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex-1 min-w-[280px]">
             <Input
               placeholder="Buscar por descrição ou empresa..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="rounded-xl"
+              className="rounded-xl h-9"
             />
           </div>
-          <div>
+          <div className="min-w-[140px]">
             <Select value={filterEmpresa} onValueChange={setFilterEmpresa}>
-              <SelectTrigger className="rounded-xl">
-                <SelectValue placeholder="Todas as empresas" />
+              <SelectTrigger className="rounded-xl h-9 text-sm">
+                <SelectValue placeholder="Empresa" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas as empresas</SelectItem>
@@ -95,10 +95,10 @@ const DespesasFilterSimple: React.FC<DespesasFilterSimpleProps> = ({
               </SelectContent>
             </Select>
           </div>
-          <div>
+          <div className="min-w-[130px]">
             <Select value={filterCategoria} onValueChange={setFilterCategoria}>
-              <SelectTrigger className="rounded-xl">
-                <SelectValue placeholder="Todas as categorias" />
+              <SelectTrigger className="rounded-xl h-9 text-sm">
+                <SelectValue placeholder="Categoria" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas as categorias</SelectItem>
@@ -110,10 +110,10 @@ const DespesasFilterSimple: React.FC<DespesasFilterSimpleProps> = ({
               </SelectContent>
             </Select>
           </div>
-          <div>
+          <div className="min-w-[110px]">
             <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="rounded-xl">
-                <SelectValue placeholder="Todos os status" />
+              <SelectTrigger className="rounded-xl h-9 text-sm">
+                <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os status</SelectItem>
@@ -127,27 +127,27 @@ const DespesasFilterSimple: React.FC<DespesasFilterSimpleProps> = ({
           {/* Filtros de Data */}
           {setDateFrom && setDateTo && (
             <>
-              <div className="md:col-span-3 lg:col-span-1">
+              <div className="min-w-[130px]">
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
                   <Input
                     type="date"
                     placeholder="Data inicial"
                     value={dateFrom || ''}
                     onChange={(e) => setDateFrom(e.target.value)}
-                    className="rounded-xl pl-10"
+                    className="rounded-xl pl-8 h-9 text-sm"
                   />
                 </div>
               </div>
-              <div className="md:col-span-3 lg:col-span-1">
+              <div className="min-w-[130px]">
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
                   <Input
                     type="date"
                     placeholder="Data final"
                     value={dateTo || ''}
                     onChange={(e) => setDateTo(e.target.value)}
-                    className="rounded-xl pl-10"
+                    className="rounded-xl pl-8 h-9 text-sm"
                   />
                 </div>
               </div>
