@@ -15,6 +15,8 @@ const ReceitasPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterEmpresa, setFilterEmpresa] = useState('all');
   const [filterCategoria, setFilterCategoria] = useState('all');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   
   const { data: receitas, isLoading } = useReceitas();
   const { isAdmin } = useAdminAccess();
@@ -26,7 +28,30 @@ const ReceitasPage = () => {
     const matchesEmpresa = filterEmpresa === 'all' || receita.empresa === filterEmpresa;
     const matchesCategoria = filterCategoria === 'all' || receita.categoria === filterCategoria;
     
-    return matchesSearch && matchesEmpresa && matchesCategoria;
+    // Filtro por data (usando data da receita ou data de recebimento)
+    let matchesDate = true;
+    if (dateFrom || dateTo) {
+      const receitaDate = new Date(receita.data);
+      const receitaRecebimentoDate = receita.data_recebimento ? new Date(receita.data_recebimento) : null;
+      
+      if (dateFrom) {
+        const fromDate = new Date(dateFrom);
+        matchesDate = matchesDate && (
+          receitaDate >= fromDate || 
+          (receitaRecebimentoDate && receitaRecebimentoDate >= fromDate)
+        );
+      }
+      
+      if (dateTo) {
+        const toDate = new Date(dateTo);
+        matchesDate = matchesDate && (
+          receitaDate <= toDate || 
+          (receitaRecebimentoDate && receitaRecebimentoDate <= toDate)
+        );
+      }
+    }
+    
+    return matchesSearch && matchesEmpresa && matchesCategoria && matchesDate;
   }) || [];
 
   // Calcular estatísticas baseadas nas receitas filtradas
@@ -95,6 +120,10 @@ const ReceitasPage = () => {
             setFilterEmpresa={setFilterEmpresa}
             filterCategoria={filterCategoria}
             setFilterCategoria={setFilterCategoria}
+            dateFrom={dateFrom}
+            setDateFrom={setDateFrom}
+            dateTo={dateTo}
+            setDateTo={setDateTo}
           />
 
           {/* Stats Cards */}
