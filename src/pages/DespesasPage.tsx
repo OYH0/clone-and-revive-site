@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Plus, TrendingDown, DollarSign, CheckCircle, Clock, AlertTriangle, Shield } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -19,6 +18,8 @@ const DespesasPage = () => {
   const [filterEmpresa, setFilterEmpresa] = useState('all');
   const [filterCategoria, setFilterCategoria] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   
   const { data: despesas = [], isLoading, refetch } = useDespesas();
   const { user } = useAuth();
@@ -51,9 +52,23 @@ const DespesasPage = () => {
       const matchesCategoria = filterCategoria === 'all' || transaction.category === filterCategoria;
       const matchesStatus = filterStatus === 'all' || status === filterStatus;
       
-      return matchesSearch && matchesEmpresa && matchesCategoria && matchesStatus;
+      // Filtros de data
+      let matchesDateFrom = true;
+      let matchesDateTo = true;
+      
+      if (dateFrom) {
+        const transactionDate = transaction.data_vencimento || transaction.date;
+        matchesDateFrom = transactionDate >= dateFrom;
+      }
+      
+      if (dateTo) {
+        const transactionDate = transaction.data_vencimento || transaction.date;
+        matchesDateTo = transactionDate <= dateTo;
+      }
+      
+      return matchesSearch && matchesEmpresa && matchesCategoria && matchesStatus && matchesDateFrom && matchesDateTo;
     });
-  }, [allTransactions, searchTerm, filterEmpresa, filterCategoria, filterStatus]);
+  }, [allTransactions, searchTerm, filterEmpresa, filterCategoria, filterStatus, dateFrom, dateTo]);
 
   // Calcular estatísticas usando valor_total
   const totalDespesas = filteredTransactions.reduce((sum, transaction) => sum + (transaction.valor_total || transaction.valor), 0);
@@ -137,6 +152,10 @@ const DespesasPage = () => {
             setFilterCategoria={setFilterCategoria}
             filterStatus={filterStatus}
             setFilterStatus={setFilterStatus}
+            dateFrom={dateFrom}
+            setDateFrom={setDateFrom}
+            dateTo={dateTo}
+            setDateTo={setDateTo}
           />
 
           {/* Stats Cards */}
