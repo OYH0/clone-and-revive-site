@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Plus, TrendingDown, DollarSign, CheckCircle, Clock, AlertTriangle, Shield } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -11,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useAdminAccess } from '@/hooks/useAdminAccess';
 import { Transaction } from '@/types/transaction';
 import { getTransactionStatus } from '@/utils/transactionUtils';
+import { filterDespesasCurrentMonth } from '@/utils/currentMonthFilter';
 
 const DespesasPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -41,9 +43,14 @@ const DespesasPage = () => {
     valor_total: despesa.valor_total || despesa.valor
   }));
 
-  // Filtrar despesas
+  // Aplicar filtro do mês atual primeiro
+  const currentMonthTransactions = useMemo(() => {
+    return filterDespesasCurrentMonth(allTransactions, dateFrom, dateTo);
+  }, [allTransactions, dateFrom, dateTo]);
+
+  // Filtrar despesas com base nos outros filtros
   const filteredTransactions = useMemo(() => {
-    return allTransactions.filter(transaction => {
+    return currentMonthTransactions.filter(transaction => {
       const status = getTransactionStatus(transaction);
       
       const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -52,23 +59,9 @@ const DespesasPage = () => {
       const matchesCategoria = filterCategoria === 'all' || transaction.category === filterCategoria;
       const matchesStatus = filterStatus === 'all' || status === filterStatus;
       
-      // Filtros de data
-      let matchesDateFrom = true;
-      let matchesDateTo = true;
-      
-      if (dateFrom) {
-        const transactionDate = transaction.data_vencimento || transaction.date;
-        matchesDateFrom = transactionDate >= dateFrom;
-      }
-      
-      if (dateTo) {
-        const transactionDate = transaction.data_vencimento || transaction.date;
-        matchesDateTo = transactionDate <= dateTo;
-      }
-      
-      return matchesSearch && matchesEmpresa && matchesCategoria && matchesStatus && matchesDateFrom && matchesDateTo;
+      return matchesSearch && matchesEmpresa && matchesCategoria && matchesStatus;
     });
-  }, [allTransactions, searchTerm, filterEmpresa, filterCategoria, filterStatus, dateFrom, dateTo]);
+  }, [currentMonthTransactions, searchTerm, filterEmpresa, filterCategoria, filterStatus]);
 
   // Calcular estatísticas usando valor_total
   const totalDespesas = filteredTransactions.reduce((sum, transaction) => sum + (transaction.valor_total || transaction.valor), 0);
@@ -241,7 +234,7 @@ const DespesasPage = () => {
                 <div>
                   <CardTitle className="text-xl text-gray-800">Lista de Despesas</CardTitle>
                   <CardDescription className="text-gray-600">
-                    {filteredTransactions.length} despesa(s) encontrada(s)
+                    {filteredTransactions.length} despesa(s) encontrada(s) - Mês atual e pagamentos recentes
                   </CardDescription>
                 </div>
               </div>

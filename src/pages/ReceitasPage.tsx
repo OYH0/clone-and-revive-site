@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Plus, TrendingUp, DollarSign, Calendar, Shield } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import ReceitaTable from '@/components/ReceitaTable';
 import ReceitasFilter from '@/components/ReceitasFilter';
 import { useReceitas } from '@/hooks/useReceitas';
 import { useAdminAccess } from '@/hooks/useAdminAccess';
+import { filterReceitasCurrentMonth } from '@/utils/currentMonthFilter';
 
 const ReceitasPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -21,38 +22,22 @@ const ReceitasPage = () => {
   const { data: receitas, isLoading } = useReceitas();
   const { isAdmin } = useAdminAccess();
 
-  // Filtrar receitas
-  const filteredReceitas = receitas?.filter(receita => {
-    const matchesSearch = receita.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         receita.empresa.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesEmpresa = filterEmpresa === 'all' || receita.empresa === filterEmpresa;
-    const matchesCategoria = filterCategoria === 'all' || receita.categoria === filterCategoria;
-    
-    // Filtro por data (usando data da receita ou data de recebimento)
-    let matchesDate = true;
-    if (dateFrom || dateTo) {
-      const receitaDate = new Date(receita.data);
-      const receitaRecebimentoDate = receita.data_recebimento ? new Date(receita.data_recebimento) : null;
+  // Aplicar filtro do mês atual primeiro
+  const currentMonthReceitas = useMemo(() => {
+    return filterReceitasCurrentMonth(receitas || [], dateFrom, dateTo);
+  }, [receitas, dateFrom, dateTo]);
+
+  // Filtrar receitas com base nos outros filtros
+  const filteredReceitas = useMemo(() => {
+    return currentMonthReceitas.filter(receita => {
+      const matchesSearch = receita.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           receita.empresa.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesEmpresa = filterEmpresa === 'all' || receita.empresa === filterEmpresa;
+      const matchesCategoria = filterCategoria === 'all' || receita.categoria === filterCategoria;
       
-      if (dateFrom) {
-        const fromDate = new Date(dateFrom);
-        matchesDate = matchesDate && (
-          receitaDate >= fromDate || 
-          (receitaRecebimentoDate && receitaRecebimentoDate >= fromDate)
-        );
-      }
-      
-      if (dateTo) {
-        const toDate = new Date(dateTo);
-        matchesDate = matchesDate && (
-          receitaDate <= toDate || 
-          (receitaRecebimentoDate && receitaRecebimentoDate <= toDate)
-        );
-      }
-    }
-    
-    return matchesSearch && matchesEmpresa && matchesCategoria && matchesDate;
-  }) || [];
+      return matchesSearch && matchesEmpresa && matchesCategoria;
+    });
+  }, [currentMonthReceitas, searchTerm, filterEmpresa, filterCategoria]);
 
   // Calcular estatísticas baseadas nas receitas filtradas
   const totalReceitas = filteredReceitas.reduce((sum, receita) => sum + receita.valor, 0);
@@ -194,7 +179,7 @@ const ReceitasPage = () => {
                 <div>
                   <CardTitle className="text-xl text-gray-800">Lista de Receitas</CardTitle>
                   <CardDescription className="text-gray-600">
-                    {filteredReceitas.length} receita(s) encontrada(s)
+                    {filteredReceitas.length} receita(s) encontrada(s) - Mês atual e recebimentos recentes
                   </CardDescription>
                 </div>
               </div>
