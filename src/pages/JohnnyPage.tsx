@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Sidebar from '@/components/Sidebar';
 import { useDespesas } from '@/hooks/useDespesas';
 import { useReceitas } from '@/hooks/useReceitas';
@@ -10,11 +10,14 @@ import JohnnyHeader from '@/components/johnny/JohnnyHeader';
 import JohnnyStats from '@/components/johnny/JohnnyStats';
 import JohnnyCharts from '@/components/johnny/JohnnyCharts';
 import JohnnyInsights from '@/components/johnny/JohnnyInsights';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import { filterDataByPeriod } from '@/components/dashboard/utils';
 
 const JohnnyPage = () => {
   const { data: despesas } = useDespesas();
   const { data: receitas } = useReceitas();
   const [activeModal, setActiveModal] = useState<string | null>(null);
+  const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'year'>('month');
 
   // Filtrar dados do Johnny Rockets - usando várias variações possíveis do nome
   const johnnyDespesas = despesas?.filter(d => {
@@ -33,8 +36,16 @@ const JohnnyPage = () => {
            empresa.includes('johnny');
   }) || [];
 
-  console.log('Johnny - Despesas filtradas:', johnnyDespesas.length);
-  console.log('Johnny - Despesas por categoria:', johnnyDespesas.reduce((acc, d) => {
+  // Aplicar filtro de período
+  const { filteredDespesas, filteredReceitas } = useMemo(() => {
+    return {
+      filteredDespesas: filterDataByPeriod(johnnyDespesas, selectedPeriod),
+      filteredReceitas: filterDataByPeriod(johnnyReceitas, selectedPeriod)
+    };
+  }, [johnnyDespesas, johnnyReceitas, selectedPeriod]);
+
+  console.log('Johnny - Despesas filtradas:', filteredDespesas.length);
+  console.log('Johnny - Despesas por categoria:', filteredDespesas.reduce((acc, d) => {
     const cat = d.categoria || 'SEM_CATEGORIA';
     acc[cat] = (acc[cat] || 0) + 1;
     return acc;
@@ -47,9 +58,18 @@ const JohnnyPage = () => {
       <div className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
           <JohnnyHeader onModalOpen={setActiveModal} />
-          <JohnnyStats despesas={johnnyDespesas} receitas={johnnyReceitas} />
-          <JohnnyCharts despesas={johnnyDespesas} receitas={johnnyReceitas} />
-          <JohnnyInsights despesas={johnnyDespesas} receitas={johnnyReceitas} />
+          
+          {/* Filtros de Período */}
+          <div className="mb-6">
+            <DashboardHeader 
+              selectedPeriod={selectedPeriod} 
+              onPeriodChange={setSelectedPeriod} 
+            />
+          </div>
+          
+          <JohnnyStats despesas={filteredDespesas} receitas={filteredReceitas} />
+          <JohnnyCharts despesas={filteredDespesas} receitas={filteredReceitas} />
+          <JohnnyInsights despesas={filteredDespesas} receitas={filteredReceitas} />
         </div>
       </div>
 
@@ -57,15 +77,15 @@ const JohnnyPage = () => {
       <AnalyseCostsModal
         isOpen={activeModal === 'costs'}
         onClose={() => setActiveModal(null)}
-        despesas={johnnyDespesas}
+        despesas={filteredDespesas}
         empresa="Johnny Rockets"
       />
 
       <ProjectionsModal
         isOpen={activeModal === 'projections'}
         onClose={() => setActiveModal(null)}
-        despesas={johnnyDespesas}
-        receitas={johnnyReceitas}
+        despesas={filteredDespesas}
+        receitas={filteredReceitas}
         empresa="Johnny Rockets"
       />
 

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useMemo } from 'react';
 import { Building2, TrendingUp, DollarSign, Users, BarChart3 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import { Button } from '@/components/ui/button';
@@ -12,11 +13,14 @@ import ComparativeModal from '@/components/ComparativeModal';
 import ExpenseDistribution from '@/components/ExpenseDistribution';
 import MonthlyGoals from '@/components/MonthlyGoals';
 import NextActions from '@/components/NextActions';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import { filterDataByPeriod } from '@/components/dashboard/utils';
 
 const CompanhiaPage = () => {
   const { data: despesas } = useDespesas();
   const { data: receitas } = useReceitas();
   const [activeModal, setActiveModal] = useState<string | null>(null);
+  const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'year'>('month');
 
   // Filtrar dados da Companhia do Churrasco - usando várias variações possíveis do nome
   const companhiaDespesas = despesas?.filter(d => {
@@ -35,28 +39,36 @@ const CompanhiaPage = () => {
            empresa.includes('churrasco');
   }) || [];
 
-  console.log('Churrasco - Despesas filtradas:', companhiaDespesas.length);
-  console.log('Churrasco - Despesas por categoria:', companhiaDespesas.reduce((acc, d) => {
+  // Aplicar filtro de período
+  const { filteredDespesas, filteredReceitas } = useMemo(() => {
+    return {
+      filteredDespesas: filterDataByPeriod(companhiaDespesas, selectedPeriod),
+      filteredReceitas: filterDataByPeriod(companhiaReceitas, selectedPeriod)
+    };
+  }, [companhiaDespesas, companhiaReceitas, selectedPeriod]);
+
+  console.log('Churrasco - Despesas filtradas:', filteredDespesas.length);
+  console.log('Churrasco - Despesas por categoria:', filteredDespesas.reduce((acc, d) => {
     const cat = d.categoria || 'SEM_CATEGORIA';
     acc[cat] = (acc[cat] || 0) + 1;
     return acc;
   }, {} as Record<string, number>));
 
   // Calcular estatísticas - removendo divisão por 100
-  const totalDespesas = companhiaDespesas.reduce((sum, d) => sum + d.valor, 0);
-  const totalReceitas = companhiaReceitas.reduce((sum, r) => sum + r.valor, 0);
+  const totalDespesas = filteredDespesas.reduce((sum, d) => sum + d.valor, 0);
+  const totalReceitas = filteredReceitas.reduce((sum, r) => sum + r.valor, 0);
   const lucro = totalReceitas - totalDespesas;
   const margemLucro = totalReceitas > 0 ? (lucro / totalReceitas) * 100 : 0;
 
   const evolucaoMensal = React.useMemo(() => {
     const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
     return months.map((month, index) => {
-      const monthDespesas = companhiaDespesas.filter(d => {
+      const monthDespesas = filteredDespesas.filter(d => {
         const date = new Date(d.data);
         return date.getMonth() === index;
       }).reduce((sum, d) => sum + d.valor, 0);
       
-      const monthReceitas = companhiaReceitas.filter(r => {
+      const monthReceitas = filteredReceitas.filter(r => {
         const date = new Date(r.data);
         return date.getMonth() === index;
       }).reduce((sum, r) => sum + r.valor, 0);
@@ -68,7 +80,7 @@ const CompanhiaPage = () => {
         lucro: monthReceitas - monthDespesas
       };
     });
-  }, [companhiaDespesas, companhiaReceitas]);
+  }, [filteredDespesas, filteredReceitas]);
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50">
@@ -88,6 +100,14 @@ const CompanhiaPage = () => {
                 </h1>
                 <p className="text-gray-600 text-lg">Análise financeira detalhada da empresa</p>
               </div>
+            </div>
+
+            {/* Filtros de Período */}
+            <div className="mb-6">
+              <DashboardHeader 
+                selectedPeriod={selectedPeriod} 
+                onPeriodChange={setSelectedPeriod} 
+              />
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -131,7 +151,7 @@ const CompanhiaPage = () => {
                 <div className="text-2xl font-bold text-green-600">
                   R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">{companhiaReceitas.length} transações</p>
+                <p className="text-xs text-gray-500 mt-1">{filteredReceitas.length} transações</p>
               </CardContent>
             </Card>
 
@@ -146,7 +166,7 @@ const CompanhiaPage = () => {
                 <div className="text-2xl font-bold text-red-600">
                   R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">{companhiaDespesas.length} transações</p>
+                <p className="text-xs text-gray-500 mt-1">{filteredDespesas.length} transações</p>
               </CardContent>
             </Card>
 
@@ -176,7 +196,7 @@ const CompanhiaPage = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-purple-600">
-                  R$ {companhiaReceitas.length > 0 ? (totalReceitas / companhiaReceitas.length).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}
+                  R$ {filteredReceitas.length > 0 ? (totalReceitas / filteredReceitas.length).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">Por transação</p>
               </CardContent>
@@ -214,7 +234,7 @@ const CompanhiaPage = () => {
                 <CardDescription>Categorias de gastos</CardDescription>
               </CardHeader>
               <CardContent>
-                <ExpenseDistribution despesas={companhiaDespesas} empresa="Companhia do Churrasco" />
+                <ExpenseDistribution despesas={filteredDespesas} empresa="Companhia do Churrasco" />
               </CardContent>
             </Card>
           </div>
@@ -262,15 +282,15 @@ const CompanhiaPage = () => {
       <AnalyseCostsModal
         isOpen={activeModal === 'costs'}
         onClose={() => setActiveModal(null)}
-        despesas={companhiaDespesas}
+        despesas={filteredDespesas}
         empresa="Companhia do Churrasco"
       />
 
       <ProjectionsModal
         isOpen={activeModal === 'projections'}
         onClose={() => setActiveModal(null)}
-        despesas={companhiaDespesas}
-        receitas={companhiaReceitas}
+        despesas={filteredDespesas}
+        receitas={filteredReceitas}
         empresa="Companhia do Churrasco"
       />
 

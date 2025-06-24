@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useMemo } from 'react';
 import { Building2, TrendingUp, DollarSign, Users, BarChart3 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import { Button } from '@/components/ui/button';
@@ -11,11 +12,14 @@ import ProjectionsModal from '@/components/ProjectionsModal';
 import ComparativeModal from '@/components/ComparativeModal';
 import ExpenseDistribution from '@/components/ExpenseDistribution';
 import NextActions from '@/components/NextActions';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import { filterDataByPeriod } from '@/components/dashboard/utils';
 
 const CamerinoPage = () => {
   const { data: despesas } = useDespesas();
   const { data: receitas } = useReceitas();
   const [activeModal, setActiveModal] = useState<string | null>(null);
+  const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'year'>('month');
 
   // Filtrar dados do Camerino - usando várias variações possíveis do nome
   const camerinoDespesas = despesas?.filter(d => {
@@ -28,28 +32,36 @@ const CamerinoPage = () => {
     return empresa === 'camerino' || empresa.includes('camerino');
   }) || [];
 
-  console.log('Camerino - Despesas filtradas:', camerinoDespesas.length);
-  console.log('Camerino - Despesas por categoria:', camerinoDespesas.reduce((acc, d) => {
+  // Aplicar filtro de período
+  const { filteredDespesas, filteredReceitas } = useMemo(() => {
+    return {
+      filteredDespesas: filterDataByPeriod(camerinoDespesas, selectedPeriod),
+      filteredReceitas: filterDataByPeriod(camerinoReceitas, selectedPeriod)
+    };
+  }, [camerinoDespesas, camerinoReceitas, selectedPeriod]);
+
+  console.log('Camerino - Despesas filtradas:', filteredDespesas.length);
+  console.log('Camerino - Despesas por categoria:', filteredDespesas.reduce((acc, d) => {
     const cat = d.categoria || 'SEM_CATEGORIA';
     acc[cat] = (acc[cat] || 0) + 1;
     return acc;
   }, {} as Record<string, number>));
 
   // Calcular estatísticas - removendo divisão por 100
-  const totalDespesas = camerinoDespesas.reduce((sum, d) => sum + d.valor, 0);
-  const totalReceitas = camerinoReceitas.reduce((sum, r) => sum + r.valor, 0);
+  const totalDespesas = filteredDespesas.reduce((sum, d) => sum + d.valor, 0);
+  const totalReceitas = filteredReceitas.reduce((sum, r) => sum + r.valor, 0);
   const lucro = totalReceitas - totalDespesas;
   const margemLucro = totalReceitas > 0 ? (lucro / totalReceitas) * 100 : 0;
 
   const evolucaoMensal = React.useMemo(() => {
     const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
     return months.map((month, index) => {
-      const monthDespesas = camerinoDespesas.filter(d => {
+      const monthDespesas = filteredDespesas.filter(d => {
         const date = new Date(d.data);
         return date.getMonth() === index;
       }).reduce((sum, d) => sum + d.valor, 0);
       
-      const monthReceitas = camerinoReceitas.filter(r => {
+      const monthReceitas = filteredReceitas.filter(r => {
         const date = new Date(r.data);
         return date.getMonth() === index;
       }).reduce((sum, r) => sum + r.valor, 0);
@@ -61,7 +73,7 @@ const CamerinoPage = () => {
         lucro: monthReceitas - monthDespesas
       };
     });
-  }, [camerinoDespesas, camerinoReceitas]);
+  }, [filteredDespesas, filteredReceitas]);
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50">
@@ -81,6 +93,14 @@ const CamerinoPage = () => {
                 </h1>
                 <p className="text-gray-600 text-lg">Análise financeira detalhada da empresa</p>
               </div>
+            </div>
+
+            {/* Filtros de Período */}
+            <div className="mb-6">
+              <DashboardHeader 
+                selectedPeriod={selectedPeriod} 
+                onPeriodChange={setSelectedPeriod} 
+              />
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -124,7 +144,7 @@ const CamerinoPage = () => {
                 <div className="text-2xl font-bold text-green-600">
                   R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">{camerinoReceitas.length} transações</p>
+                <p className="text-xs text-gray-500 mt-1">{filteredReceitas.length} transações</p>
               </CardContent>
             </Card>
 
@@ -139,7 +159,7 @@ const CamerinoPage = () => {
                 <div className="text-2xl font-bold text-red-600">
                   R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">{camerinoDespesas.length} transações</p>
+                <p className="text-xs text-gray-500 mt-1">{filteredDespesas.length} transações</p>
               </CardContent>
             </Card>
 
@@ -169,7 +189,7 @@ const CamerinoPage = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-purple-600">
-                  R$ {camerinoReceitas.length > 0 ? (totalReceitas / camerinoReceitas.length).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}
+                  R$ {filteredReceitas.length > 0 ? (totalReceitas / filteredReceitas.length).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">Por transação</p>
               </CardContent>
@@ -207,7 +227,7 @@ const CamerinoPage = () => {
                 <CardDescription>Categorias de gastos</CardDescription>
               </CardHeader>
               <CardContent>
-                <ExpenseDistribution despesas={camerinoDespesas} empresa="Camerino" />
+                <ExpenseDistribution despesas={filteredDespesas} empresa="Camerino" />
               </CardContent>
             </Card>
           </div>
@@ -224,15 +244,15 @@ const CamerinoPage = () => {
       <AnalyseCostsModal
         isOpen={activeModal === 'costs'}
         onClose={() => setActiveModal(null)}
-        despesas={camerinoDespesas}
+        despesas={filteredDespesas}
         empresa="Camerino"
       />
 
       <ProjectionsModal
         isOpen={activeModal === 'projections'}
         onClose={() => setActiveModal(null)}
-        despesas={camerinoDespesas}
-        receitas={camerinoReceitas}
+        despesas={filteredDespesas}
+        receitas={filteredReceitas}
         empresa="Camerino"
       />
 
