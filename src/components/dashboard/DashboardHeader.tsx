@@ -8,8 +8,7 @@ interface DashboardHeaderProps {
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ selectedPeriod, onPeriodChange }) => {
   return (
-    <div className="flex justify-between items-center mb-8">
-      <h1 className="text-3xl font-bold text-gray-900">Dashboard Financeiro</h1>
+    <div className="flex justify-end items-center mb-6">
       <div className="flex gap-2">
         <button 
           className={`px-4 py-2 text-sm rounded-2xl ${
