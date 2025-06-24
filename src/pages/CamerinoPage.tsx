@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Building2, TrendingUp, DollarSign, Users, BarChart3 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -83,24 +82,62 @@ const CamerinoPage = () => {
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}
           <div className="mb-8">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl shadow-lg">
-                <Building2 className="h-8 w-8 text-white" />
+            <div className="flex items-center justify-between gap-3 mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl shadow-lg">
+                  <Building2 className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 bg-clip-text text-transparent">
+                    Camerino
+                  </h1>
+                  <p className="text-gray-600 text-lg">Análise financeira detalhada da empresa</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 bg-clip-text text-transparent">
-                  Camerino
-                </h1>
-                <p className="text-gray-600 text-lg">Análise financeira detalhada da empresa</p>
-              </div>
-            </div>
 
-            {/* Filtros de Período */}
-            <div className="mb-6">
-              <DashboardHeader 
-                selectedPeriod={selectedPeriod} 
-                onPeriodChange={setSelectedPeriod} 
-              />
+              {/* Filtros de Período */}
+              <div className="flex gap-2">
+                <button 
+                  className={`px-4 py-2 text-sm rounded-2xl ${
+                    selectedPeriod === 'today' 
+                      ? 'bg-black text-white' 
+                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedPeriod('today')}
+                >
+                  Hoje
+                </button>
+                <button 
+                  className={`px-4 py-2 text-sm rounded-2xl ${
+                    selectedPeriod === 'week' 
+                      ? 'bg-black text-white' 
+                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedPeriod('week')}
+                >
+                  Semana
+                </button>
+                <button 
+                  className={`px-4 py-2 text-sm rounded-2xl ${
+                    selectedPeriod === 'month' 
+                      ? 'bg-black text-white' 
+                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedPeriod('month')}
+                >
+                  Mês
+                </button>
+                <button 
+                  className={`px-4 py-2 text-sm rounded-2xl ${
+                    selectedPeriod === 'year' 
+                      ? 'bg-black text-white' 
+                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedPeriod('year')}
+                >
+                  Ano
+                </button>
+              </div>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

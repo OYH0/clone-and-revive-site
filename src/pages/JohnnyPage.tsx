@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import Sidebar from '@/components/Sidebar';
 import { useDespesas } from '@/hooks/useDespesas';
@@ -57,15 +56,7 @@ const JohnnyPage = () => {
       
       <div className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
-          <JohnnyHeader onModalOpen={setActiveModal} />
-          
-          {/* Filtros de Período */}
-          <div className="mb-6">
-            <DashboardHeader 
-              selectedPeriod={selectedPeriod} 
-              onPeriodChange={setSelectedPeriod} 
-            />
-          </div>
+          <JohnnyHeader onModalOpen={setActiveModal} selectedPeriod={selectedPeriod} onPeriodChange={setSelectedPeriod} />
           
           <JohnnyStats despesas={filteredDespesas} receitas={filteredReceitas} />
           <JohnnyCharts despesas={filteredDespesas} receitas={filteredReceitas} />
@@ -73,7 +64,6 @@ const JohnnyPage = () => {
         </div>
       </div>
 
-      {/* Modals */}
       <AnalyseCostsModal
         isOpen={activeModal === 'costs'}
         onClose={() => setActiveModal(null)}

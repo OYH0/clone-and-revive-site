@@ -4,21 +4,69 @@ import { Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface JohnnyHeaderProps {
-  onModalOpen: (modalType: string) => void;
+  onModalOpen: (modal: string) => void;
+  selectedPeriod: 'today' | 'week' | 'month' | 'year';
+  onPeriodChange: (period: 'today' | 'week' | 'month' | 'year') => void;
 }
 
-const JohnnyHeader: React.FC<JohnnyHeaderProps> = ({ onModalOpen }) => {
+const JohnnyHeader: React.FC<JohnnyHeaderProps> = ({ onModalOpen, selectedPeriod, onPeriodChange }) => {
   return (
     <div className="mb-8">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl shadow-lg">
-          <Building2 className="h-8 w-8 text-white" />
+      <div className="flex items-center justify-between gap-3 mb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl shadow-lg">
+            <Building2 className="h-8 w-8 text-white" />
+          </div>
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 bg-clip-text text-transparent">
+              Johnny Rockets
+            </h1>
+            <p className="text-gray-600 text-lg">Análise financeira detalhada da empresa</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 bg-clip-text text-transparent">
-            Johnny Rockets
-          </h1>
-          <p className="text-gray-600 text-lg">Análise financeira detalhada da empresa</p>
+
+        {/* Filtros de Período */}
+        <div className="flex gap-2">
+          <button 
+            className={`px-4 py-2 text-sm rounded-2xl ${
+              selectedPeriod === 'today' 
+                ? 'bg-black text-white' 
+                : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+            }`}
+            onClick={() => onPeriodChange('today')}
+          >
+            Hoje
+          </button>
+          <button 
+            className={`px-4 py-2 text-sm rounded-2xl ${
+              selectedPeriod === 'week' 
+                ? 'bg-black text-white' 
+                : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+            }`}
+            onClick={() => onPeriodChange('week')}
+          >
+            Semana
+          </button>
+          <button 
+            className={`px-4 py-2 text-sm rounded-2xl ${
+              selectedPeriod === 'month' 
+                ? 'bg-black text-white' 
+                : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+            }`}
+            onClick={() => onPeriodChange('month')}
+          >
+            Mês
+          </button>
+          <button 
+            className={`px-4 py-2 text-sm rounded-2xl ${
+              selectedPeriod === 'year' 
+                ? 'bg-black text-white' 
+                : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+            }`}
+            onClick={() => onPeriodChange('year')}
+          >
+            Ano
+          </button>
         </div>
       </div>
       
