@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { Building2, TrendingUp, DollarSign, Users, BarChart3 } from 'lucide-react';
-import Sidebar from '@/components/Sidebar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts';
@@ -11,7 +10,6 @@ import ProjectionsModal from '@/components/ProjectionsModal';
 import ComparativeModal from '@/components/ComparativeModal';
 import ExpenseDistribution from '@/components/ExpenseDistribution';
 import NextActions from '@/components/NextActions';
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import { filterDataByPeriod } from '@/components/dashboard/utils';
 
 const CamerinoPage = () => {
@@ -75,10 +73,8 @@ const CamerinoPage = () => {
   }, [filteredDespesas, filteredReceitas]);
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50">
-      <Sidebar />
-      
-      <div className="flex-1 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50">
+      <div className="p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}
           <div className="mb-8">
