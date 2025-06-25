@@ -46,8 +46,8 @@ const CamerinoPage = () => {
     return acc;
   }, {} as Record<string, number>));
 
-  // Calcular estatísticas - removendo divisão por 100
-  const totalDespesas = filteredDespesas.reduce((sum, d) => sum + d.valor, 0);
+  // Calcular estatísticas - usando valor_total que inclui juros
+  const totalDespesas = filteredDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
   const totalReceitas = filteredReceitas.reduce((sum, r) => sum + r.valor, 0);
   const lucro = totalReceitas - totalDespesas;
   const margemLucro = totalReceitas > 0 ? (lucro / totalReceitas) * 100 : 0;
@@ -58,7 +58,7 @@ const CamerinoPage = () => {
       const monthDespesas = filteredDespesas.filter(d => {
         const date = new Date(d.data);
         return date.getMonth() === index;
-      }).reduce((sum, d) => sum + d.valor, 0);
+      }).reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
       
       const monthReceitas = filteredReceitas.filter(r => {
         const date = new Date(r.data);

@@ -11,7 +11,8 @@ interface JohnnyStatsProps {
 }
 
 const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas }) => {
-  const totalDespesas = despesas.reduce((sum, d) => sum + d.valor, 0);
+  // Usar valor_total que inclui juros, ou valor como fallback
+  const totalDespesas = despesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
   const totalReceitas = receitas.reduce((sum, r) => sum + r.valor, 0);
   const lucro = totalReceitas - totalDespesas;
   const margemLucro = totalReceitas > 0 ? (lucro / totalReceitas) * 100 : 0;
