@@ -1,4 +1,3 @@
-
 /**
  * Utility functions for filtering data by current month rules
  */
@@ -20,10 +19,25 @@ export const getCurrentMonthDateRange = () => {
 export const isCurrentMonth = (dateString: string): boolean => {
   if (!dateString) return false;
   
-  const date = new Date(dateString);
+  // Criar a data de forma consistente para evitar problemas de timezone
+  const dateParts = dateString.split('-');
+  const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+  
   const now = new Date();
   
-  return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+  const result = date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+  
+  console.log('isCurrentMonth check:', {
+    dateString,
+    parsedDate: date.toLocaleDateString('pt-BR'),
+    currentMonth: now.getMonth(),
+    currentYear: now.getFullYear(),
+    dateMonth: date.getMonth(),
+    dateYear: date.getFullYear(),
+    isCurrentMonth: result
+  });
+  
+  return result;
 };
 
 export const filterDespesasCurrentMonth = (despesas: any[], dateFrom?: string, dateTo?: string) => {
