@@ -46,15 +46,20 @@ export const filterDespesasCurrentMonth = (despesas: any[], dateFrom?: string, d
     });
   }
 
-  // Aplicar regras do mês atual
+  // Aplicar regras do mês atual - incluir TODAS as despesas que atendem aos critérios
   return despesas.filter(despesa => {
-    // Regra 1: Despesas do mês atual (por vencimento)
+    // Regra 1: Despesas com vencimento no mês atual (independente do status)
     if (despesa.data_vencimento && isCurrentMonth(despesa.data_vencimento)) {
       return true;
     }
     
     // Regra 2: Despesas de meses anteriores que foram pagas no mês atual
     if (despesa.status === 'PAGO' && despesa.data && isCurrentMonth(despesa.data)) {
+      return true;
+    }
+    
+    // Regra 3: Despesas sem data de vencimento mas criadas/pagas no mês atual
+    if (!despesa.data_vencimento && despesa.data && isCurrentMonth(despesa.data)) {
       return true;
     }
     
