@@ -45,21 +45,15 @@ const DespesasPage = () => {
 
   // Aplicar filtro do mês atual primeiro
   const currentMonthTransactions = useMemo(() => {
-    console.log('Total de despesas antes do filtro do mês atual:', allTransactions.length);
+    console.log('=== DEBUG FILTRO MÊS ATUAL ===');
+    console.log('Total de despesas antes do filtro:', allTransactions.length);
     console.log('Filtros de data - De:', dateFrom, 'Até:', dateTo);
+    console.log('Usando filtros manuais?', !!(dateFrom || dateTo));
     
     const filtered = filterDespesasCurrentMonth(allTransactions, dateFrom, dateTo);
     
     console.log('Despesas após filtro do mês atual:', filtered.length);
-    console.log('Primeiras 5 despesas filtradas:', filtered.slice(0, 5).map(d => ({
-      id: d.id,
-      company: d.company,
-      data_vencimento: d.data_vencimento,
-      data: d.date,
-      valor: d.valor,
-      valor_total: d.valor_total,
-      status: d.status
-    })));
+    console.log('Total dos valores filtrados:', filtered.reduce((sum, t) => sum + (t.valor_total || t.valor), 0));
     
     return filtered;
   }, [allTransactions, dateFrom, dateTo]);
@@ -90,9 +84,9 @@ const DespesasPage = () => {
   const valorPendente = despesasPendentes.reduce((sum, t) => sum + (t.valor_total || t.valor), 0);
   const valorAtrasado = despesasAtrasadas.reduce((sum, t) => sum + (t.valor_total || t.valor), 0);
 
-  console.log('Estatísticas calculadas:');
+  console.log('=== ESTATÍSTICAS FINAIS ===');
   console.log('Total de despesas filtradas:', filteredTransactions.length);
-  console.log('Total geral:', totalDespesas);
+  console.log('Total geral (valor_total):', totalDespesas);
   console.log('Total de juros:', totalJuros);
   console.log('Valor pago:', valorPago);
   console.log('Valor pendente:', valorPendente);
