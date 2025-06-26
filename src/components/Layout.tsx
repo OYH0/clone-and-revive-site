@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
 import AppSidebar from './AppSidebar';
 import { Menu } from 'lucide-react';
@@ -9,29 +9,13 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      setIsScrolled(scrollTop > 20);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <SidebarInset className="flex-1">
-          {/* Header com trigger sempre visível e cor que muda com o scroll */}
-          <header className={`sticky top-0 z-40 flex h-14 items-center gap-4 border-b px-4 sm:px-6 transition-colors duration-200 ${
-            isScrolled 
-              ? 'bg-white/80 backdrop-blur-sm border-gray-200/50 shadow-sm' 
-              : 'bg-background border-border'
-          }`}>
+          {/* Header com trigger sempre visível */}
+          <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6">
             <SidebarTrigger className="flex items-center justify-center">
               <Menu className="h-5 w-5" />
             </SidebarTrigger>

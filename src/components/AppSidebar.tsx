@@ -10,6 +10,7 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -48,14 +49,12 @@ const AppSidebar: React.FC = () => {
   const isCollapsed = state === 'collapsed';
 
   return (
-    <Sidebar 
-      collapsible="icon"
-      className="bg-gradient-to-b from-blue-600 via-blue-700 to-blue-800 text-white shadow-xl"
-    >
+    <Sidebar className="bg-gradient-to-b from-blue-600 via-blue-700 to-blue-800 text-white shadow-xl">
       <SidebarHeader className="p-6 border-b border-blue-500/30">
-        {!isCollapsed ? (
+        {!isCollapsed && (
           <h1 className="text-xl font-bold">Gestão Financeira</h1>
-        ) : (
+        )}
+        {isCollapsed && (
           <div className="text-xl font-bold text-center">GF</div>
         )}
       </SidebarHeader>
@@ -73,12 +72,12 @@ const AppSidebar: React.FC = () => {
                     <SidebarMenuButton
                       onClick={() => navigate(item.path)}
                       isActive={isActive}
-                      tooltip={isCollapsed ? item.label : undefined}
                       className={`w-full flex items-center gap-3 p-3 rounded-xl mb-2 text-left transition-all duration-200 ${
                         isActive 
                           ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm' 
                           : 'hover:bg-white/10 text-blue-100 hover:text-white'
                       }`}
+                      tooltip={isCollapsed ? item.label : undefined}
                     >
                       <Icon size={18} />
                       {!isCollapsed && <span className="text-sm">{item.label}</span>}
@@ -91,12 +90,12 @@ const AppSidebar: React.FC = () => {
                 <SidebarMenuButton
                   onClick={() => navigate('/admin')}
                   isActive={location.pathname === '/admin'}
-                  tooltip={isCollapsed ? 'Admin' : undefined}
                   className={`w-full flex items-center gap-3 p-3 rounded-xl mb-2 text-left transition-all duration-200 ${
                     location.pathname === '/admin'
                       ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm' 
                       : 'hover:bg-white/10 text-blue-100 hover:text-white'
                   }`}
+                  tooltip={isCollapsed ? 'Admin' : undefined}
                 >
                   <Shield size={18} />
                   {!isCollapsed && <span className="text-sm">Admin</span>}
@@ -120,6 +119,7 @@ const AppSidebar: React.FC = () => {
           variant="outline" 
           size={isCollapsed ? "icon" : "sm"}
           className="w-full text-white border-white/30 bg-white/10 hover:bg-white/20 rounded-xl backdrop-blur-sm transition-all duration-200"
+          disabled={false}
         >
           <LogOut size={16} className={isCollapsed ? "" : "mr-2"} />
           {!isCollapsed && "Sair"}
