@@ -26,11 +26,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <SidebarInset className="flex-1">
-          {/* Header com trigger sempre visível e cor que muda com o scroll */}
-          <header className={`sticky top-0 z-40 flex h-14 items-center gap-4 border-b px-4 sm:px-6 transition-colors duration-200 ${
+          {/* Header sempre translúcido com intensidade que varia com o scroll */}
+          <header className={`sticky top-0 z-40 flex h-14 items-center gap-4 border-b px-4 sm:px-6 transition-all duration-200 ${
             isScrolled 
-              ? 'bg-white/80 backdrop-blur-sm border-gray-200/50 shadow-sm' 
-              : 'bg-background border-border'
+              ? 'bg-white/90 backdrop-blur-md border-gray-200/60 shadow-md' 
+              : 'bg-white/70 backdrop-blur-sm border-gray-200/40 shadow-sm'
           }`}>
             <SidebarTrigger className="flex items-center justify-center">
               <Menu className="h-5 w-5" />
