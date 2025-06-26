@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Layout from "./components/Layout";
 import Index from "./pages/Index";
 import AuthPage from "./pages/AuthPage";
 import DespesasPage from "./pages/DespesasPage";
@@ -37,67 +36,67 @@ const App = () => {
               <Routes>
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/" element={
-                  <ProtectedRoute>
-                    <Layout>
+                  <div className="main-content">
+                    <ProtectedRoute>
                       <Index />
-                    </Layout>
-                  </ProtectedRoute>
+                    </ProtectedRoute>
+                  </div>
                 } />
                 <Route path="/despesas" element={
-                  <ProtectedRoute>
-                    <Layout>
+                  <div className="main-content">
+                    <ProtectedRoute>
                       <DespesasPage />
-                    </Layout>
-                  </ProtectedRoute>
+                    </ProtectedRoute>
+                  </div>
                 } />
                 <Route path="/receitas" element={
-                  <ProtectedRoute>
-                    <Layout>
+                  <div className="main-content">
+                    <ProtectedRoute>
                       <ReceitasPage />
-                    </Layout>
-                  </ProtectedRoute>
+                    </ProtectedRoute>
+                  </div>
                 } />
                 <Route path="/relatorios" element={
-                  <ProtectedRoute>
-                    <Layout>
+                  <div className="main-content">
+                    <ProtectedRoute>
                       <RelatoriosPage />
-                    </Layout>
-                  </ProtectedRoute>
+                    </ProtectedRoute>
+                  </div>
                 } />
                 <Route path="/configuracoes" element={
-                  <ProtectedRoute>
-                    <Layout>
+                  <div className="main-content">
+                    <ProtectedRoute>
                       <ConfiguracoesPage />
-                    </Layout>
-                  </ProtectedRoute>
+                    </ProtectedRoute>
+                  </div>
                 } />
                 <Route path="/camerino" element={
-                  <ProtectedRoute>
-                    <Layout>
+                  <div className="main-content">
+                    <ProtectedRoute>
                       <CamerinoPage />
-                    </Layout>
-                  </ProtectedRoute>
+                    </ProtectedRoute>
+                  </div>
                 } />
                 <Route path="/companhia" element={
-                  <ProtectedRoute>
-                    <Layout>
+                  <div className="main-content">
+                    <ProtectedRoute>
                       <CompanhiaPage />
-                    </Layout>
-                  </ProtectedRoute>
+                    </ProtectedRoute>
+                  </div>
                 } />
                 <Route path="/johnny" element={
-                  <ProtectedRoute>
-                    <Layout>
+                  <div className="main-content">
+                    <ProtectedRoute>
                       <JohnnyPage />
-                    </Layout>
-                  </ProtectedRoute>
+                    </ProtectedRoute>
+                  </div>
                 } />
                 <Route path="/admin" element={
-                  <ProtectedRoute>
-                    <Layout>
+                  <div className="main-content">
+                    <ProtectedRoute>
                       <AdminPage />
-                    </Layout>
-                  </ProtectedRoute>
+                    </ProtectedRoute>
+                  </div>
                 } />
                 <Route path="*" element={<NotFound />} />
               </Routes>
