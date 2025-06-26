@@ -5,6 +5,8 @@ import MonthlyGoals from '@/components/MonthlyGoals';
 import NextActions from '@/components/NextActions';
 import { Despesa } from '@/hooks/useDespesas';
 import { Receita } from '@/hooks/useReceitas';
+import { useDespesas } from '@/hooks/useDespesas';
+import { useReceitas } from '@/hooks/useReceitas';
 
 interface JohnnyInsightsProps {
   despesas: Despesa[];
@@ -12,9 +14,30 @@ interface JohnnyInsightsProps {
 }
 
 const JohnnyInsights: React.FC<JohnnyInsightsProps> = ({ despesas, receitas }) => {
-  const totalDespesas = despesas.reduce((sum, d) => sum + d.valor, 0);
-  const totalReceitas = receitas.reduce((sum, r) => sum + r.valor, 0);
-  const lucro = totalReceitas - totalDespesas;
+  const { data: todasDespesas } = useDespesas();
+  const { data: todasReceitas } = useReceitas();
+
+  // Filtrar TODOS os dados do Johnny para cálculos acumulados
+  const johnnyDespesasCompleto = todasDespesas?.filter(d => {
+    const empresa = d.empresa?.toLowerCase().trim() || '';
+    return empresa === 'johnny' || 
+           empresa === 'johnny rockets' || 
+           empresa === 'johnny rocket' ||
+           empresa.includes('johnny');
+  }) || [];
+  
+  const johnnyReceitasCompleto = todasReceitas?.filter(r => {
+    const empresa = r.empresa?.toLowerCase().trim() || '';
+    return empresa === 'johnny' || 
+           empresa === 'johnny rockets' || 
+           empresa === 'johnny rocket' ||
+           empresa.includes('johnny');
+  }) || [];
+
+  // USAR DADOS ACUMULADOS para os indicadores
+  const totalDespesasAcumulado = johnnyDespesasCompleto.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
+  const totalReceitasAcumulado = johnnyReceitasCompleto.reduce((sum, r) => sum + r.valor, 0);
+  const lucroAcumulado = totalReceitasAcumulado - totalDespesasAcumulado;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -28,14 +51,14 @@ const JohnnyInsights: React.FC<JohnnyInsightsProps> = ({ despesas, receitas }) =
           <div className="flex justify-between items-center p-3 bg-blue-50 rounded-xl">
             <span className="text-blue-700 font-medium">ROI</span>
             <span className="text-blue-800 font-bold">
-              {totalDespesas > 0 ? ((lucro / totalDespesas) * 100).toFixed(1) : '0'}%
+              {totalDespesasAcumulado > 0 ? ((lucroAcumulado / totalDespesasAcumulado) * 100).toFixed(1) : '0'}%
             </span>
           </div>
           
           <div className="flex justify-between items-center p-3 bg-indigo-50 rounded-xl">
             <span className="text-indigo-700 font-medium">Break Even</span>
             <span className="text-indigo-800 font-bold">
-              R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              R$ {totalDespesasAcumulado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </span>
           </div>
           

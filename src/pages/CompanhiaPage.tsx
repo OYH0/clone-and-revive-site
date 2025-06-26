@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Building2, TrendingUp, DollarSign, Users, BarChart3 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -38,7 +39,7 @@ const CompanhiaPage = () => {
            empresa.includes('churrasco');
   }) || [];
 
-  // Aplicar filtro de período
+  // Aplicar filtro de período APENAS para exibição dos gráficos e distribuição
   const { filteredDespesas, filteredReceitas } = useMemo(() => {
     return {
       filteredDespesas: filterDataByPeriod(companhiaDespesas, selectedPeriod),
@@ -53,11 +54,15 @@ const CompanhiaPage = () => {
     return acc;
   }, {} as Record<string, number>));
 
-  // Calcular estatísticas - usando valor_total que inclui juros
-  const totalDespesas = filteredDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
-  const totalReceitas = filteredReceitas.reduce((sum, r) => sum + r.valor, 0);
-  const lucro = totalReceitas - totalDespesas;
-  const margemLucro = totalReceitas > 0 ? (lucro / totalReceitas) * 100 : 0;
+  // Calcular estatísticas - LUCRO ACUMULADO usa todos os dados, outros usam filtros
+  const totalDespesasPeriodo = filteredDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
+  const totalReceitasPeriodo = filteredReceitas.reduce((sum, r) => sum + r.valor, 0);
+  
+  // LUCRO ACUMULADO - usar TODOS os dados da empresa, não apenas o período selecionado
+  const totalDespesasAcumulado = companhiaDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
+  const totalReceitasAcumulado = companhiaReceitas.reduce((sum, r) => sum + r.valor, 0);
+  const lucroAcumulado = totalReceitasAcumulado - totalDespesasAcumulado;
+  const margemLucro = totalReceitasAcumulado > 0 ? (lucroAcumulado / totalReceitasAcumulado) * 100 : 0;
 
   const evolucaoMensal = React.useMemo(() => {
     const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
@@ -186,7 +191,7 @@ const CompanhiaPage = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">
-                  R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  R$ {totalReceitasPeriodo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">{filteredReceitas.length} transações</p>
               </CardContent>
@@ -201,7 +206,7 @@ const CompanhiaPage = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-red-600">
-                  R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  R$ {totalDespesasPeriodo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">{filteredDespesas.length} transações</p>
               </CardContent>
@@ -209,17 +214,17 @@ const CompanhiaPage = () => {
 
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">Lucro Líquido</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600">Lucro Líquido Acumulado</CardTitle>
                 <div className="p-2 bg-gradient-to-r from-blue-100 to-blue-200 rounded-xl">
                   <BarChart3 className="h-4 w-4 text-blue-600" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className={`text-2xl font-bold ${lucro >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  R$ {lucro.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                <div className={`text-2xl font-bold ${lucroAcumulado >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  R$ {lucroAcumulado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  {lucro >= 0 ? '+' : ''}{margemLucro.toFixed(1)}% margem
+                  {lucroAcumulado >= 0 ? '+' : ''}{margemLucro.toFixed(1)}% margem acumulada
                 </p>
               </CardContent>
             </Card>
@@ -233,7 +238,7 @@ const CompanhiaPage = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-purple-600">
-                  R$ {filteredReceitas.length > 0 ? (totalReceitas / filteredReceitas.length).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}
+                  R$ {filteredReceitas.length > 0 ? (totalReceitasPeriodo / filteredReceitas.length).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">Por transação</p>
               </CardContent>
@@ -288,14 +293,14 @@ const CompanhiaPage = () => {
                 <div className="flex justify-between items-center p-3 bg-red-50 rounded-xl">
                   <span className="text-red-700 font-medium">ROI</span>
                   <span className="text-red-800 font-bold">
-                    {totalDespesas > 0 ? ((lucro / totalDespesas) * 100).toFixed(1) : '0'}%
+                    {totalDespesasAcumulado > 0 ? ((lucroAcumulado / totalDespesasAcumulado) * 100).toFixed(1) : '0'}%
                   </span>
                 </div>
                 
                 <div className="flex justify-between items-center p-3 bg-orange-50 rounded-xl">
                   <span className="text-orange-700 font-medium">Break Even</span>
                   <span className="text-orange-800 font-bold">
-                    R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    R$ {totalDespesasAcumulado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </span>
                 </div>
                 
