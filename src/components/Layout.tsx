@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
 import AppSidebar from './AppSidebar';
-import { Menu } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -32,9 +31,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               ? 'bg-white/90 backdrop-blur-md border-gray-200/60 shadow-md' 
               : 'bg-white/70 backdrop-blur-sm border-gray-200/40 shadow-sm'
           }`}>
-            <SidebarTrigger className="flex items-center justify-center">
-              <Menu className="h-5 w-5" />
-            </SidebarTrigger>
+            <SidebarTrigger />
           </header>
           
           {/* Conteúdo principal */}
