@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Building2, TrendingUp, DollarSign, Users, BarChart3 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -244,7 +245,7 @@ const CompanhiaPage = () => {
 
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">Ticket Médio</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600">Média de Vendas</CardTitle>
                 <div className="p-2 bg-gradient-to-r from-purple-100 to-purple-200 rounded-xl">
                   <Users className="h-4 w-4 text-purple-600" />
                 </div>
@@ -253,7 +254,7 @@ const CompanhiaPage = () => {
                 <div className="text-2xl font-bold text-purple-600">
                   R$ {filteredReceitas.length > 0 ? (totalReceitasPeriodo / filteredReceitas.length).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Por transação</p>
+                <p className="text-xs text-gray-500 mt-1">Por venda</p>
               </CardContent>
             </Card>
           </div>

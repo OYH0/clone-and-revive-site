@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Building2, TrendingUp, DollarSign, Users, BarChart3 } from 'lucide-react';
+import { Building2, TrendingUp, DollarSign, BarChart3 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -186,8 +186,8 @@ const CamerinoPage = () => {
             </div>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          {/* Stats Cards - Removido o card de Ticket Médio */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                 <CardTitle className="text-sm font-medium text-gray-600">Receita Total</CardTitle>
@@ -232,21 +232,6 @@ const CamerinoPage = () => {
                 <p className="text-xs text-gray-500 mt-1">
                   {lucroCalculado >= 0 ? '+' : ''}{margemLucro.toFixed(1)}% margem
                 </p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">Ticket Médio</CardTitle>
-                <div className="p-2 bg-gradient-to-r from-purple-100 to-purple-200 rounded-xl">
-                  <Users className="h-4 w-4 text-purple-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-purple-600">
-                  R$ {filteredReceitas.length > 0 ? (totalReceitasPeriodo / filteredReceitas.length).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">Por transação</p>
               </CardContent>
             </Card>
           </div>
