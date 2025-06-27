@@ -26,36 +26,36 @@ const RelatoriosPage = () => {
     
     return months.map((month, index) => {
       const monthDespesas = despesas?.filter(d => {
-        const date = new Date(d.data);
-        return date.getMonth() === index && date.getFullYear() === currentYear;
-      }).reduce((sum, d) => sum + d.valor, 0) || 0;
+        const date = d.data_vencimento ? new Date(d.data_vencimento) : d.data ? new Date(d.data) : null;
+        return date && date.getMonth() === index && date.getFullYear() === currentYear;
+      }).reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0) || 0;
       
       const monthReceitas = receitas?.filter(r => {
         const date = new Date(r.data);
         return date.getMonth() === index && date.getFullYear() === currentYear;
-      }).reduce((sum, r) => sum + r.valor, 0) || 0;
+      }).reduce((sum, r) => sum + (r.valor || 0), 0) || 0;
       
       return {
         month,
-        despesas: monthDespesas, // Removido divisão por 100
+        despesas: monthDespesas,
         receitas: monthReceitas,
-        lucro: monthReceitas - monthDespesas // Removido divisão por 100
+        lucro: monthReceitas - monthDespesas
       };
     });
   }, [despesas, receitas]);
 
-  // Dados para gráfico de distribuição por categoria
+  // Dados para gráfico de distribuição por categoria (usando valor_total)
   const categoryData = React.useMemo(() => {
-    const categories = ['INSUMOS', 'FIXAS', 'VARIAVEIS', 'ATRASADOS'];
-    const colors = ['#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444'];
+    const categories = ['INSUMOS', 'FIXAS', 'VARIAVEIS', 'ATRASADOS', 'RETIRADAS'];
+    const colors = ['#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#10b981'];
     
     return categories.map((category, index) => {
-      const value = despesas?.filter(d => d.categoria === category)
-        .reduce((sum, d) => sum + d.valor, 0) || 0;
+      const value = despesas?.filter(d => d.categoria === category || (category === 'VARIAVEIS' && d.categoria === 'VARIÁVEIS'))
+        .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0) || 0;
       
       return {
         name: category,
-        value: value, // Removido divisão por 100
+        value: value,
         color: colors[index]
       };
     }).filter(item => item.value > 0);
@@ -63,24 +63,29 @@ const RelatoriosPage = () => {
 
   // Dados para gráfico de receitas por empresa
   const receitasEmpresaData = React.useMemo(() => {
-    const empresas = ['Churrasco', 'Johnny', 'Outros'];
-    const colors = ['#ef4444', '#3b82f6', '#6b7280'];
+    const empresas = ['Churrasco', 'Johnny', 'Camerino'];
+    const colors = ['#ef4444', '#3b82f6', '#10b981'];
     
     return empresas.map((empresa, index) => {
-      const value = receitas?.filter(r => r.empresa === empresa)
-        .reduce((sum, r) => sum + r.valor, 0) || 0;
+      const value = receitas?.filter(r => 
+        r.empresa === empresa || 
+        (empresa === 'Churrasco' && r.empresa === 'Companhia do Churrasco') ||
+        (empresa === 'Johnny' && r.empresa === 'Johnny Rockets')
+      ).reduce((sum, r) => sum + (r.valor || 0), 0) || 0;
       
       return {
-        name: empresa === 'Churrasco' ? 'Companhia do Churrasco' : empresa === 'Johnny' ? 'Johnny Rockets' : empresa,
+        name: empresa === 'Churrasco' ? 'Companhia do Churrasco' : 
+              empresa === 'Johnny' ? 'Johnny Rockets' : 
+              empresa === 'Camerino' ? 'Camerino' : empresa,
         value,
         color: colors[index]
       };
     }).filter(item => item.value > 0);
   }, [receitas]);
 
-  // Calcular estatísticas
-  const totalDespesas = despesas?.reduce((sum, d) => sum + d.valor, 0) || 0; // Removido divisão por 100
-  const totalReceitas = receitas?.reduce((sum, r) => sum + r.valor, 0) || 0;
+  // Calcular estatísticas usando valor_total para despesas
+  const totalDespesas = despesas?.reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0) || 0;
+  const totalReceitas = receitas?.reduce((sum, r) => sum + (r.valor || 0), 0) || 0;
   const lucroTotal = totalReceitas - totalDespesas;
   const margemLucro = totalReceitas > 0 ? (lucroTotal / totalReceitas) * 100 : 0;
 
@@ -93,7 +98,7 @@ const RelatoriosPage = () => {
 
       // Header
       doc.setFontSize(20);
-      doc.setTextColor(59, 130, 246); // Blue color
+      doc.setTextColor(59, 130, 246);
       doc.text('Relatório Financeiro', margin, yPosition);
       yPosition += 15;
 
@@ -154,8 +159,8 @@ const RelatoriosPage = () => {
       yPosition += 15;
 
       doc.setFontSize(12);
-      const maiorReceita = Math.max(...(receitas?.map(r => r.valor) || [0]));
-      const maiorDespesa = Math.max(...(despesas?.map(d => d.valor) || [0])); // Removido divisão por 100
+      const maiorReceita = Math.max(...(receitas?.map(r => r.valor || 0) || [0]));
+      const maiorDespesa = Math.max(...(despesas?.map(d => d.valor_total || d.valor || 0) || [0]));
       const mediaMensal = totalReceitas / 12;
       const totalTransacoes = (despesas?.length || 0) + (receitas?.length || 0);
 
@@ -172,7 +177,6 @@ const RelatoriosPage = () => {
       doc.setTextColor(100, 100, 100);
       doc.text(`Relatório gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`, margin, doc.internal.pageSize.height - 20);
 
-      // Save the PDF
       const fileName = `relatorio-financeiro-${new Date().toISOString().split('T')[0]}.pdf`;
       doc.save(fileName);
 
@@ -392,14 +396,14 @@ const RelatoriosPage = () => {
                 <div className="flex justify-between items-center p-4 bg-green-50 rounded-xl">
                   <span className="text-green-700 font-medium">Maior Receita</span>
                   <span className="text-green-800 font-bold">
-                    R$ {Math.max(...(receitas?.map(r => r.valor) || [0])).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    R$ {Math.max(...(receitas?.map(r => r.valor || 0) || [0])).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </span>
                 </div>
                 
                 <div className="flex justify-between items-center p-4 bg-red-50 rounded-xl">
                   <span className="text-red-700 font-medium">Maior Despesa</span>
                   <span className="text-red-800 font-bold">
-                    R$ {Math.max(...(despesas?.map(d => d.valor) || [0])).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    R$ {Math.max(...(despesas?.map(d => d.valor_total || d.valor || 0) || [0])).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </span>
                 </div>
                 
