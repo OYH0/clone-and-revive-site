@@ -24,15 +24,39 @@ const RelatoriosPage = () => {
     const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
     const currentYear = new Date().getFullYear();
     
+    console.log('=== DEBUG EVOLUÇÃO MENSAL ===');
+    console.log('Ano atual:', currentYear);
+    console.log('Total de receitas:', receitas?.length || 0);
+    console.log('Primeiras 5 receitas:', receitas?.slice(0, 5).map(r => ({
+      id: r.id,
+      data: r.data,
+      valor: r.valor,
+      empresa: r.empresa
+    })));
+    
     return months.map((month, index) => {
       const monthDespesas = despesas?.filter(d => {
-        const date = d.data_vencimento ? new Date(d.data_vencimento) : d.data ? new Date(d.data) : null;
-        return date && date.getMonth() === index && date.getFullYear() === currentYear;
+        const date = d.data_vencimento ? new Date(d.data_vencimento + 'T12:00:00') : d.data ? new Date(d.data + 'T12:00:00') : null;
+        if (!date) return false;
+        
+        const isCurrentMonth = date.getMonth() === index && date.getFullYear() === currentYear;
+        
+        if (index === 0 || index === 5) { // Debug para Jan e Jun
+          console.log(`Despesa - ${month}: data=${d.data_vencimento || d.data}, parsedDate=${date.toISOString()}, month=${date.getMonth()}, isCurrentMonth=${isCurrentMonth}`);
+        }
+        
+        return isCurrentMonth;
       }).reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0) || 0;
       
       const monthReceitas = receitas?.filter(r => {
-        const date = new Date(r.data);
-        return date.getMonth() === index && date.getFullYear() === currentYear;
+        const date = new Date(r.data + 'T12:00:00');
+        const isCurrentMonth = date.getMonth() === index && date.getFullYear() === currentYear;
+        
+        if (index === 0 || index === 5) { // Debug para Jan e Jun
+          console.log(`Receita - ${month}: data=${r.data}, parsedDate=${date.toISOString()}, month=${date.getMonth()}, isCurrentMonth=${isCurrentMonth}, valor=${r.valor}`);
+        }
+        
+        return isCurrentMonth;
       }).reduce((sum, r) => sum + (r.valor || 0), 0) || 0;
       
       return {
@@ -249,7 +273,6 @@ const RelatoriosPage = () => {
             </div>
           </div>
 
-          {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
@@ -310,7 +333,6 @@ const RelatoriosPage = () => {
 
           {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {/* Evolução Mensal */}
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader>
                 <CardTitle className="text-xl text-gray-800">Evolução Mensal</CardTitle>
@@ -333,7 +355,6 @@ const RelatoriosPage = () => {
               </CardContent>
             </Card>
 
-            {/* Distribuição de Despesas */}
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader>
                 <CardTitle className="text-xl text-gray-800">Distribuição de Despesas</CardTitle>
@@ -364,9 +385,7 @@ const RelatoriosPage = () => {
             </Card>
           </div>
 
-          {/* Mais gráficos */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Receitas por Empresa */}
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader>
                 <CardTitle className="text-xl text-gray-800">Receitas por Empresa</CardTitle>
@@ -386,7 +405,6 @@ const RelatoriosPage = () => {
               </CardContent>
             </Card>
 
-            {/* Resumo do Período */}
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader>
                 <CardTitle className="text-xl text-gray-800">Resumo do Período</CardTitle>
