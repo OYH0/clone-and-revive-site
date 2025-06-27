@@ -3,9 +3,10 @@ import React from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend, LineChart, Line } from 'recharts';
-import { TrendingUp, TrendingDown, ArrowUpDown } from 'lucide-react';
 import { useDespesas } from '@/hooks/useDespesas';
 import { useReceitas } from '@/hooks/useReceitas';
+import { calculateProfitByPeriod } from '@/utils/dateUtils';
+import { TrendingUp, TrendingDown, BarChart3, Target } from 'lucide-react';
 
 interface ComparativeModalProps {
   isOpen: boolean;
@@ -17,312 +18,281 @@ const ComparativeModal: React.FC<ComparativeModalProps> = ({ isOpen, onClose, em
   const { data: todasDespesas } = useDespesas();
   const { data: todasReceitas } = useReceitas();
 
-  // Mapear nomes das empresas para consistência
-  const empresaMapping: { [key: string]: string } = {
-    'Johnny Rockets': 'Johnny',
-    'Companhia do Churrasco': 'Churrasco',
-    'Camerino': 'Camerino'
-  };
-
-  const empresaAtualKey = empresaMapping[empresa] || empresa;
-
   // Filtrar dados por empresa
-  const despesasCamerino = todasDespesas?.filter(d => d.empresa === 'Camerino') || [];
-  const receitasCamerino = todasReceitas?.filter(r => r.empresa === 'Camerino') || [];
-  const despesasJohnny = todasDespesas?.filter(d => d.empresa === 'Johnny') || [];
-  const receitasJohnny = todasReceitas?.filter(r => r.empresa === 'Johnny') || [];
-  const despesasChurrasco = todasDespesas?.filter(d => d.empresa === 'Churrasco') || [];
-  const receitasChurrasco = todasReceitas?.filter(r => r.empresa === 'Churrasco') || [];
-
-  // Calcular totais para cada empresa
-  const calcularTotais = (despesas: any[], receitas: any[]) => {
-    const totalDespesas = despesas.reduce((sum, d) => sum + d.valor, 0);
-    const totalReceitas = receitas.reduce((sum, r) => sum + r.valor, 0);
-    const lucro = totalReceitas - totalDespesas;
-    const margem = totalReceitas > 0 ? (lucro / totalReceitas) * 100 : 0;
+  const getEmpresaData = (empresaNome: string) => {
+    const despesas = todasDespesas?.filter(d => {
+      const emp = d.empresa?.toLowerCase().trim() || '';
+      switch (empresaNome.toLowerCase()) {
+        case 'churrasco':
+          return emp.includes('churrasco') || emp === 'companhia do churrasco' || emp === 'cia do churrasco';
+        case 'johnny':
+          return emp === 'johnny' || emp === 'johnny rockets' || emp === 'johnny rocket' || emp.includes('johnny');
+        case 'camerino':
+          return emp === 'camerino' || emp.includes('camerino');
+        default:
+          return emp === empresaNome.toLowerCase();
+      }
+    }) || [];
     
-    return { totalDespesas, totalReceitas, lucro, margem };
+    const receitas = todasReceitas?.filter(r => {
+      const emp = r.empresa?.toLowerCase().trim() || '';
+      switch (empresaNome.toLowerCase()) {
+        case 'churrasco':
+          return emp.includes('churrasco') || emp === 'companhia do churrasco' || emp === 'cia do churrasco';
+        case 'johnny':
+          return emp === 'johnny' || emp === 'johnny rockets' || emp === 'johnny rocket' || emp.includes('johnny');
+        case 'camerino':
+          return emp === 'camerino' || emp.includes('camerino');
+        default:
+          return emp === empresaNome.toLowerCase();
+      }
+    }) || [];
+    
+    return { despesas, receitas };
   };
 
-  const totaisCamerino = calcularTotais(despesasCamerino, receitasCamerino);
-  const totaisJohnny = calcularTotais(despesasJohnny, receitasJohnny);
-  const totaisChurrasco = calcularTotais(despesasChurrasco, receitasChurrasco);
-
-  // Comparativo mensal entre todas as empresas
-  const comparativoMensal = React.useMemo(() => {
-    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
-    return months.map((month, index) => {
-      // Camerino
-      const receitasCamerinoMes = receitasCamerino.filter(r => {
-        const date = new Date(r.data);
-        return date.getMonth() === index;
-      }).reduce((sum, r) => sum + r.valor, 0);
-
-      const despesasCamerinoMes = despesasCamerino.filter(d => {
-        const date = new Date(d.data);
-        return date.getMonth() === index;
-      }).reduce((sum, d) => sum + d.valor, 0);
-
-      // Johnny
-      const receitasJohnnyMes = receitasJohnny.filter(r => {
-        const date = new Date(r.data);
-        return date.getMonth() === index;
-      }).reduce((sum, r) => sum + r.valor, 0);
-
-      const despesasJohnnyMes = despesasJohnny.filter(d => {
-        const date = new Date(d.data);
-        return date.getMonth() === index;
-      }).reduce((sum, d) => sum + d.valor, 0);
-
-      // Churrasco
-      const receitasChurrascoMes = receitasChurrasco.filter(r => {
-        const date = new Date(r.data);
-        return date.getMonth() === index;
-      }).reduce((sum, r) => sum + r.valor, 0);
-
-      const despesasChurrascoMes = despesasChurrasco.filter(d => {
-        const date = new Date(d.data);
-        return date.getMonth() === index;
-      }).reduce((sum, d) => sum + d.valor, 0);
-
+  const empresas = ['Camerino', 'Johnny', 'Churrasco'];
+  
+  // Dados comparativos por período
+  const periodos = ['month', 'year'] as const;
+  
+  const dadosComparativos = React.useMemo(() => {
+    return empresas.map(emp => {
+      const { despesas, receitas } = getEmpresaData(emp);
+      
+      const totalDespesas = despesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
+      const totalReceitas = receitas.reduce((sum, r) => sum + r.valor, 0);
+      
+      // Calcular lucro por período
+      const lucroMensal = calculateProfitByPeriod(despesas, receitas, 'month');
+      const lucroAnual = calculateProfitByPeriod(despesas, receitas, 'year');
+      
       return {
-        month,
-        'Camerino - Receitas': receitasCamerinoMes,
-        'Johnny Rockets - Receitas': receitasJohnnyMes,
-        'Companhia do Churrasco - Receitas': receitasChurrascoMes,
-        'Camerino - Despesas': despesasCamerinoMes,
-        'Johnny Rockets - Despesas': despesasJohnnyMes,
-        'Companhia do Churrasco - Despesas': despesasChurrascoMes,
-        'Camerino - Lucro': receitasCamerinoMes - despesasCamerinoMes,
-        'Johnny Rockets - Lucro': receitasJohnnyMes - despesasJohnnyMes,
-        'Companhia do Churrasco - Lucro': receitasChurrascoMes - despesasChurrascoMes
+        empresa: emp,
+        despesas: totalDespesas,
+        receitas: totalReceitas,
+        lucroTotal: totalReceitas - totalDespesas,
+        lucroMensal,
+        lucroAnual,
+        margemTotal: totalReceitas > 0 ? ((totalReceitas - totalDespesas) / totalReceitas) * 100 : 0,
+        margemMensal: totalReceitas > 0 ? (lucroMensal / totalReceitas) * 100 : 0,
+        roi: totalDespesas > 0 ? ((totalReceitas - totalDespesas) / totalDespesas) * 100 : 0
       };
     });
-  }, [despesasCamerino, receitasCamerino, despesasJohnny, receitasJohnny, despesasChurrasco, receitasChurrasco]);
+  }, [todasDespesas, todasReceitas]);
+
+  // Evolução mensal comparativa (últimos 6 meses)
+  const evolucaoComparativa = React.useMemo(() => {
+    const now = new Date();
+    const meses = [];
+    
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const mesNome = date.toLocaleDateString('pt-BR', { month: 'short' });
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      
+      const dadosMes: any = { mes: mesNome };
+      
+      empresas.forEach(emp => {
+        const { despesas, receitas } = getEmpresaData(emp);
+        
+        const receitasMes = receitas.filter(r => {
+          const itemDate = new Date(r.data + 'T00:00:00');
+          return itemDate.getFullYear() === year && itemDate.getMonth() === month;
+        }).reduce((sum, r) => sum + r.valor, 0);
+        
+        const despesasMes = despesas.filter(d => {
+          let itemDate: Date;
+          if (d.data_vencimento) {
+            itemDate = new Date(d.data_vencimento + 'T00:00:00');
+          } else if (d.data) {
+            itemDate = new Date(d.data + 'T00:00:00');
+          } else {
+            return false;
+          }
+          return itemDate.getFullYear() === year && itemDate.getMonth() === month;
+        }).reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
+        
+        dadosMes[`${emp}_lucro`] = receitasMes - despesasMes;
+      });
+      
+      meses.push(dadosMes);
+    }
+    
+    return meses;
+  }, [todasDespesas, todasReceitas]);
+
+  const empresaAtual = dadosComparativos.find(e => e.empresa.toLowerCase() === empresa.toLowerCase().replace(' rockets', ''));
+  const posicaoRanking = dadosComparativos
+    .sort((a, b) => b.lucroAnual - a.lucroAnual)
+    .findIndex(e => e.empresa.toLowerCase() === empresa.toLowerCase().replace(' rockets', '')) + 1;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Análise Comparativa</DialogTitle>
+          <DialogTitle className="text-2xl font-bold">Análise Comparativa - {empresa}</DialogTitle>
           <DialogDescription>
-            Comparação entre todas as empresas: Camerino, Johnny Rockets e Companhia do Churrasco
+            Comparação de performance entre todas as empresas
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Comparativo de Indicadores - Todas as Empresas */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Camerino */}
-            <Card className={empresa === 'Camerino' ? 'ring-2 ring-purple-500' : ''}>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  Camerino
-                  {empresa === 'Camerino' && <span className="text-sm text-purple-600">(Atual)</span>}
-                </CardTitle>
-                <CardDescription>Indicadores financeiros</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Receitas:</span>
-                  <span className="font-bold text-green-600">
-                    R$ {totaisCamerino.totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Despesas:</span>
-                  <span className="font-bold text-red-600">
-                    R$ {totaisCamerino.totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Lucro:</span>
-                  <span className={`font-bold ${totaisCamerino.lucro >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    R$ {totaisCamerino.lucro.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Margem:</span>
-                  <span className={`font-bold ${totaisCamerino.margem >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {totaisCamerino.margem.toFixed(1)}%
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Resumo da Posição */}
+          {empresaAtual && (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Target className="h-4 w-4 text-blue-500" />
+                    Posição no Ranking
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {posicaoRanking}º lugar
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">de {empresas.length} empresas</p>
+                </CardContent>
+              </Card>
 
-            {/* Johnny Rockets */}
-            <Card className={empresa === 'Johnny Rockets' ? 'ring-2 ring-blue-500' : ''}>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  Johnny Rockets
-                  {empresa === 'Johnny Rockets' && <span className="text-sm text-blue-600">(Atual)</span>}
-                </CardTitle>
-                <CardDescription>Indicadores financeiros</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Receitas:</span>
-                  <span className="font-bold text-green-600">
-                    R$ {totaisJohnny.totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Despesas:</span>
-                  <span className="font-bold text-red-600">
-                    R$ {totaisJohnny.totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Lucro:</span>
-                  <span className={`font-bold ${totaisJohnny.lucro >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    R$ {totaisJohnny.lucro.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Margem:</span>
-                  <span className={`font-bold ${totaisJohnny.margem >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {totaisJohnny.margem.toFixed(1)}%
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm">Lucro Mensal Acumulado</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className={`text-2xl font-bold ${empresaAtual.lucroMensal >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    R$ {empresaAtual.lucroMensal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">{empresaAtual.margemMensal.toFixed(1)}% margem</p>
+                </CardContent>
+              </Card>
 
-            {/* Companhia do Churrasco */}
-            <Card className={empresa === 'Companhia do Churrasco' ? 'ring-2 ring-red-500' : ''}>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  Companhia do Churrasco
-                  {empresa === 'Companhia do Churrasco' && <span className="text-sm text-red-600">(Atual)</span>}
-                </CardTitle>
-                <CardDescription>Indicadores financeiros</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Receitas:</span>
-                  <span className="font-bold text-green-600">
-                    R$ {totaisChurrasco.totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Despesas:</span>
-                  <span className="font-bold text-red-600">
-                    R$ {totaisChurrasco.totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Lucro:</span>
-                  <span className={`font-bold ${totaisChurrasco.lucro >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    R$ {totaisChurrasco.lucro.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Margem:</span>
-                  <span className={`font-bold ${totaisChurrasco.margem >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {totaisChurrasco.margem.toFixed(1)}%
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm">Lucro Anual</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className={`text-2xl font-bold ${empresaAtual.lucroAnual >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    R$ {empresaAtual.lucroAnual.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Ano completo</p>
+                </CardContent>
+              </Card>
 
-          {/* Ranking de Performance */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm">ROI</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className={`text-2xl font-bold ${empresaAtual.roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {empresaAtual.roi.toFixed(1)}%
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Retorno sobre investimento</p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Comparativo por Empresa */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ArrowUpDown className="h-5 w-5" />
-                Ranking de Performance
-              </CardTitle>
-              <CardDescription>Comparativo entre todas as empresas</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 bg-yellow-50 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="h-4 w-4 text-yellow-600" />
-                    <span className="font-medium">Maior Receita</span>
-                  </div>
-                  <p className="text-sm text-gray-600 font-semibold">
-                    {totaisCamerino.totalReceitas >= totaisJohnny.totalReceitas && totaisCamerino.totalReceitas >= totaisChurrasco.totalReceitas ? 'Camerino' :
-                     totaisJohnny.totalReceitas >= totaisChurrasco.totalReceitas ? 'Johnny Rockets' : 'Companhia do Churrasco'}
-                  </p>
-                  <p className="text-xs mt-1">
-                    R$ {Math.max(totaisCamerino.totalReceitas, totaisJohnny.totalReceitas, totaisChurrasco.totalReceitas).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </p>
-                </div>
-
-                <div className="p-4 bg-green-50 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <TrendingDown className="h-4 w-4 text-green-600" />
-                    <span className="font-medium">Menor Despesa</span>
-                  </div>
-                  <p className="text-sm text-gray-600 font-semibold">
-                    {totaisCamerino.totalDespesas <= totaisJohnny.totalDespesas && totaisCamerino.totalDespesas <= totaisChurrasco.totalDespesas ? 'Camerino' :
-                     totaisJohnny.totalDespesas <= totaisChurrasco.totalDespesas ? 'Johnny Rockets' : 'Companhia do Churrasco'}
-                  </p>
-                  <p className="text-xs mt-1">
-                    R$ {Math.min(totaisCamerino.totalDespesas, totaisJohnny.totalDespesas, totaisChurrasco.totalDespesas).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </p>
-                </div>
-
-                <div className="p-4 bg-blue-50 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="h-4 w-4 text-blue-600" />
-                    <span className="font-medium">Melhor Margem</span>
-                  </div>
-                  <p className="text-sm text-gray-600 font-semibold">
-                    {totaisCamerino.margem >= totaisJohnny.margem && totaisCamerino.margem >= totaisChurrasco.margem ? 'Camerino' :
-                     totaisJohnny.margem >= totaisChurrasco.margem ? 'Johnny Rockets' : 'Companhia do Churrasco'}
-                  </p>
-                  <p className="text-xs mt-1">
-                    {Math.max(totaisCamerino.margem, totaisJohnny.margem, totaisChurrasco.margem).toFixed(1)}%
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Gráfico Comparativo - Receitas */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Evolução Comparativa (Receitas)</CardTitle>
-              <CardDescription>Comparação mensal das receitas entre todas as empresas</CardDescription>
+              <CardTitle>Comparativo de Performance</CardTitle>
+              <CardDescription>Lucro anual por empresa</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={comparativoMensal}>
-                    <XAxis dataKey="month" />
+                  <BarChart data={dadosComparativos}>
+                    <XAxis dataKey="empresa" />
                     <YAxis />
                     <Tooltip formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
                     <Legend />
-                    <Bar dataKey="Camerino - Receitas" fill="#8b5cf6" name="Camerino" />
-                    <Bar dataKey="Johnny Rockets - Receitas" fill="#3b82f6" name="Johnny Rockets" />
-                    <Bar dataKey="Companhia do Churrasco - Receitas" fill="#ef4444" name="Companhia do Churrasco" />
+                    <Bar dataKey="receitas" fill="#10b981" name="Receitas" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="despesas" fill="#ef4444" name="Despesas" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
 
-          {/* Gráfico de Lucro Comparativo */}
+          {/* Evolução Comparativa */}
           <Card>
             <CardHeader>
-              <CardTitle>Comparativo de Lucro</CardTitle>
-              <CardDescription>Evolução do lucro mensal entre todas as empresas</CardDescription>
+              <CardTitle>Evolução Comparativa (Últimos 6 Meses)</CardTitle>
+              <CardDescription>Lucro mensal por empresa</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={comparativoMensal}>
-                    <XAxis dataKey="month" />
+                  <LineChart data={evolucaoComparativa}>
+                    <XAxis dataKey="mes" />
                     <YAxis />
                     <Tooltip formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
                     <Legend />
-                    <Line type="monotone" dataKey="Camerino - Lucro" stroke="#8b5cf6" strokeWidth={3} name="Camerino" />
-                    <Line type="monotone" dataKey="Johnny Rockets - Lucro" stroke="#3b82f6" strokeWidth={3} name="Johnny Rockets" />
-                    <Line type="monotone" dataKey="Companhia do Churrasco - Lucro" stroke="#ef4444" strokeWidth={3} name="Companhia do Churrasco" />
+                    <Line type="monotone" dataKey="Camerino_lucro" stroke="#8b5cf6" strokeWidth={3} name="Camerino" />
+                    <Line type="monotone" dataKey="Johnny_lucro" stroke="#3b82f6" strokeWidth={3} name="Johnny" />
+                    <Line type="monotone" dataKey="Churrasco_lucro" stroke="#10b981" strokeWidth={3} name="Churrasco" />
                   </LineChart>
                 </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Tabela Detalhada */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Detalhamento por Empresa</CardTitle>
+              <CardDescription>Métricas detalhadas de performance</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left p-2">Empresa</th>
+                      <th className="text-right p-2">Receitas</th>
+                      <th className="text-right p-2">Despesas</th>
+                      <th className="text-right p-2">Lucro Mensal</th>
+                      <th className="text-right p-2">Lucro Anual</th>
+                      <th className="text-right p-2">Margem %</th>
+                      <th className="text-right p-2">ROI %</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dadosComparativos
+                      .sort((a, b) => b.lucroAnual - a.lucroAnual)
+                      .map((emp, index) => (
+                      <tr key={emp.empresa} className={`border-b ${emp.empresa.toLowerCase() === empresa.toLowerCase().replace(' rockets', '') ? 'bg-blue-50' : ''}`}>
+                        <td className="p-2 font-medium">
+                          {index + 1}º {emp.empresa}
+                          {emp.empresa.toLowerCase() === empresa.toLowerCase().replace(' rockets', '') && (
+                            <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Atual</span>
+                          )}
+                        </td>
+                        <td className="text-right p-2 text-green-600">
+                          R$ {emp.receitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="text-right p-2 text-red-600">
+                          R$ {emp.despesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className={`text-right p-2 ${emp.lucroMensal >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          R$ {emp.lucroMensal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className={`text-right p-2 ${emp.lucroAnual >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          R$ {emp.lucroAnual.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className={`text-right p-2 ${emp.margemMensal >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {emp.margemMensal.toFixed(1)}%
+                        </td>
+                        <td className={`text-right p-2 ${emp.roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {emp.roi.toFixed(1)}%
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </CardContent>
           </Card>

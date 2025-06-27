@@ -14,26 +14,55 @@ interface ProjectionsModalProps {
 }
 
 const ProjectionsModal: React.FC<ProjectionsModalProps> = ({ isOpen, onClose, despesas, receitas, empresa }) => {
-  // Calcular médias dos últimos 6 meses
+  // Calcular médias dos últimos 6 meses usando valor_total
   const calcularMedias = () => {
-    const months = Array.from({ length: 6 }, (_, i) => i);
-    const receitasMensais = months.map(month => {
-      return receitas.filter(r => {
-        const date = new Date(r.data);
-        return date.getMonth() === month;
-      }).reduce((sum, r) => sum + r.valor, 0);
-    });
+    const now = new Date();
+    const receitasMensais = [];
+    const despesasMensais = [];
     
-    const despesasMensais = months.map(month => {
-      return despesas.filter(d => {
-        const date = new Date(d.data);
-        return date.getMonth() === month;
-      }).reduce((sum, d) => sum + d.valor, 0);
-    });
+    for (let i = 5; i >= 0; i--) {
+      const targetDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const year = targetDate.getFullYear();
+      const month = targetDate.getMonth();
+      
+      const receitasMes = receitas.filter(r => {
+        let itemDate: Date;
+        
+        if (r.data) {
+          itemDate = new Date(r.data + 'T00:00:00');
+        } else if (r.data_recebimento) {
+          itemDate = new Date(r.data_recebimento + 'T00:00:00');
+        } else {
+          return false;
+        }
+        
+        return itemDate.getFullYear() === year && itemDate.getMonth() === month;
+      }).reduce((sum, r) => sum + r.valor, 0);
+      
+      const despesasMes = despesas.filter(d => {
+        let itemDate: Date;
+        
+        if (d.data_vencimento) {
+          itemDate = new Date(d.data_vencimento + 'T00:00:00');
+        } else if (d.data) {
+          itemDate = new Date(d.data + 'T00:00:00');
+        } else {
+          return false;
+        }
+        
+        return itemDate.getFullYear() === year && itemDate.getMonth() === month;
+      }).reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
+      
+      receitasMensais.push(receitasMes);
+      despesasMensais.push(despesasMes);
+    }
 
+    const receitasValidas = receitasMensais.filter(val => val > 0);
+    const despesasValidas = despesasMensais.filter(val => val > 0);
+    
     return {
-      mediaReceitas: receitasMensais.reduce((sum, val) => sum + val, 0) / receitasMensais.filter(val => val > 0).length || 0,
-      mediaDespesas: despesasMensais.reduce((sum, val) => sum + val, 0) / despesasMensais.filter(val => val > 0).length || 0
+      mediaReceitas: receitasValidas.length > 0 ? receitasValidas.reduce((sum, val) => sum + val, 0) / receitasValidas.length : 0,
+      mediaDespesas: despesasValidas.length > 0 ? despesasValidas.reduce((sum, val) => sum + val, 0) / despesasValidas.length : 0
     };
   };
 
@@ -41,21 +70,27 @@ const ProjectionsModal: React.FC<ProjectionsModalProps> = ({ isOpen, onClose, de
 
   // Projeções para os próximos 6 meses
   const projecoes = React.useMemo(() => {
-    const mesesFuturos = ['Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const now = new Date();
+    const mesesFuturos = [];
     const crescimentoReceitas = 1.05; // 5% de crescimento
     const crescimentoDespesas = 1.03; // 3% de crescimento
 
-    return mesesFuturos.map((mes, index) => {
-      const receitaProjetada = mediaReceitas * Math.pow(crescimentoReceitas, index + 1);
-      const despesaProjetada = mediaDespesas * Math.pow(crescimentoDespesas, index + 1);
+    for (let i = 1; i <= 6; i++) {
+      const futureDate = new Date(now.getFullYear(), now.getMonth() + i, 1);
+      const mes = futureDate.toLocaleDateString('pt-BR', { month: 'short' });
       
-      return {
+      const receitaProjetada = mediaReceitas * Math.pow(crescimentoReceitas, i);
+      const despesaProjetada = mediaDespesas * Math.pow(crescimentoDespesas, i);
+      
+      mesesFuturos.push({
         mes,
         receitas: receitaProjetada,
         despesas: despesaProjetada,
         lucro: receitaProjetada - despesaProjetada
-      };
-    });
+      });
+    }
+    
+    return mesesFuturos;
   }, [mediaReceitas, mediaDespesas]);
 
   const totalReceitaProjetada = projecoes.reduce((sum, p) => sum + p.receitas, 0);
@@ -139,7 +174,7 @@ const ProjectionsModal: React.FC<ProjectionsModalProps> = ({ isOpen, onClose, de
                   R$ {lucroProjetado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  {((lucroProjetado / totalReceitaProjetada) * 100).toFixed(1)}% margem
+                  {totalReceitaProjetada > 0 ? ((lucroProjetado / totalReceitaProjetada) * 100).toFixed(1) : '0'}% margem
                 </p>
               </CardContent>
             </Card>
@@ -149,7 +184,7 @@ const ProjectionsModal: React.FC<ProjectionsModalProps> = ({ isOpen, onClose, de
           <Card>
             <CardHeader>
               <CardTitle>Evolução Projetada (Próximos 6 Meses)</CardTitle>
-              <CardDescription>Projeção baseada na tendência histórica</CardDescription>
+              <CardDescription>Projeção baseada na tendência histórica dos últimos 6 meses</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-80">
@@ -221,7 +256,7 @@ const ProjectionsModal: React.FC<ProjectionsModalProps> = ({ isOpen, onClose, de
               </div>
               <div className="p-3 bg-purple-50 rounded-lg border-l-4 border-purple-400">
                 <p className="text-sm">
-                  <strong>Meta de Margem:</strong> {(((totalReceitaProjetada * 1.1) - (totalDespesaProjetada * 0.95)) / (totalReceitaProjetada * 1.1) * 100).toFixed(1)}% de margem de lucro
+                  <strong>Meta de Margem:</strong> {totalReceitaProjetada > 0 ? (((totalReceitaProjetada * 1.1) - (totalDespesaProjetada * 0.95)) / (totalReceitaProjetada * 1.1) * 100).toFixed(1) : '0'}% de margem de lucro
                 </p>
               </div>
             </CardContent>

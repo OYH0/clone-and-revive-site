@@ -13,30 +13,77 @@ interface AnalyseCostsModalProps {
 }
 
 const AnalyseCostsModal: React.FC<AnalyseCostsModalProps> = ({ isOpen, onClose, despesas, empresa }) => {
-  // Análise por categoria
+  // Análise por categoria usando valor_total ou valor
   const custosPorCategoria = [
-    { name: 'Insumos', value: despesas.filter(d => d.categoria === 'INSUMOS').reduce((sum, d) => sum + d.valor, 0), color: '#3b82f6' },
-    { name: 'Fixas', value: despesas.filter(d => d.categoria === 'FIXAS').reduce((sum, d) => sum + d.valor, 0), color: '#8b5cf6' },
-    { name: 'Atrasados', value: despesas.filter(d => d.categoria === 'ATRASADOS').reduce((sum, d) => sum + d.valor, 0), color: '#ef4444' },
-    { name: 'Variáveis', value: despesas.filter(d => d.categoria === 'VARIAVEIS').reduce((sum, d) => sum + d.valor, 0), color: '#f59e0b' }
+    { 
+      name: 'Insumos', 
+      value: despesas.filter(d => d.categoria === 'INSUMOS').reduce((sum, d) => sum + (d.valor_total || d.valor), 0), 
+      color: '#3b82f6' 
+    },
+    { 
+      name: 'Fixas', 
+      value: despesas.filter(d => d.categoria === 'FIXAS').reduce((sum, d) => sum + (d.valor_total || d.valor), 0), 
+      color: '#8b5cf6' 
+    },
+    { 
+      name: 'Atrasados', 
+      value: despesas.filter(d => d.categoria === 'ATRASADOS').reduce((sum, d) => sum + (d.valor_total || d.valor), 0), 
+      color: '#ef4444' 
+    },
+    { 
+      name: 'Variáveis', 
+      value: despesas.filter(d => d.categoria === 'VARIAVEIS' || d.categoria === 'VARIÁVEIS').reduce((sum, d) => sum + (d.valor_total || d.valor), 0), 
+      color: '#f59e0b' 
+    },
+    { 
+      name: 'Retiradas', 
+      value: despesas.filter(d => d.categoria === 'RETIRADAS').reduce((sum, d) => sum + (d.valor_total || d.valor), 0), 
+      color: '#10b981' 
+    }
   ].filter(item => item.value > 0);
 
-  // Evolução dos custos (últimos 6 meses)
+  // Evolução dos custos (últimos 12 meses)
   const evolucaoCustos = React.useMemo(() => {
-    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
-    return months.map((month, index) => {
-      const monthDespesas = despesas.filter(d => {
-        const date = new Date(d.data);
-        return date.getMonth() === index;
-      }).reduce((sum, d) => sum + d.valor, 0);
+    const now = new Date();
+    const months = [];
+    
+    for (let i = 11; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthName = date.toLocaleDateString('pt-BR', { month: 'short' });
+      const year = date.getFullYear();
+      const month = date.getMonth();
       
-      return { month, valor: monthDespesas };
-    });
+      const monthDespesas = despesas.filter(d => {
+        let itemDate: Date;
+        
+        if (d.data_vencimento) {
+          itemDate = new Date(d.data_vencimento + 'T00:00:00');
+        } else if (d.data) {
+          itemDate = new Date(d.data + 'T00:00:00');
+        } else {
+          return false;
+        }
+        
+        return itemDate.getFullYear() === year && itemDate.getMonth() === month;
+      }).reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
+      
+      months.push({ 
+        month: `${monthName}/${year.toString().slice(-2)}`, 
+        valor: monthDespesas 
+      });
+    }
+    
+    return months;
   }, [despesas]);
 
-  const totalCustos = despesas.reduce((sum, d) => sum + d.valor, 0);
+  const totalCustos = despesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
   const mediaMaxima = Math.max(...evolucaoCustos.map(e => e.valor));
-  const mediaMinima = Math.min(...evolucaoCustos.map(e => e.valor));
+  const mediaMinima = Math.min(...evolucaoCustos.filter(e => e.valor > 0).map(e => e.valor));
+
+  // Categoria com maior gasto
+  const categoriaMaiorGasto = custosPorCategoria.length > 0 
+    ? custosPorCategoria.reduce((max, cat) => cat.value > max.value ? cat : max)
+    : null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -59,6 +106,7 @@ const AnalyseCostsModal: React.FC<AnalyseCostsModalProps> = ({ isOpen, onClose, 
                 <div className="text-2xl font-bold text-red-600">
                   R$ {totalCustos.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
+                <p className="text-xs text-gray-500 mt-1">{despesas.length} despesas</p>
               </CardContent>
             </Card>
 
@@ -84,7 +132,7 @@ const AnalyseCostsModal: React.FC<AnalyseCostsModalProps> = ({ isOpen, onClose, 
                 <div className="flex items-center gap-2">
                   <TrendingDown className="h-4 w-4 text-green-500" />
                   <div className="text-xl font-bold">
-                    R$ {mediaMinima.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    R$ {(mediaMinima || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </div>
                 </div>
               </CardContent>
@@ -127,7 +175,7 @@ const AnalyseCostsModal: React.FC<AnalyseCostsModalProps> = ({ isOpen, onClose, 
             <Card>
               <CardHeader>
                 <CardTitle>Evolução dos Custos</CardTitle>
-                <CardDescription>Custos mensais ao longo do tempo</CardDescription>
+                <CardDescription>Custos mensais dos últimos 12 meses</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-64">
@@ -153,19 +201,22 @@ const AnalyseCostsModal: React.FC<AnalyseCostsModalProps> = ({ isOpen, onClose, 
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="p-3 bg-yellow-50 rounded-lg border-l-4 border-yellow-400">
-                <p className="text-sm">
-                  <strong>Categoria com maior gasto:</strong> {custosPorCategoria.length > 0 ? custosPorCategoria.reduce((max, cat) => cat.value > max.value ? cat : max).name : 'N/A'}
-                </p>
-              </div>
+              {categoriaMaiorGasto && (
+                <div className="p-3 bg-yellow-50 rounded-lg border-l-4 border-yellow-400">
+                  <p className="text-sm">
+                    <strong>Categoria com maior gasto:</strong> {categoriaMaiorGasto.name} - 
+                    R$ {categoriaMaiorGasto.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </p>
+                </div>
+              )}
               <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
                 <p className="text-sm">
-                  <strong>Variação mensal:</strong> Diferença de R$ {(mediaMaxima - mediaMinima).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} entre o maior e menor mês
+                  <strong>Variação mensal:</strong> Diferença de R$ {(mediaMaxima - (mediaMinima || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} entre o maior e menor mês
                 </p>
               </div>
               <div className="p-3 bg-green-50 rounded-lg border-l-4 border-green-400">
                 <p className="text-sm">
-                  <strong>Oportunidade:</strong> Considere revisar contratos da categoria com maior gasto para possíveis reduções
+                  <strong>Oportunidade:</strong> {categoriaMaiorGasto ? `Considere revisar contratos da categoria ${categoriaMaiorGasto.name} para possíveis reduções` : 'Mantenha o controle das categorias de despesas'}
                 </p>
               </div>
             </CardContent>
