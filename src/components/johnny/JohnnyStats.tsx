@@ -6,17 +6,19 @@ import { Despesa } from '@/hooks/useDespesas';
 import { Receita } from '@/hooks/useReceitas';
 import { useDespesas } from '@/hooks/useDespesas';
 import { useReceitas } from '@/hooks/useReceitas';
+import { calculateProfitByPeriod } from '@/utils/dateUtils';
 
 interface JohnnyStatsProps {
   despesas: Despesa[];
   receitas: Receita[];
+  selectedPeriod: 'today' | 'week' | 'month' | 'year';
 }
 
-const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas }) => {
+const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas, selectedPeriod }) => {
   const { data: todasDespesas } = useDespesas();
   const { data: todasReceitas } = useReceitas();
 
-  // Filtrar TODOS os dados do Johnny para lucro acumulado
+  // Filtrar TODOS os dados do Johnny para cálculos
   const johnnyDespesasCompleto = todasDespesas?.filter(d => {
     const empresa = d.empresa?.toLowerCase().trim() || '';
     return empresa === 'johnny' || 
@@ -37,11 +39,20 @@ const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas }) => {
   const totalDespesasPeriodo = despesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
   const totalReceitasPeriodo = receitas.reduce((sum, r) => sum + r.valor, 0);
   
-  // LUCRO ACUMULADO - usar TODOS os dados da empresa, não apenas o período selecionado
-  const totalDespesasAcumulado = johnnyDespesasCompleto.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
-  const totalReceitasAcumulado = johnnyReceitasCompleto.reduce((sum, r) => sum + r.valor, 0);
-  const lucroAcumulado = totalReceitasAcumulado - totalDespesasAcumulado;
-  const margemLucro = totalReceitasAcumulado > 0 ? (lucroAcumulado / totalReceitasAcumulado) * 100 : 0;
+  // NOVO: Calcular lucro baseado no período selecionado
+  const lucroCalculado = calculateProfitByPeriod(johnnyDespesasCompleto, johnnyReceitasCompleto, selectedPeriod);
+  const margemLucro = totalReceitasPeriodo > 0 ? (lucroCalculado / totalReceitasPeriodo) * 100 : 0;
+
+  // Determinar o label do lucro baseado no período
+  const getLucroLabel = () => {
+    switch (selectedPeriod) {
+      case 'today': return 'Lucro Líquido Hoje';
+      case 'week': return 'Lucro Líquido Semanal';
+      case 'month': return 'Lucro Líquido Acumulado';
+      case 'year': return 'Lucro Líquido Anual';
+      default: return 'Lucro Líquido';
+    }
+  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -77,17 +88,17 @@ const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas }) => {
 
       <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-sm font-medium text-gray-600">Lucro Líquido Acumulado</CardTitle>
+          <CardTitle className="text-sm font-medium text-gray-600">{getLucroLabel()}</CardTitle>
           <div className="p-2 bg-gradient-to-r from-blue-100 to-blue-200 rounded-xl">
             <BarChart3 className="h-4 w-4 text-blue-600" />
           </div>
         </CardHeader>
         <CardContent>
-          <div className={`text-2xl font-bold ${lucroAcumulado >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            R$ {lucroAcumulado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          <div className={`text-2xl font-bold ${lucroCalculado >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            R$ {lucroCalculado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </div>
           <p className="text-xs text-gray-500 mt-1">
-            {lucroAcumulado >= 0 ? '+' : ''}{margemLucro.toFixed(1)}% margem acumulada
+            {lucroCalculado >= 0 ? '+' : ''}{margemLucro.toFixed(1)}% margem
           </p>
         </CardContent>
       </Card>

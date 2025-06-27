@@ -17,7 +17,7 @@ const JohnnyInsights: React.FC<JohnnyInsightsProps> = ({ despesas, receitas }) =
   const { data: todasDespesas } = useDespesas();
   const { data: todasReceitas } = useReceitas();
 
-  // Filtrar TODOS os dados do Johnny para cálculos acumulados
+  // Filtrar TODOS os dados do Johnny para cálculos acumulados (para indicadores)
   const johnnyDespesasCompleto = todasDespesas?.filter(d => {
     const empresa = d.empresa?.toLowerCase().trim() || '';
     return empresa === 'johnny' || 
@@ -34,7 +34,7 @@ const JohnnyInsights: React.FC<JohnnyInsightsProps> = ({ despesas, receitas }) =
            empresa.includes('johnny');
   }) || [];
 
-  // USAR DADOS ACUMULADOS para os indicadores
+  // Para os indicadores (ROI e Break Even), usar dados acumulados totais
   const totalDespesasAcumulado = johnnyDespesasCompleto.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
   const totalReceitasAcumulado = johnnyReceitasCompleto.reduce((sum, r) => sum + r.valor, 0);
   const lucroAcumulado = totalReceitasAcumulado - totalDespesasAcumulado;

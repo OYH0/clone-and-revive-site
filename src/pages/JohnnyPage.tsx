@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import Sidebar from '@/components/Sidebar';
 import { useDespesas } from '@/hooks/useDespesas';
@@ -58,7 +59,7 @@ const JohnnyPage = () => {
         <div className="max-w-7xl mx-auto">
           <JohnnyHeader onModalOpen={setActiveModal} selectedPeriod={selectedPeriod} onPeriodChange={setSelectedPeriod} />
           
-          <JohnnyStats despesas={filteredDespesas} receitas={filteredReceitas} />
+          <JohnnyStats despesas={filteredDespesas} receitas={filteredReceitas} selectedPeriod={selectedPeriod} />
           <JohnnyCharts despesas={filteredDespesas} receitas={filteredReceitas} />
           <JohnnyInsights despesas={filteredDespesas} receitas={filteredReceitas} />
         </div>

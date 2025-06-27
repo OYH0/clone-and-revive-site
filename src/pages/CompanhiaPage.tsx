@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Building2, TrendingUp, DollarSign, Users, BarChart3 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -15,6 +14,7 @@ import MonthlyGoals from '@/components/MonthlyGoals';
 import NextActions from '@/components/NextActions';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import { filterDataByPeriod } from '@/components/dashboard/utils';
+import { calculateProfitByPeriod } from '@/utils/dateUtils';
 
 const CompanhiaPage = () => {
   const { data: despesas } = useDespesas();
@@ -54,15 +54,17 @@ const CompanhiaPage = () => {
     return acc;
   }, {} as Record<string, number>));
 
-  // Calcular estatísticas - LUCRO ACUMULADO usa todos os dados, outros usam filtros
+  // Calcular estatísticas - usar nova lógica de lucro por período
   const totalDespesasPeriodo = filteredDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
   const totalReceitasPeriodo = filteredReceitas.reduce((sum, r) => sum + r.valor, 0);
   
-  // LUCRO ACUMULADO - usar TODOS os dados da empresa, não apenas o período selecionado
+  // NOVO: Calcular lucro baseado no período selecionado
+  const lucroCalculado = calculateProfitByPeriod(companhiaDespesas, companhiaReceitas, selectedPeriod);
+  const margemLucro = totalReceitasPeriodo > 0 ? (lucroCalculado / totalReceitasPeriodo) * 100 : 0;
+
+  // Para os indicadores (ROI e Break Even), usar dados acumulados totais
   const totalDespesasAcumulado = companhiaDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
   const totalReceitasAcumulado = companhiaReceitas.reduce((sum, r) => sum + r.valor, 0);
-  const lucroAcumulado = totalReceitasAcumulado - totalDespesasAcumulado;
-  const margemLucro = totalReceitasAcumulado > 0 ? (lucroAcumulado / totalReceitasAcumulado) * 100 : 0;
 
   const evolucaoMensal = React.useMemo(() => {
     const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
@@ -85,6 +87,17 @@ const CompanhiaPage = () => {
       };
     });
   }, [filteredDespesas, filteredReceitas]);
+
+  // Determinar o label do lucro baseado no período
+  const getLucroLabel = () => {
+    switch (selectedPeriod) {
+      case 'today': return 'Lucro Líquido Hoje';
+      case 'week': return 'Lucro Líquido Semanal';
+      case 'month': return 'Lucro Líquido Acumulado';
+      case 'year': return 'Lucro Líquido Anual';
+      default: return 'Lucro Líquido';
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50">
@@ -214,17 +227,17 @@ const CompanhiaPage = () => {
 
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">Lucro Líquido Acumulado</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600">{getLucroLabel()}</CardTitle>
                 <div className="p-2 bg-gradient-to-r from-blue-100 to-blue-200 rounded-xl">
                   <BarChart3 className="h-4 w-4 text-blue-600" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className={`text-2xl font-bold ${lucroAcumulado >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  R$ {lucroAcumulado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                <div className={`text-2xl font-bold ${lucroCalculado >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  R$ {lucroCalculado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  {lucroAcumulado >= 0 ? '+' : ''}{margemLucro.toFixed(1)}% margem acumulada
+                  {lucroCalculado >= 0 ? '+' : ''}{margemLucro.toFixed(1)}% margem
                 </p>
               </CardContent>
             </Card>
@@ -293,7 +306,7 @@ const CompanhiaPage = () => {
                 <div className="flex justify-between items-center p-3 bg-red-50 rounded-xl">
                   <span className="text-red-700 font-medium">ROI</span>
                   <span className="text-red-800 font-bold">
-                    {totalDespesasAcumulado > 0 ? ((lucroAcumulado / totalDespesasAcumulado) * 100).toFixed(1) : '0'}%
+                    {totalDespesasAcumulado > 0 ? (((totalReceitasAcumulado - totalDespesasAcumulado) / totalDespesasAcumulado) * 100).toFixed(1) : '0'}%
                   </span>
                 </div>
                 
