@@ -68,17 +68,50 @@ const CompanhiaPage = () => {
   const totalReceitasAcumulado = companhiaReceitas.reduce((sum, r) => sum + r.valor, 0);
 
   const evolucaoMensal = React.useMemo(() => {
-    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
+    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const currentYear = new Date().getFullYear();
+    
+    console.log('=== DEBUG CHURRASCO EVOLUÇÃO MENSAL ===');
+    console.log('Ano atual:', currentYear);
+    console.log('Total de receitas Churrasco:', filteredReceitas?.length || 0);
+    console.log('Total de despesas Churrasco:', filteredDespesas?.length || 0);
+    
     return months.map((month, index) => {
-      const monthDespesas = filteredDespesas.filter(d => {
-        const date = new Date(d.data);
-        return date.getMonth() === index;
-      }).reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
+      const monthDespesas = filteredDespesas?.filter(d => {
+        if (!d.data) return false;
+        
+        // Parsing corrigido - criar date de forma consistente
+        const dateParts = d.data.split('-');
+        const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+        
+        const isCurrentMonth = date.getMonth() === index && date.getFullYear() === currentYear;
+        
+        if (index === 4 || index === 5) { // Debug para Mai e Jun
+          console.log(`Churrasco Despesa - ${month}: data=${d.data}, parsedMonth=${date.getMonth()}, isCurrentMonth=${isCurrentMonth}`);
+        }
+        
+        return isCurrentMonth;
+      }).reduce((sum, d) => sum + (d.valor_total || d.valor), 0) || 0;
       
-      const monthReceitas = filteredReceitas.filter(r => {
-        const date = new Date(r.data);
-        return date.getMonth() === index;
-      }).reduce((sum, r) => sum + r.valor, 0);
+      const monthReceitas = filteredReceitas?.filter(r => {
+        if (!r.data) return false;
+        
+        // Parsing corrigido - criar date de forma consistente
+        const dateParts = r.data.split('-');
+        const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+        
+        const isCurrentMonth = date.getMonth() === index && date.getFullYear() === currentYear;
+        
+        if (index === 4 || index === 5) { // Debug para Mai e Jun
+          console.log(`Churrasco Receita - ${month}: data=${r.data}, parsedMonth=${date.getMonth()}, isCurrentMonth=${isCurrentMonth}, valor=${r.valor}`);
+        }
+        
+        return isCurrentMonth;
+      }).reduce((sum, r) => sum + r.valor, 0) || 0;
+      
+      if (index === 4 || index === 5) {
+        console.log(`Churrasco Total ${month}: Receitas=${monthReceitas}, Despesas=${monthDespesas}`);
+      }
       
       return {
         month,
