@@ -1,4 +1,5 @@
 
+
 export const filterDataByPeriod = (data: any[], period: string) => {
   if (!data || data.length === 0) return [];
   
@@ -45,22 +46,6 @@ export const filterDataByPeriod = (data: any[], period: string) => {
   }
 
   const filtered = data.filter(item => {
-    // Verificar se é de maio de 2025 e excluir
-    const isFromMay2025 = (dateString: string) => {
-      if (!dateString) return false;
-      const dateParts = dateString.split('-');
-      if (dateParts.length !== 3) return false;
-      const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
-      return date.getMonth() === 4 && date.getFullYear() === 2025; // maio = mês 4 (0-indexed)
-    };
-
-    // Excluir despesas de maio de 2025
-    if ((item.data_vencimento && isFromMay2025(item.data_vencimento)) ||
-        (item.data && isFromMay2025(item.data))) {
-      console.log('Item de maio 2025 excluído:', item.id, item.data_vencimento || item.data);
-      return false;
-    }
-
     // Parse da data - PRIORIZAR data_vencimento para despesas
     let itemDate: Date;
     
