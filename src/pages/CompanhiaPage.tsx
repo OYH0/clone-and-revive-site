@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Building2, TrendingUp, DollarSign, Users, BarChart3 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -15,7 +16,6 @@ import NextActions from '@/components/NextActions';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import { filterDataByPeriod } from '@/components/dashboard/utils';
 import { calculateProfitByPeriod } from '@/utils/dateUtils';
-import { getExpenseValue } from '@/utils/expenseFilters';
 
 const CompanhiaPage = () => {
   const { data: despesas } = useDespesas();
@@ -40,7 +40,7 @@ const CompanhiaPage = () => {
            empresa.includes('churrasco');
   }) || [];
 
-  // Aplicar filtro de período
+  // Aplicar filtro de período APENAS para exibição dos gráficos e distribuição
   const { filteredDespesas, filteredReceitas } = useMemo(() => {
     return {
       filteredDespesas: filterDataByPeriod(companhiaDespesas, selectedPeriod),
@@ -48,26 +48,25 @@ const CompanhiaPage = () => {
     };
   }, [companhiaDespesas, companhiaReceitas, selectedPeriod]);
 
-  console.log('=== CHURRASCO PAGE DEBUG ===');
-  console.log('Período selecionado:', selectedPeriod);
-  console.log('Total despesas Churrasco (completo):', companhiaDespesas.length);
-  console.log('Total despesas Churrasco (filtrado):', filteredDespesas.length);
-  console.log('Valor total despesas Churrasco (filtrado):', filteredDespesas.reduce((sum, d) => sum + getExpenseValue(d), 0));
-  console.log('Valor total despesas Churrasco (completo):', companhiaDespesas.reduce((sum, d) => sum + getExpenseValue(d), 0));
+  console.log('Churrasco - Despesas filtradas:', filteredDespesas.length);
+  console.log('Churrasco - Despesas por categoria:', filteredDespesas.reduce((acc, d) => {
+    const cat = d.categoria || 'SEM_CATEGORIA';
+    acc[cat] = (acc[cat] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>));
 
-  // Calcular estatísticas - usar dados filtrados por período
-  const totalDespesasPeriodo = filteredDespesas.reduce((sum, d) => sum + getExpenseValue(d), 0);
+  // Calcular estatísticas - usar nova lógica de lucro por período
+  const totalDespesasPeriodo = filteredDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
   const totalReceitasPeriodo = filteredReceitas.reduce((sum, r) => sum + r.valor, 0);
   
-  // Calcular lucro baseado no período selecionado usando dados completos
+  // NOVO: Calcular lucro baseado no período selecionado
   const lucroCalculado = calculateProfitByPeriod(companhiaDespesas, companhiaReceitas, selectedPeriod);
   const margemLucro = totalReceitasPeriodo > 0 ? (lucroCalculado / totalReceitasPeriodo) * 100 : 0;
 
   // Para os indicadores (ROI e Break Even), usar dados acumulados totais
-  const totalDespesasAcumulado = companhiaDespesas.reduce((sum, d) => sum + getExpenseValue(d), 0);
+  const totalDespesasAcumulado = companhiaDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
   const totalReceitasAcumulado = companhiaReceitas.reduce((sum, r) => sum + r.valor, 0);
 
-  // Evolução Mensal
   const evolucaoMensal = React.useMemo(() => {
     const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
     const currentYear = new Date().getFullYear();
@@ -92,7 +91,7 @@ const CompanhiaPage = () => {
         }
         
         return isCurrentMonth;
-      }).reduce((sum, d) => sum + getExpenseValue(d), 0) || 0;
+      }).reduce((sum, d) => sum + (d.valor_total || d.valor), 0) || 0;
       
       const monthReceitas = filteredReceitas?.filter(r => {
         if (!r.data) return false;
@@ -128,7 +127,7 @@ const CompanhiaPage = () => {
     switch (selectedPeriod) {
       case 'today': return 'Lucro Líquido Hoje';
       case 'week': return 'Lucro Líquido Semanal';
-      case 'month': return 'Lucro Líquido Mensal';
+      case 'month': return 'Lucro Líquido Acumulado';
       case 'year': return 'Lucro Líquido Anual';
       default: return 'Lucro Líquido';
     }
