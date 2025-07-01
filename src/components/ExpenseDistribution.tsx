@@ -36,8 +36,8 @@ const ExpenseDistribution: React.FC<ExpenseDistributionProps> = ({ despesas, emp
                (category === 'Retiradas' && normalizedCategory === 'RETIRADAS');
       });
 
-      // Agrupar por subcategoria
-      const subcategoryTotals = categoryExpenses.reduce((acc, expense) => {
+      // Agrupar por subcategoria com tipagem correta
+      const subcategoryTotals = categoryExpenses.reduce((acc: Record<string, { label: string; value: number }>, expense) => {
         const subcategory = expense.subcategoria || 'Sem subcategoria';
         const label = expense.subcategoria ? getSubcategoryLabel(expense.subcategoria) : 'Sem subcategoria';
         const value = expense.valor_total || expense.valor || 0;
@@ -48,7 +48,7 @@ const ExpenseDistribution: React.FC<ExpenseDistributionProps> = ({ despesas, emp
         acc[subcategory].value += value;
         
         return acc;
-      }, {} as Record<string, { label: string; value: number }>);
+      }, {});
 
       return (
         <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg max-w-xs">
