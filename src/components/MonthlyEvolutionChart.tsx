@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { normalizeCompanyName, getTransactionValue } from '@/utils/dashboardCalculations';
@@ -12,28 +13,6 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
   console.log('Despesas recebidas:', despesas?.length || 0);
   console.log('Período selecionado:', selectedPeriod);
   
-  // Function to parse date consistently
-  const parseDate = (dateString: string) => {
-    if (!dateString) return null;
-    
-    // Handle YYYY-MM-DD format consistently
-    const parts = dateString.split('-');
-    if (parts.length === 3) {
-      const year = parseInt(parts[0]);
-      const month = parseInt(parts[1]) - 1; // Month is 0-indexed in JavaScript
-      const day = parseInt(parts[2]);
-      
-      const date = new Date(year, month, day);
-      console.log(`Parsing date: ${dateString} -> Month: ${date.getMonth()} (${date.getMonth() + 1}), Day: ${date.getDate()}`);
-      return date;
-    }
-    
-    // Fallback to regular Date parsing
-    const date = new Date(dateString);
-    console.log(`Fallback parsing date: ${dateString} -> Month: ${date.getMonth()} (${date.getMonth() + 1}), Day: ${date.getDate()}`);
-    return date;
-  };
-
   // Generate data based on selected period
   const chartData = React.useMemo(() => {
     if (!despesas) return [];
@@ -45,8 +24,8 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
       const hours = Array.from({ length: 24 }, (_, i) => i);
       return hours.map(hour => {
         const hourData = despesas.filter(d => {
-          const date = parseDate(d.data);
-          return date && date.getHours() === hour;
+          const date = new Date(d.data);
+          return date.getHours() === hour;
         });
         
         const churrasco = hourData
@@ -75,8 +54,8 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
       const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
       return days.map((day, index) => {
         const dayData = despesas.filter(d => {
-          const date = parseDate(d.data);
-          return date && date.getDay() === index;
+          const date = new Date(d.data);
+          return date.getDay() === index;
         });
         
         const churrasco = dayData
@@ -109,14 +88,8 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
       
       return months.map((month, index) => {
         const monthData = despesas.filter(d => {
-          const date = parseDate(d.data);
-          const isCorrectMonth = date && date.getMonth() === index;
-          
-          if (isCorrectMonth) {
-            console.log(`Item do mês ${month} (${index}):`, d.data, 'Valor:', getTransactionValue(d));
-          }
-          
-          return isCorrectMonth;
+          const date = new Date(d.data);
+          return date.getMonth() === index;
         });
         
         const churrasco = monthData
@@ -155,14 +128,10 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
     }));
     
     despesas.forEach(despesa => {
-      const date = parseDate(despesa.data);
-      if (!date) return;
-      
+      const date = new Date(despesa.data);
       const monthIndex = date.getMonth();
       const valor = getTransactionValue(despesa);
       const empresa = normalizeCompanyName(despesa.empresa);
-      
-      console.log(`Processando despesa: ${despesa.data} -> Mês: ${monthIndex} (${months[monthIndex]}), Empresa: ${empresa}, Valor: ${valor}`);
       
       if (empresa === 'churrasco') {
         data[monthIndex].churrasco += valor;
