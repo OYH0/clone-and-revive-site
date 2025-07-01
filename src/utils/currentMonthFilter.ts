@@ -1,3 +1,4 @@
+
 /**
  * Utility functions for filtering data by current month rules
  */
@@ -60,8 +61,23 @@ export const filterDespesasCurrentMonth = (despesas: any[], dateFrom?: string, d
     });
   }
 
-  // Aplicar regras do mês atual - CORRIGIDO
+  // Aplicar regras do mês atual - EXCLUIR MAIO DE 2025
   return despesas.filter(despesa => {
+    // Verificar se é de maio de 2025 e excluir
+    const isFromMay2025 = (dateString: string) => {
+      if (!dateString) return false;
+      const dateParts = dateString.split('-');
+      const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+      return date.getMonth() === 4 && date.getFullYear() === 2025; // maio = mês 4 (0-indexed)
+    };
+
+    // Excluir despesas de maio de 2025
+    if ((despesa.data_vencimento && isFromMay2025(despesa.data_vencimento)) ||
+        (despesa.data && isFromMay2025(despesa.data))) {
+      console.log('Despesa de maio 2025 excluída:', despesa.id, despesa.data_vencimento || despesa.data);
+      return false;
+    }
+    
     // Regra 1: Despesas com vencimento no mês atual (independente do status)
     if (despesa.data_vencimento && isCurrentMonth(despesa.data_vencimento)) {
       console.log('Despesa incluída por vencimento no mês atual:', despesa.id, despesa.data_vencimento);

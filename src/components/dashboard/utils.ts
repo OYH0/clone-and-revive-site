@@ -1,4 +1,5 @@
 
+
 export const filterDataByPeriod = (data: any[], period: string) => {
   if (!data || data.length === 0) return [];
   
@@ -55,29 +56,32 @@ export const filterDataByPeriod = (data: any[], period: string) => {
         const [dia, mes, ano] = item.data_vencimento.split('/');
         itemDate = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
       } else {
-        // Formato YYYY-MM-DD
-        itemDate = new Date(item.data_vencimento + 'T00:00:00');
+        // Formato YYYY-MM-DD - CORRIGIR PROBLEMA DO MÊS
+        const dateParts = item.data_vencimento.split('-');
+        itemDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
       }
-      console.log('Usando data_vencimento:', item.data_vencimento, 'para item:', item.descricao || item.empresa);
+      console.log('Usando data_vencimento:', item.data_vencimento, 'parsada como:', itemDate.toLocaleDateString('pt-BR'), 'para item:', item.descricao || item.empresa);
     } else if (item.data) {
       if (item.data.includes('/')) {
         // Formato DD/MM/YYYY
         const [dia, mes, ano] = item.data.split('/');
         itemDate = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
       } else {
-        // Formato YYYY-MM-DD
-        itemDate = new Date(item.data + 'T00:00:00');
+        // Formato YYYY-MM-DD - CORRIGIR PROBLEMA DO MÊS
+        const dateParts = item.data.split('-');
+        itemDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
       }
-      console.log('Usando data:', item.data, 'para item:', item.descricao || item.empresa);
+      console.log('Usando data:', item.data, 'parsada como:', itemDate.toLocaleDateString('pt-BR'), 'para item:', item.descricao || item.empresa);
     } else if (item.data_pagamento) {
       // Usar data_pagamento apenas se não houver data_vencimento nem data
       if (item.data_pagamento.includes('/')) {
         const [dia, mes, ano] = item.data_pagamento.split('/');
         itemDate = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
       } else {
-        itemDate = new Date(item.data_pagamento + 'T00:00:00');
+        const dateParts = item.data_pagamento.split('-');
+        itemDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
       }
-      console.log('Usando data_pagamento:', item.data_pagamento, 'para item:', item.descricao || item.empresa);
+      console.log('Usando data_pagamento:', item.data_pagamento, 'parsada como:', itemDate.toLocaleDateString('pt-BR'), 'para item:', item.descricao || item.empresa);
     } else {
       console.log('Item sem data válida:', item);
       return false;
@@ -99,7 +103,7 @@ export const filterDataByPeriod = (data: any[], period: string) => {
     const match = itemDate >= startDate && itemDate <= endDate;
     
     if (match) {
-      console.log(`Item do período ${period} encontrado:`, item.data_vencimento || item.data || item.data_pagamento, item.descricao || item.empresa);
+      console.log(`Item do período ${period} encontrado:`, item.data_vencimento || item.data || item.data_pagamento, 'parsada como:', itemDate.toLocaleDateString('pt-BR'), item.descricao || item.empresa);
     }
     
     return match;
