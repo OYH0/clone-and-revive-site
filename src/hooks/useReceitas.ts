@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -36,15 +35,6 @@ export const useReceitas = () => {
       }
       
       console.log('Receitas fetched successfully:', data?.length || 0, 'records');
-      
-      // Log das receitas para debug
-      if (data) {
-        console.log('Receitas detalhadas:');
-        data.forEach(receita => {
-          console.log(`ID: ${receita.id}, Data: ${receita.data}, Empresa: ${receita.empresa}, Valor: ${receita.valor}, Descrição: ${receita.descricao}`);
-        });
-      }
-      
       return data as Receita[];
     },
     enabled: true,
@@ -64,13 +54,6 @@ export const useReceitas = () => {
     const totalPendentes = receitas
       .filter(r => !r.data_recebimento)
       .reduce((sum, r) => sum + (r.valor || 0), 0);
-
-    console.log('Processamento de receitas:', {
-      total: receitas.length,
-      totalValor: totalReceitas,
-      recebidas: receitas.filter(r => r.data_recebimento).length,
-      pendentes: receitas.filter(r => !r.data_recebimento).length
-    });
 
     return {
       receitas,
