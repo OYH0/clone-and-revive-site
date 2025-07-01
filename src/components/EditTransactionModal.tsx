@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -28,6 +29,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     valor: '',
     empresa: '',
     categoria: '',
+    subcategoria: '',
     data_vencimento: '',
     descricao: '',
     valor_juros: ''
@@ -45,13 +47,29 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     { value: 'RETIRADAS', label: 'Retiradas' }
   ];
 
+  const companies = [
+    { value: 'Churrasco', label: 'Companhia do Churrasco' },
+    { value: 'Johnny', label: 'Johnny Rockets' },
+    { value: 'Camerino', label: 'Camerino' }
+  ];
+
+  // Subcategorias por categoria
+  const subcategoriesByCategory = {
+    INSUMOS: ['Descartáveis', 'Limpeza', 'Hortifrute', 'Carnes', 'Bebidas', 'Peixes', 'SuperMercado'],
+    FIXAS: ['Impostos', 'Empréstimos'],
+    VARIÁVEIS: [],
+    ATRASADOS: [],
+    RETIRADAS: []
+  };
+
   useEffect(() => {
     if (transaction) {
       setFormData({
-        data: transaction.date || '', // Don't fill with current date, use existing date or empty
+        data: transaction.date || '',
         valor: transaction.valor.toString(),
         empresa: transaction.company,
         categoria: transaction.category,
+        subcategoria: transaction.subcategoria || '',
         data_vencimento: transaction.data_vencimento || '',
         descricao: transaction.description,
         valor_juros: transaction.valor_juros?.toString() || ''
@@ -77,10 +95,11 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
       const { error } = await supabase
         .from('despesas')
         .update({
-          data: formData.data || null, // Don't use current date, leave empty if not provided
+          data: formData.data || null,
           valor: parseFloat(formData.valor),
           empresa: formData.empresa,
           categoria: formData.categoria,
+          subcategoria: formData.subcategoria,
           data_vencimento: formData.data_vencimento,
           descricao: formData.descricao,
           valor_juros: formData.valor_juros ? parseFloat(formData.valor_juros) : 0,
@@ -111,6 +130,10 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const getAvailableSubcategories = () => {
+    return subcategoriesByCategory[formData.categoria as keyof typeof subcategoriesByCategory] || [];
   };
 
   return (
@@ -172,18 +195,26 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
 
           <div>
             <Label htmlFor="empresa">Empresa *</Label>
-            <Input
-              id="empresa"
-              value={formData.empresa}
-              onChange={(e) => handleInputChange('empresa', e.target.value)}
-              required
-              className="rounded-full"
-            />
+            <Select value={formData.empresa} onValueChange={(value) => handleInputChange('empresa', value)}>
+              <SelectTrigger className="rounded-full">
+                <SelectValue placeholder="Selecione uma empresa" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl">
+                {companies.map(company => (
+                  <SelectItem key={company.value} value={company.value}>
+                    {company.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
             <Label htmlFor="categoria">Categoria</Label>
-            <Select value={formData.categoria} onValueChange={(value) => handleInputChange('categoria', value)}>
+            <Select value={formData.categoria} onValueChange={(value) => {
+              handleInputChange('categoria', value);
+              handleInputChange('subcategoria', ''); // Reset subcategoria
+            }}>
               <SelectTrigger className="rounded-full">
                 <SelectValue placeholder="Selecione uma categoria" />
               </SelectTrigger>
@@ -196,6 +227,24 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
               </SelectContent>
             </Select>
           </div>
+
+          {getAvailableSubcategories().length > 0 && (
+            <div>
+              <Label htmlFor="subcategoria">Subcategoria</Label>
+              <Select value={formData.subcategoria} onValueChange={(value) => handleInputChange('subcategoria', value)}>
+                <SelectTrigger className="rounded-full">
+                  <SelectValue placeholder="Selecione uma subcategoria" />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl">
+                  {getAvailableSubcategories().map(subcategory => (
+                    <SelectItem key={subcategory} value={subcategory}>
+                      {subcategory}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div>
             <Label htmlFor="descricao">Descrição</Label>

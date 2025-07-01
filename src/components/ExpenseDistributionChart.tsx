@@ -27,12 +27,26 @@ const ExpenseDistributionChart: React.FC<ExpenseDistributionChartProps> = ({ des
   
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
+      const data = payload[0];
+      const subcategories = data.payload.subcategories || {};
+      
       return (
-        <div className="bg-white p-2 border border-gray-200 rounded-lg shadow-md">
-          <p className="font-medium">{payload[0].name}</p>
-          <p className="text-sm text-gray-600">
-            R$ {payload[0].value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg max-w-xs">
+          <p className="font-medium text-gray-900">{data.payload.name}</p>
+          <p className="text-sm text-gray-600 mb-2">
+            R$ {data.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
+          {Object.keys(subcategories).length > 0 && (
+            <div className="border-t pt-2">
+              <p className="text-xs font-medium text-gray-700 mb-1">Subcategorias:</p>
+              {Object.entries(subcategories).map(([subcategoria, valor]: [string, any]) => (
+                <div key={subcategoria} className="flex justify-between text-xs text-gray-600">
+                  <span>{subcategoria}:</span>
+                  <span>R$ {valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       );
     }
