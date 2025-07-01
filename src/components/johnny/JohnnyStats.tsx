@@ -7,6 +7,7 @@ import { Receita } from '@/hooks/useReceitas';
 import { useDespesas } from '@/hooks/useDespesas';
 import { useReceitas } from '@/hooks/useReceitas';
 import { calculateProfitByPeriod } from '@/utils/dateUtils';
+import { getExpenseValue } from '@/utils/expenseFilters';
 
 interface JohnnyStatsProps {
   despesas: Despesa[];
@@ -35,11 +36,11 @@ const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas, selectedP
            empresa.includes('johnny');
   }) || [];
 
-  // Usar valor_total que inclui juros, ou valor como fallback - PERÍODO SELECIONADO
-  const totalDespesasPeriodo = despesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
+  // CORRIGIDO: Usar as despesas e receitas já filtradas por período que foram passadas via props
+  const totalDespesasPeriodo = despesas.reduce((sum, d) => sum + getExpenseValue(d), 0);
   const totalReceitasPeriodo = receitas.reduce((sum, r) => sum + r.valor, 0);
   
-  // NOVO: Calcular lucro baseado no período selecionado
+  // Calcular lucro baseado no período selecionado usando dados completos
   const lucroCalculado = calculateProfitByPeriod(johnnyDespesasCompleto, johnnyReceitasCompleto, selectedPeriod);
   const margemLucro = totalReceitasPeriodo > 0 ? (lucroCalculado / totalReceitasPeriodo) * 100 : 0;
 
@@ -48,11 +49,18 @@ const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas, selectedP
     switch (selectedPeriod) {
       case 'today': return 'Lucro Líquido Hoje';
       case 'week': return 'Lucro Líquido Semanal';
-      case 'month': return 'Lucro Líquido Acumulado';
+      case 'month': return 'Lucro Líquido Mensal';
       case 'year': return 'Lucro Líquido Anual';
       default: return 'Lucro Líquido';
     }
   };
+
+  console.log('=== JOHNNY STATS DEBUG ===');
+  console.log('Período:', selectedPeriod);
+  console.log('Despesas filtradas por período:', despesas.length);
+  console.log('Total despesas período:', totalDespesasPeriodo);
+  console.log('Total receitas período:', totalReceitasPeriodo);
+  console.log('Lucro calculado:', lucroCalculado);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

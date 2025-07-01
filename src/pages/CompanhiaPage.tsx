@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Building2, TrendingUp, DollarSign, Users, BarChart3 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -16,6 +15,7 @@ import NextActions from '@/components/NextActions';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import { filterDataByPeriod } from '@/components/dashboard/utils';
 import { calculateProfitByPeriod } from '@/utils/dateUtils';
+import { getExpenseValue } from '@/utils/expenseFilters';
 
 const CompanhiaPage = () => {
   const { data: despesas } = useDespesas();
@@ -40,7 +40,7 @@ const CompanhiaPage = () => {
            empresa.includes('churrasco');
   }) || [];
 
-  // Aplicar filtro de período APENAS para exibição dos gráficos e distribuição
+  // Aplicar filtro de período
   const { filteredDespesas, filteredReceitas } = useMemo(() => {
     return {
       filteredDespesas: filterDataByPeriod(companhiaDespesas, selectedPeriod),
@@ -48,37 +48,71 @@ const CompanhiaPage = () => {
     };
   }, [companhiaDespesas, companhiaReceitas, selectedPeriod]);
 
-  console.log('Churrasco - Despesas filtradas:', filteredDespesas.length);
-  console.log('Churrasco - Despesas por categoria:', filteredDespesas.reduce((acc, d) => {
-    const cat = d.categoria || 'SEM_CATEGORIA';
-    acc[cat] = (acc[cat] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>));
+  console.log('=== CHURRASCO PAGE DEBUG ===');
+  console.log('Período selecionado:', selectedPeriod);
+  console.log('Total despesas Churrasco (completo):', companhiaDespesas.length);
+  console.log('Total despesas Churrasco (filtrado):', filteredDespesas.length);
+  console.log('Valor total despesas Churrasco (filtrado):', filteredDespesas.reduce((sum, d) => sum + getExpenseValue(d), 0));
+  console.log('Valor total despesas Churrasco (completo):', companhiaDespesas.reduce((sum, d) => sum + getExpenseValue(d), 0));
 
-  // Calcular estatísticas - usar nova lógica de lucro por período
-  const totalDespesasPeriodo = filteredDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
+  // Calcular estatísticas - usar dados filtrados por período
+  const totalDespesasPeriodo = filteredDespesas.reduce((sum, d) => sum + getExpenseValue(d), 0);
   const totalReceitasPeriodo = filteredReceitas.reduce((sum, r) => sum + r.valor, 0);
   
-  // NOVO: Calcular lucro baseado no período selecionado
+  // Calcular lucro baseado no período selecionado usando dados completos
   const lucroCalculado = calculateProfitByPeriod(companhiaDespesas, companhiaReceitas, selectedPeriod);
   const margemLucro = totalReceitasPeriodo > 0 ? (lucroCalculado / totalReceitasPeriodo) * 100 : 0;
 
   // Para os indicadores (ROI e Break Even), usar dados acumulados totais
-  const totalDespesasAcumulado = companhiaDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
+  const totalDespesasAcumulado = companhiaDespesas.reduce((sum, d) => sum + getExpenseValue(d), 0);
   const totalReceitasAcumulado = companhiaReceitas.reduce((sum, r) => sum + r.valor, 0);
 
+  // Evolução Mensal
   const evolucaoMensal = React.useMemo(() => {
-    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
+    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const currentYear = new Date().getFullYear();
+    
+    console.log('=== DEBUG CHURRASCO EVOLUÇÃO MENSAL ===');
+    console.log('Ano atual:', currentYear);
+    console.log('Total de receitas Churrasco:', filteredReceitas?.length || 0);
+    console.log('Total de despesas Churrasco:', filteredDespesas?.length || 0);
+    
     return months.map((month, index) => {
-      const monthDespesas = filteredDespesas.filter(d => {
-        const date = new Date(d.data);
-        return date.getMonth() === index;
-      }).reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
+      const monthDespesas = filteredDespesas?.filter(d => {
+        if (!d.data) return false;
+        
+        // Parsing corrigido - criar date de forma consistente
+        const dateParts = d.data.split('-');
+        const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+        
+        const isCurrentMonth = date.getMonth() === index && date.getFullYear() === currentYear;
+        
+        if (index === 4 || index === 5) { // Debug para Mai e Jun
+          console.log(`Churrasco Despesa - ${month}: data=${d.data}, parsedMonth=${date.getMonth()}, isCurrentMonth=${isCurrentMonth}`);
+        }
+        
+        return isCurrentMonth;
+      }).reduce((sum, d) => sum + getExpenseValue(d), 0) || 0;
       
-      const monthReceitas = filteredReceitas.filter(r => {
-        const date = new Date(r.data);
-        return date.getMonth() === index;
-      }).reduce((sum, r) => sum + r.valor, 0);
+      const monthReceitas = filteredReceitas?.filter(r => {
+        if (!r.data) return false;
+        
+        // Parsing corrigido - criar date de forma consistente
+        const dateParts = r.data.split('-');
+        const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+        
+        const isCurrentMonth = date.getMonth() === index && date.getFullYear() === currentYear;
+        
+        if (index === 4 || index === 5) { // Debug para Mai e Jun
+          console.log(`Churrasco Receita - ${month}: data=${r.data}, parsedMonth=${date.getMonth()}, isCurrentMonth=${isCurrentMonth}, valor=${r.valor}`);
+        }
+        
+        return isCurrentMonth;
+      }).reduce((sum, r) => sum + r.valor, 0) || 0;
+      
+      if (index === 4 || index === 5) {
+        console.log(`Churrasco Total ${month}: Receitas=${monthReceitas}, Despesas=${monthDespesas}`);
+      }
       
       return {
         month,
@@ -94,7 +128,7 @@ const CompanhiaPage = () => {
     switch (selectedPeriod) {
       case 'today': return 'Lucro Líquido Hoje';
       case 'week': return 'Lucro Líquido Semanal';
-      case 'month': return 'Lucro Líquido Acumulado';
+      case 'month': return 'Lucro Líquido Mensal';
       case 'year': return 'Lucro Líquido Anual';
       default: return 'Lucro Líquido';
     }

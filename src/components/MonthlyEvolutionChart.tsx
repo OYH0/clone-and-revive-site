@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { normalizeCompanyName, getTransactionValue } from '@/utils/dashboardCalculations';
+import { normalizeCompanyName } from '@/utils/dashboardCalculations';
+import { getExpenseValue } from '@/utils/expenseFilters';
 
 interface MonthlyEvolutionChartProps {
   despesas?: any[];
@@ -24,21 +24,23 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
       const hours = Array.from({ length: 24 }, (_, i) => i);
       return hours.map(hour => {
         const hourData = despesas.filter(d => {
-          const date = new Date(d.data);
+          // Parsing corrigido para evitar problemas de timezone
+          const dateParts = d.data.split('-');
+          const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
           return date.getHours() === hour;
         });
         
         const churrasco = hourData
           .filter(d => normalizeCompanyName(d.empresa) === 'churrasco')
-          .reduce((sum, d) => sum + getTransactionValue(d), 0);
+          .reduce((sum, d) => sum + getExpenseValue(d), 0);
         
         const johnny = hourData
           .filter(d => normalizeCompanyName(d.empresa) === 'johnny')
-          .reduce((sum, d) => sum + getTransactionValue(d), 0);
+          .reduce((sum, d) => sum + getExpenseValue(d), 0);
         
         const camerino = hourData
           .filter(d => normalizeCompanyName(d.empresa) === 'camerino')
-          .reduce((sum, d) => sum + getTransactionValue(d), 0);
+          .reduce((sum, d) => sum + getExpenseValue(d), 0);
         
         return {
           period: `${hour}h`,
@@ -54,21 +56,23 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
       const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
       return days.map((day, index) => {
         const dayData = despesas.filter(d => {
-          const date = new Date(d.data);
+          // Parsing corrigido para evitar problemas de timezone
+          const dateParts = d.data.split('-');
+          const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
           return date.getDay() === index;
         });
         
         const churrasco = dayData
           .filter(d => normalizeCompanyName(d.empresa) === 'churrasco')
-          .reduce((sum, d) => sum + getTransactionValue(d), 0);
+          .reduce((sum, d) => sum + getExpenseValue(d), 0);
         
         const johnny = dayData
           .filter(d => normalizeCompanyName(d.empresa) === 'johnny')
-          .reduce((sum, d) => sum + getTransactionValue(d), 0);
+          .reduce((sum, d) => sum + getExpenseValue(d), 0);
         
         const camerino = dayData
           .filter(d => normalizeCompanyName(d.empresa) === 'camerino')
-          .reduce((sum, d) => sum + getTransactionValue(d), 0);
+          .reduce((sum, d) => sum + getExpenseValue(d), 0);
         
         return {
           period: day,
@@ -88,21 +92,23 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
       
       return months.map((month, index) => {
         const monthData = despesas.filter(d => {
-          const date = new Date(d.data);
+          // Parsing corrigido para evitar problemas de timezone
+          const dateParts = d.data.split('-');
+          const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
           return date.getMonth() === index;
         });
         
         const churrasco = monthData
           .filter(d => normalizeCompanyName(d.empresa) === 'churrasco')
-          .reduce((sum, d) => sum + getTransactionValue(d), 0);
+          .reduce((sum, d) => sum + getExpenseValue(d), 0);
         
         const johnny = monthData
           .filter(d => normalizeCompanyName(d.empresa) === 'johnny')
-          .reduce((sum, d) => sum + getTransactionValue(d), 0);
+          .reduce((sum, d) => sum + getExpenseValue(d), 0);
         
         const camerino = monthData
           .filter(d => normalizeCompanyName(d.empresa) === 'camerino')
-          .reduce((sum, d) => sum + getTransactionValue(d), 0);
+          .reduce((sum, d) => sum + getExpenseValue(d), 0);
         
         return {
           period: month,
@@ -128,9 +134,11 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
     }));
     
     despesas.forEach(despesa => {
-      const date = new Date(despesa.data);
+      // Parsing corrigido para evitar problemas de timezone
+      const dateParts = despesa.data.split('-');
+      const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
       const monthIndex = date.getMonth();
-      const valor = getTransactionValue(despesa);
+      const valor = getExpenseValue(despesa);
       const empresa = normalizeCompanyName(despesa.empresa);
       
       if (empresa === 'churrasco') {

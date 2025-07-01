@@ -12,6 +12,7 @@ import JohnnyCharts from '@/components/johnny/JohnnyCharts';
 import JohnnyInsights from '@/components/johnny/JohnnyInsights';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import { filterDataByPeriod } from '@/components/dashboard/utils';
+import { getExpenseValue } from '@/utils/expenseFilters';
 
 const JohnnyPage = () => {
   const { data: despesas } = useDespesas();
@@ -36,7 +37,7 @@ const JohnnyPage = () => {
            empresa.includes('johnny');
   }) || [];
 
-  // Aplicar filtro de período
+  // Aplicar filtro de período - CORRIGIDO: usar dados completos do Johnny para cálculo correto
   const { filteredDespesas, filteredReceitas } = useMemo(() => {
     return {
       filteredDespesas: filterDataByPeriod(johnnyDespesas, selectedPeriod),
@@ -44,12 +45,12 @@ const JohnnyPage = () => {
     };
   }, [johnnyDespesas, johnnyReceitas, selectedPeriod]);
 
-  console.log('Johnny - Despesas filtradas:', filteredDespesas.length);
-  console.log('Johnny - Despesas por categoria:', filteredDespesas.reduce((acc, d) => {
-    const cat = d.categoria || 'SEM_CATEGORIA';
-    acc[cat] = (acc[cat] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>));
+  console.log('=== JOHNNY PAGE DEBUG ===');
+  console.log('Período selecionado:', selectedPeriod);
+  console.log('Total despesas Johnny (completo):', johnnyDespesas.length);
+  console.log('Total despesas Johnny (filtrado):', filteredDespesas.length);
+  console.log('Valor total despesas Johnny (filtrado):', filteredDespesas.reduce((sum, d) => sum + getExpenseValue(d), 0));
+  console.log('Valor total despesas Johnny (completo):', johnnyDespesas.reduce((sum, d) => sum + getExpenseValue(d), 0));
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
