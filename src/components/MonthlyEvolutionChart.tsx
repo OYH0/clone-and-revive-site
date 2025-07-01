@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { normalizeCompanyName, getTransactionValue } from '@/utils/dashboardCalculations';
@@ -34,17 +35,37 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
     return date;
   };
 
+  // Filter out May 2025 data
+  const filterMay2025 = (data: any[]) => {
+    return data.filter(item => {
+      const date = parseDate(item.data);
+      if (!date) return true;
+      
+      const isMay2025 = date.getMonth() === 4 && date.getFullYear() === 2025;
+      if (isMay2025) {
+        console.log('Excluindo item de maio 2025:', item.data, item.empresa);
+        return false;
+      }
+      
+      return true;
+    });
+  };
+
   // Generate data based on selected period
   const chartData = React.useMemo(() => {
     if (!despesas) return [];
 
     console.log('Gerando dados do gráfico para período:', selectedPeriod);
+    
+    // Filter out May 2025 data first
+    const filteredDespesas = filterMay2025(despesas);
+    console.log('Despesas após filtrar maio 2025:', filteredDespesas.length);
 
     if (selectedPeriod === 'today') {
       // Show hourly data for today
       const hours = Array.from({ length: 24 }, (_, i) => i);
       return hours.map(hour => {
-        const hourData = despesas.filter(d => {
+        const hourData = filteredDespesas.filter(d => {
           const date = parseDate(d.data);
           return date && date.getHours() === hour;
         });
@@ -74,7 +95,7 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
       // Show daily data for the week
       const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
       return days.map((day, index) => {
-        const dayData = despesas.filter(d => {
+        const dayData = filteredDespesas.filter(d => {
           const date = parseDate(d.data);
           return date && date.getDay() === index;
         });
@@ -108,7 +129,7 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
       ];
       
       return months.map((month, index) => {
-        const monthData = despesas.filter(d => {
+        const monthData = filteredDespesas.filter(d => {
           const date = parseDate(d.data);
           const isCorrectMonth = date && date.getMonth() === index;
           
@@ -154,7 +175,7 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
       camerino: 0
     }));
     
-    despesas.forEach(despesa => {
+    filteredDespesas.forEach(despesa => {
       const date = parseDate(despesa.data);
       if (!date) return;
       

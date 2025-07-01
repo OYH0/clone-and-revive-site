@@ -67,6 +67,7 @@ export const filterDespesasCurrentMonth = (despesas: any[], dateFrom?: string, d
     const isFromMay2025 = (dateString: string) => {
       if (!dateString) return false;
       const dateParts = dateString.split('-');
+      if (dateParts.length !== 3) return false;
       const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
       return date.getMonth() === 4 && date.getFullYear() === 2025; // maio = mês 4 (0-indexed)
     };
@@ -123,8 +124,24 @@ export const filterReceitasCurrentMonth = (receitas: any[], dateFrom?: string, d
     });
   }
 
-  // Aplicar regras do mês atual
+  // Aplicar regras do mês atual - EXCLUIR MAIO DE 2025
   return receitas.filter(receita => {
+    // Verificar se é de maio de 2025 e excluir
+    const isFromMay2025 = (dateString: string) => {
+      if (!dateString) return false;
+      const dateParts = dateString.split('-');
+      if (dateParts.length !== 3) return false;
+      const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+      return date.getMonth() === 4 && date.getFullYear() === 2025; // maio = mês 4 (0-indexed)
+    };
+
+    // Excluir receitas de maio de 2025
+    if ((receita.data && isFromMay2025(receita.data)) ||
+        (receita.data_recebimento && isFromMay2025(receita.data_recebimento))) {
+      console.log('Receita de maio 2025 excluída:', receita.id, receita.data || receita.data_recebimento);
+      return false;
+    }
+    
     // Regra 1: Receitas do mês atual (por data da receita)
     if (receita.data && isCurrentMonth(receita.data)) {
       return true;
