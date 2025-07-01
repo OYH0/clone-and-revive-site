@@ -65,11 +65,14 @@ const ExpenseDistributionChart: React.FC<ExpenseDistributionChartProps> = ({ des
           {Object.keys(subcategoryTotals).length > 0 && (
             <div className="border-t pt-2 mt-1">
               <p className="text-xs font-medium text-gray-700 mb-1">Subcategorias:</p>
-              {Object.entries(subcategoryTotals).map(([key, subcategoryData]) => (
-                <p key={key} className="text-xs text-gray-600">
-                  • {subcategoryData.label}: R$ {subcategoryData.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </p>
-              ))}
+              {Object.entries(subcategoryTotals).map(([key, subcategoryData]) => {
+                const typedData = subcategoryData as { label: string; value: number };
+                return (
+                  <p key={key} className="text-xs text-gray-600">
+                    • {typedData.label}: R$ {typedData.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </p>
+                );
+              })}
             </div>
           )}
         </div>
