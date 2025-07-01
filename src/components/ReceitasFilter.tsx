@@ -104,7 +104,7 @@ const ReceitasFilter: React.FC<ReceitasFilterProps> = ({
             </Select>
           </div>
           
-          {/* Filtros de Data - CORRIGIDO para usar apenas data principal das receitas */}
+          {/* Filtros de Data */}
           {setDateFrom && setDateTo && (
             <>
               <div className="min-w-[130px]">
@@ -114,10 +114,7 @@ const ReceitasFilter: React.FC<ReceitasFilterProps> = ({
                     type="date"
                     placeholder="Data inicial"
                     value={dateFrom || ''}
-                    onChange={(e) => {
-                      console.log('Data inicial alterada:', e.target.value);
-                      setDateFrom(e.target.value);
-                    }}
+                    onChange={(e) => setDateFrom(e.target.value)}
                     className="rounded-xl pl-8 h-9 text-sm"
                   />
                 </div>
@@ -129,10 +126,7 @@ const ReceitasFilter: React.FC<ReceitasFilterProps> = ({
                     type="date"
                     placeholder="Data final"
                     value={dateTo || ''}
-                    onChange={(e) => {
-                      console.log('Data final alterada:', e.target.value);
-                      setDateTo(e.target.value);
-                    }}
+                    onChange={(e) => setDateTo(e.target.value)}
                     className="rounded-xl pl-8 h-9 text-sm"
                   />
                 </div>

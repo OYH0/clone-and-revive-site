@@ -13,50 +13,17 @@ interface JohnnyChartsProps {
 
 const JohnnyCharts: React.FC<JohnnyChartsProps> = ({ despesas, receitas }) => {
   const evolucaoMensal = React.useMemo(() => {
-    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-    const currentYear = new Date().getFullYear();
-    
-    console.log('=== DEBUG JOHNNY EVOLUÇÃO MENSAL ===');
-    console.log('Ano atual:', currentYear);
-    console.log('Total de receitas Johnny:', receitas?.length || 0);
-    console.log('Total de despesas Johnny:', despesas?.length || 0);
-    
+    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
     return months.map((month, index) => {
-      const monthDespesas = despesas?.filter(d => {
-        if (!d.data) return false;
-        
-        // Parsing corrigido - criar date de forma consistente
-        const dateParts = d.data.split('-');
-        const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
-        
-        const isCurrentMonth = date.getMonth() === index && date.getFullYear() === currentYear;
-        
-        if (index === 4 || index === 5) { // Debug para Mai e Jun
-          console.log(`Johnny Despesa - ${month}: data=${d.data}, parsedMonth=${date.getMonth()}, isCurrentMonth=${isCurrentMonth}`);
-        }
-        
-        return isCurrentMonth;
-      }).reduce((sum, d) => sum + (d.valor || 0), 0) || 0;
+      const monthDespesas = despesas.filter(d => {
+        const date = new Date(d.data);
+        return date.getMonth() === index;
+      }).reduce((sum, d) => sum + d.valor, 0);
       
-      const monthReceitas = receitas?.filter(r => {
-        if (!r.data) return false;
-        
-        // Parsing corrigido - criar date de forma consistente
-        const dateParts = r.data.split('-');
-        const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
-        
-        const isCurrentMonth = date.getMonth() === index && date.getFullYear() === currentYear;
-        
-        if (index === 4 || index === 5) { // Debug para Mai e Jun
-          console.log(`Johnny Receita - ${month}: data=${r.data}, parsedMonth=${date.getMonth()}, isCurrentMonth=${isCurrentMonth}, valor=${r.valor}`);
-        }
-        
-        return isCurrentMonth;
-      }).reduce((sum, r) => sum + (r.valor || 0), 0) || 0;
-      
-      if (index === 4 || index === 5) {
-        console.log(`Johnny Total ${month}: Receitas=${monthReceitas}, Despesas=${monthDespesas}`);
-      }
+      const monthReceitas = receitas.filter(r => {
+        const date = new Date(r.data);
+        return date.getMonth() === index;
+      }).reduce((sum, r) => sum + r.valor, 0);
       
       return {
         month,
