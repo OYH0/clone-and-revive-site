@@ -1,10 +1,10 @@
 
 export const filterDataByPeriod = (data: any[], period: string) => {
   if (!data || data.length === 0) return [];
-
+  
   console.log(`\n=== FILTRO DE PERÍODO: ${period.toUpperCase()} ===`);
   console.log('Total de dados para filtrar:', data.length);
-
+  
   const now = new Date();
   let startDate: Date;
   let endDate: Date;
@@ -47,7 +47,7 @@ export const filterDataByPeriod = (data: any[], period: string) => {
   const filtered = data.filter(item => {
     // Parse da data - PRIORIZAR data_vencimento para despesas
     let itemDate: Date;
-
+    
     // Para despesas, usar data_vencimento primeiro, depois data
     if (item.data_vencimento) {
       if (item.data_vencimento.includes('/')) {
@@ -82,29 +82,29 @@ export const filterDataByPeriod = (data: any[], period: string) => {
       console.log('Item sem data válida:', item);
       return false;
     }
-
+    
     if (period === 'today') {
       // Para hoje, comparar apenas a data (ano, mês, dia)
       const itemDateOnly = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate());
       const todayOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const match = itemDateOnly.getTime() === todayOnly.getTime();
-
+      
       if (match) {
         console.log('Item de HOJE encontrado:', item.data_vencimento || item.data || item.data_pagamento, item.descricao || item.empresa);
       }
-
+      
       return match;
     }
-
+    
     const match = itemDate >= startDate && itemDate <= endDate;
-
+    
     if (match) {
       console.log(`Item do período ${period} encontrado:`, item.data_vencimento || item.data || item.data_pagamento, item.descricao || item.empresa);
     }
-
+    
     return match;
   });
-
+  
   console.log(`Dados filtrados para ${period}:`, filtered.length, 'de', data.length);
   return filtered;
 };
@@ -113,7 +113,7 @@ export const getPeriodString = (selectedPeriod: string) => {
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth();
   const currentYear = currentDate.getFullYear();
-
+  
   switch (selectedPeriod) {
     case 'today':
       return `Hoje - ${currentDate.toLocaleDateString('pt-BR')}`;

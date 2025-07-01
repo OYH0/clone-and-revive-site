@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Building2, TrendingUp, DollarSign, BarChart3 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -15,7 +14,6 @@ import NextActions from '@/components/NextActions';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import { filterDataByPeriod } from '@/components/dashboard/utils';
 import { calculateProfitByPeriod } from '@/utils/dateUtils';
-import { getExpenseValue } from '@/utils/expenseFilters';
 
 const CamerinoPage = () => {
   const { data: despesas } = useDespesas();
@@ -50,7 +48,7 @@ const CamerinoPage = () => {
   }, {} as Record<string, number>));
 
   // Calcular estatísticas - usar nova lógica de lucro por período
-  const totalDespesasPeriodo = filteredDespesas.reduce((sum, d) => sum + getExpenseValue(d), 0);
+  const totalDespesasPeriodo = filteredDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
   const totalReceitasPeriodo = filteredReceitas.reduce((sum, r) => sum + r.valor, 0);
   
   // NOVO: Calcular lucro baseado no período selecionado
@@ -58,54 +56,21 @@ const CamerinoPage = () => {
   const margemLucro = totalReceitasPeriodo > 0 ? (lucroCalculado / totalReceitasPeriodo) * 100 : 0;
 
   // Para os indicadores (ROI e Break Even), usar dados acumulados totais
-  const totalDespesasAcumulado = camerinoDespesas.reduce((sum, d) => sum + getExpenseValue(d), 0);
+  const totalDespesasAcumulado = camerinoDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
   const totalReceitasAcumulado = camerinoReceitas.reduce((sum, r) => sum + r.valor, 0);
 
   const evolucaoMensal = React.useMemo(() => {
-    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-    const currentYear = new Date().getFullYear();
-    
-    console.log('=== DEBUG CAMERINO EVOLUÇÃO MENSAL ===');
-    console.log('Ano atual:', currentYear);
-    console.log('Total de receitas Camerino:', filteredReceitas?.length || 0);
-    console.log('Total de despesas Camerino:', filteredDespesas?.length || 0);
-    
+    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
     return months.map((month, index) => {
-      const monthDespesas = filteredDespesas?.filter(d => {
-        if (!d.data) return false;
-        
-        // Parsing corrigido - criar date de forma consistente
-        const dateParts = d.data.split('-');
-        const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
-        
-        const isCurrentMonth = date.getMonth() === index && date.getFullYear() === currentYear;
-        
-        if (index === 4 || index === 5) { // Debug para Mai e Jun
-          console.log(`Camerino Despesa - ${month}: data=${d.data}, parsedMonth=${date.getMonth()}, isCurrentMonth=${isCurrentMonth}`);
-        }
-        
-        return isCurrentMonth;
-      }).reduce((sum, d) => sum + getExpenseValue(d), 0) || 0;
+      const monthDespesas = filteredDespesas.filter(d => {
+        const date = new Date(d.data);
+        return date.getMonth() === index;
+      }).reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
       
-      const monthReceitas = filteredReceitas?.filter(r => {
-        if (!r.data) return false;
-        
-        // Parsing corrigido - criar date de forma consistente
-        const dateParts = r.data.split('-');
-        const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
-        
-        const isCurrentMonth = date.getMonth() === index && date.getFullYear() === currentYear;
-        
-        if (index === 4 || index === 5) { // Debug para Mai e Jun
-          console.log(`Camerino Receita - ${month}: data=${r.data}, parsedMonth=${date.getMonth()}, isCurrentMonth=${isCurrentMonth}, valor=${r.valor}`);
-        }
-        
-        return isCurrentMonth;
-      }).reduce((sum, r) => sum + r.valor, 0) || 0;
-      
-      if (index === 4 || index === 5) {
-        console.log(`Camerino Total ${month}: Receitas=${monthReceitas}, Despesas=${monthDespesas}`);
-      }
+      const monthReceitas = filteredReceitas.filter(r => {
+        const date = new Date(r.data);
+        return date.getMonth() === index;
+      }).reduce((sum, r) => sum + r.valor, 0);
       
       return {
         month,

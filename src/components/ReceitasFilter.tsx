@@ -31,8 +31,8 @@ const ReceitasFilter: React.FC<ReceitasFilterProps> = ({
   dateTo,
   setDateTo
 }) => {
-  const hasActiveFilters = searchTerm !== '' ||
-    filterEmpresa !== 'all' ||
+  const hasActiveFilters = searchTerm !== '' || 
+    filterEmpresa !== 'all' || 
     filterCategoria !== 'all' ||
     (dateFrom && dateFrom !== '') ||
     (dateTo && dateTo !== '');
@@ -103,7 +103,7 @@ const ReceitasFilter: React.FC<ReceitasFilterProps> = ({
               </SelectContent>
             </Select>
           </div>
-
+          
           {/* Filtros de Data */}
           {setDateFrom && setDateTo && (
             <>

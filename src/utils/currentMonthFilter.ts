@@ -6,10 +6,10 @@ export const getCurrentMonthDateRange = () => {
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth();
-
+  
   const startOfMonth = new Date(year, month, 1);
   const endOfMonth = new Date(year, month + 1, 0);
-
+  
   return {
     start: startOfMonth.toISOString().split('T')[0],
     end: endOfMonth.toISOString().split('T')[0]
@@ -18,15 +18,15 @@ export const getCurrentMonthDateRange = () => {
 
 export const isCurrentMonth = (dateString: string): boolean => {
   if (!dateString) return false;
-
+  
   // Criar a data de forma consistente para evitar problemas de timezone
   const dateParts = dateString.split('-');
   const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
-
+  
   const now = new Date();
-
+  
   const result = date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
-
+  
   console.log('isCurrentMonth check:', {
     dateString,
     parsedDate: date.toLocaleDateString('pt-BR'),
@@ -36,7 +36,7 @@ export const isCurrentMonth = (dateString: string): boolean => {
     dateYear: date.getFullYear(),
     isCurrentMonth: result
   });
-
+  
   return result;
 };
 
@@ -47,15 +47,15 @@ export const filterDespesasCurrentMonth = (despesas: any[], dateFrom?: string, d
       const dataVencimento = despesa.data_vencimento || despesa.data;
       let matchesDateFrom = true;
       let matchesDateTo = true;
-
+      
       if (dateFrom && dataVencimento) {
         matchesDateFrom = dataVencimento >= dateFrom;
       }
-
+      
       if (dateTo && dataVencimento) {
         matchesDateTo = dataVencimento <= dateTo;
       }
-
+      
       return matchesDateFrom && matchesDateTo;
     });
   }
@@ -67,7 +67,7 @@ export const filterDespesasCurrentMonth = (despesas: any[], dateFrom?: string, d
       console.log('Despesa incluída por vencimento no mês atual:', despesa.id, despesa.data_vencimento);
       return true;
     }
-
+    
     // Regra 2: Despesas de meses anteriores que foram pagas no mês atual
     if (despesa.status === 'PAGO' && despesa.data && isCurrentMonth(despesa.data)) {
       // Só incluir se a data de vencimento é de mês anterior ou não existe
@@ -76,13 +76,13 @@ export const filterDespesasCurrentMonth = (despesas: any[], dateFrom?: string, d
         return true;
       }
     }
-
+    
     // Regra 3: Despesas sem data de vencimento mas criadas/pagas no mês atual
     if (!despesa.data_vencimento && despesa.data && isCurrentMonth(despesa.data)) {
       console.log('Despesa incluída por criação no mês atual (sem vencimento):', despesa.id, despesa.data);
       return true;
     }
-
+    
     return false;
   });
 };
@@ -94,15 +94,15 @@ export const filterReceitasCurrentMonth = (receitas: any[], dateFrom?: string, d
       const dataReceita = receita.data_recebimento || receita.data;
       let matchesDateFrom = true;
       let matchesDateTo = true;
-
+      
       if (dateFrom && dataReceita) {
         matchesDateFrom = dataReceita >= dateFrom;
       }
-
+      
       if (dateTo && dataReceita) {
         matchesDateTo = dataReceita <= dateTo;
       }
-
+      
       return matchesDateFrom && matchesDateTo;
     });
   }
@@ -113,12 +113,12 @@ export const filterReceitasCurrentMonth = (receitas: any[], dateFrom?: string, d
     if (receita.data && isCurrentMonth(receita.data)) {
       return true;
     }
-
+    
     // Regra 2: Receitas que foram recebidas no mês atual
     if (receita.data_recebimento && isCurrentMonth(receita.data_recebimento)) {
       return true;
     }
-
+    
     return false;
   });
 };

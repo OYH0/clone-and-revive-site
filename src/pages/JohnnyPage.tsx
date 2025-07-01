@@ -12,7 +12,6 @@ import JohnnyCharts from '@/components/johnny/JohnnyCharts';
 import JohnnyInsights from '@/components/johnny/JohnnyInsights';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import { filterDataByPeriod } from '@/components/dashboard/utils';
-import { getExpenseValue } from '@/utils/expenseFilters';
 
 const JohnnyPage = () => {
   const { data: despesas } = useDespesas();
@@ -51,16 +50,6 @@ const JohnnyPage = () => {
     acc[cat] = (acc[cat] || 0) + 1;
     return acc;
   }, {} as Record<string, number>));
-
-  // Debug dos valores das despesas
-  console.log('Johnny - Total despesas calculado:', filteredDespesas.reduce((sum, d) => sum + getExpenseValue(d), 0));
-  console.log('Johnny - Primeiras 5 despesas com valores:', filteredDespesas.slice(0, 5).map(d => ({
-    id: d.id,
-    descricao: d.descricao,
-    valor: d.valor,
-    valor_total: d.valor_total,
-    valor_usado: getExpenseValue(d)
-  })));
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">

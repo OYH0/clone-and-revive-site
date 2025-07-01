@@ -2,7 +2,6 @@
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { calculateDistributionData } from '@/utils/dashboardCalculations';
-import { getSubcategoryLabel } from '@/utils/subcategories';
 
 interface ExpenseDistributionChartProps {
   despesas?: any[];
@@ -28,53 +27,12 @@ const ExpenseDistributionChart: React.FC<ExpenseDistributionChartProps> = ({ des
   
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
-      const category = payload[0].name;
-      
-      // Buscar subcategorias da categoria
-      const categoryExpenses = despesas?.filter(d => {
-        const normalizedCategory = d.categoria?.trim().toUpperCase();
-        return normalizedCategory === category.toUpperCase() || 
-               (category === 'Insumos' && normalizedCategory === 'INSUMOS') ||
-               (category === 'Fixas' && normalizedCategory === 'FIXAS') ||
-               (category === 'Variáveis' && normalizedCategory === 'VARIÁVEIS') ||
-               (category === 'Atrasados' && normalizedCategory === 'ATRASADOS') ||
-               (category === 'Retiradas' && normalizedCategory === 'RETIRADAS');
-      }) || [];
-
-      // Agrupar por subcategoria com tipagem correta
-      const subcategoryTotals = categoryExpenses.reduce((acc: Record<string, { label: string; value: number }>, expense) => {
-        const subcategory = expense.subcategoria || 'Sem subcategoria';
-        const label = expense.subcategoria ? getSubcategoryLabel(expense.subcategoria) : 'Sem subcategoria';
-        const value = expense.valor_total || expense.valor || 0;
-        
-        if (!acc[subcategory]) {
-          acc[subcategory] = { label, value: 0 };
-        }
-        acc[subcategory].value += value;
-        
-        return acc;
-      }, {});
-
       return (
-        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg max-w-xs">
-          <p className="font-medium text-gray-800 mb-1">{category}</p>
-          <p className="text-sm text-gray-600 mb-2">
+        <div className="bg-white p-2 border border-gray-200 rounded-lg shadow-md">
+          <p className="font-medium">{payload[0].name}</p>
+          <p className="text-sm text-gray-600">
             R$ {payload[0].value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
-          
-          {Object.keys(subcategoryTotals).length > 0 && (
-            <div className="border-t pt-2 mt-1">
-              <p className="text-xs font-medium text-gray-700 mb-1">Subcategorias:</p>
-              {Object.entries(subcategoryTotals).map(([key, subcategoryData]) => {
-                const typedData = subcategoryData as { label: string; value: number };
-                return (
-                  <p key={key} className="text-xs text-gray-600">
-                    • {typedData.label}: R$ {typedData.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </p>
-                );
-              })}
-            </div>
-          )}
         </div>
       );
     }

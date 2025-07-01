@@ -4,7 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMemo } from 'react';
-import { filterExpensesExcludingMay2025 } from '@/utils/expenseFilters';
 
 export interface Despesa {
   id: number;
@@ -13,7 +12,6 @@ export interface Despesa {
   empresa: string;
   descricao: string;
   categoria: string;
-  subcategoria?: string;
   data_vencimento?: string;
   comprovante?: string;
   status?: string;
@@ -60,28 +58,24 @@ export const useDespesas = () => {
   const processedData = useMemo(() => {
     if (!query.data) return { despesas: [], stats: null };
 
-    // Filtrar despesas excluindo maio de 2025
-    const filteredDespesas = filterExpensesExcludingMay2025(query.data);
-    
-    console.log('Despesas após filtrar maio/2025:', filteredDespesas.length, 'de', query.data.length);
-
-    const totalDespesas = filteredDespesas.reduce((sum, d) => sum + (d.valor || 0), 0);
-    const totalPagas = filteredDespesas
+    const despesas = query.data;
+    const totalDespesas = despesas.reduce((sum, d) => sum + (d.valor || 0), 0);
+    const totalPagas = despesas
       .filter(d => d.status === 'PAGO')
       .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
-    const totalPendentes = filteredDespesas
+    const totalPendentes = despesas
       .filter(d => d.status !== 'PAGO')
       .reduce((sum, d) => sum + (d.valor || 0), 0);
 
     return {
-      despesas: filteredDespesas,
+      despesas,
       stats: {
         total: totalDespesas,
         pagas: totalPagas,
         pendentes: totalPendentes,
-        count: filteredDespesas.length,
-        pagasCount: filteredDespesas.filter(d => d.status === 'PAGO').length,
-        pendentesCount: filteredDespesas.filter(d => d.status !== 'PAGO').length,
+        count: despesas.length,
+        pagasCount: despesas.filter(d => d.status === 'PAGO').length,
+        pendentesCount: despesas.filter(d => d.status !== 'PAGO').length,
       }
     };
   }, [query.data]);
