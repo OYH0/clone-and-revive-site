@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { normalizeCompanyName, getTransactionValue } from '@/utils/dashboardCalculations';
@@ -13,61 +12,21 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
   console.log('Despesas recebidas:', despesas?.length || 0);
   console.log('Período selecionado:', selectedPeriod);
   
-  // Function to parse date consistently
-  const parseDate = (dateString: string) => {
-    if (!dateString) return null;
-    
-    // Handle YYYY-MM-DD format consistently
-    const parts = dateString.split('-');
-    if (parts.length === 3) {
-      const year = parseInt(parts[0]);
-      const month = parseInt(parts[1]) - 1; // Month is 0-indexed in JavaScript
-      const day = parseInt(parts[2]);
-      
-      const date = new Date(year, month, day);
-      console.log(`Parsing date: ${dateString} -> Month: ${date.getMonth()} (${date.getMonth() + 1}), Day: ${date.getDate()}`);
-      return date;
-    }
-    
-    // Fallback to regular Date parsing
-    const date = new Date(dateString);
-    console.log(`Fallback parsing date: ${dateString} -> Month: ${date.getMonth()} (${date.getMonth() + 1}), Day: ${date.getDate()}`);
-    return date;
-  };
-
-  // Filter out May 2025 data
-  const filterMay2025 = (data: any[]) => {
-    return data.filter(item => {
-      const date = parseDate(item.data);
-      if (!date) return true;
-      
-      const isMay2025 = date.getMonth() === 4 && date.getFullYear() === 2025;
-      if (isMay2025) {
-        console.log('Excluindo item de maio 2025:', item.data, item.empresa);
-        return false;
-      }
-      
-      return true;
-    });
-  };
-
   // Generate data based on selected period
   const chartData = React.useMemo(() => {
     if (!despesas) return [];
 
     console.log('Gerando dados do gráfico para período:', selectedPeriod);
-    
-    // Filter out May 2025 data first
-    const filteredDespesas = filterMay2025(despesas);
-    console.log('Despesas após filtrar maio 2025:', filteredDespesas.length);
 
     if (selectedPeriod === 'today') {
       // Show hourly data for today
       const hours = Array.from({ length: 24 }, (_, i) => i);
       return hours.map(hour => {
-        const hourData = filteredDespesas.filter(d => {
-          const date = parseDate(d.data);
-          return date && date.getHours() === hour;
+        const hourData = despesas.filter(d => {
+          // Parsing corrigido para evitar problemas de timezone
+          const dateParts = d.data.split('-');
+          const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+          return date.getHours() === hour;
         });
         
         const churrasco = hourData
@@ -95,9 +54,11 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
       // Show daily data for the week
       const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
       return days.map((day, index) => {
-        const dayData = filteredDespesas.filter(d => {
-          const date = parseDate(d.data);
-          return date && date.getDay() === index;
+        const dayData = despesas.filter(d => {
+          // Parsing corrigido para evitar problemas de timezone
+          const dateParts = d.data.split('-');
+          const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+          return date.getDay() === index;
         });
         
         const churrasco = dayData
@@ -129,15 +90,11 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
       ];
       
       return months.map((month, index) => {
-        const monthData = filteredDespesas.filter(d => {
-          const date = parseDate(d.data);
-          const isCorrectMonth = date && date.getMonth() === index;
-          
-          if (isCorrectMonth) {
-            console.log(`Item do mês ${month} (${index}):`, d.data, 'Valor:', getTransactionValue(d));
-          }
-          
-          return isCorrectMonth;
+        const monthData = despesas.filter(d => {
+          // Parsing corrigido para evitar problemas de timezone
+          const dateParts = d.data.split('-');
+          const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+          return date.getMonth() === index;
         });
         
         const churrasco = monthData
@@ -175,15 +132,13 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
       camerino: 0
     }));
     
-    filteredDespesas.forEach(despesa => {
-      const date = parseDate(despesa.data);
-      if (!date) return;
-      
+    despesas.forEach(despesa => {
+      // Parsing corrigido para evitar problemas de timezone
+      const dateParts = despesa.data.split('-');
+      const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
       const monthIndex = date.getMonth();
       const valor = getTransactionValue(despesa);
       const empresa = normalizeCompanyName(despesa.empresa);
-      
-      console.log(`Processando despesa: ${despesa.data} -> Mês: ${monthIndex} (${months[monthIndex]}), Empresa: ${empresa}, Valor: ${valor}`);
       
       if (empresa === 'churrasco') {
         data[monthIndex].churrasco += valor;

@@ -22,28 +22,14 @@ const ExpenseDistribution: React.FC<ExpenseDistributionProps> = ({ despesas, emp
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0];
-      const subcategories = data.payload.subcategories || {};
-      const total = data.payload.total || data.value;
-      
       return (
-        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg max-w-xs">
-          <p className="font-medium text-gray-900">{data.payload.name}</p>
-          <p className="text-sm text-gray-600 mb-2">
+        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
+          <p className="font-medium">{data.payload.name}</p>
+          <p className="text-sm text-gray-600">
             R$ {data.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
-          {Object.keys(subcategories).length > 0 && (
-            <div className="border-t pt-2">
-              <p className="text-xs font-medium text-gray-700 mb-1">Subcategorias:</p>
-              {Object.entries(subcategories).map(([subcategoria, valor]: [string, any]) => (
-                <div key={subcategoria} className="flex justify-between text-xs text-gray-600">
-                  <span>{subcategoria}:</span>
-                  <span>R$ {valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                </div>
-              ))}
-            </div>
-          )}
-          <p className="text-xs text-gray-500 mt-1">
-            {((data.value / total) * 100).toFixed(1)}% do total
+          <p className="text-sm text-gray-600">
+            {((data.value / data.payload.total) * 100).toFixed(1)}%
           </p>
         </div>
       );
