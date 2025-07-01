@@ -19,6 +19,10 @@ export const normalizeCompanyName = (companyName: string) => {
   return company;
 };
 
+export const getTransactionValue = (transaction: any) => {
+  return getExpenseValue(transaction);
+};
+
 export const calculateDistributionData = (despesas: any[]) => {
   console.log('Calculando dados de distribuição para', despesas.length, 'despesas');
   
@@ -88,4 +92,74 @@ export const getRevenuesForCompany = (receitas: any[], companyName: string) => {
 export const getTotalRevenuesForCompany = (receitas: any[], companyName: string) => {
   const companyRevenues = getRevenuesForCompany(receitas, companyName);
   return getTotalRevenues(companyRevenues);
+};
+
+export const calculateCompanyTotals = (despesas: any[]) => {
+  const companies = ['camerino', 'churrasco', 'johnny'];
+  const totals: any = {};
+
+  companies.forEach(company => {
+    const companyExpenses = getExpensesForCompany(despesas, company);
+    const total = companyExpenses.reduce((sum, despesa) => sum + getExpenseValue(despesa), 0);
+    
+    // Calcular por categorias
+    const categories = {
+      fixas: 0,
+      insumos: 0,
+      variaveis: 0,
+      atrasados: 0,
+      retiradas: 0,
+      sem_categoria: 0
+    };
+
+    companyExpenses.forEach(despesa => {
+      const valor = getExpenseValue(despesa);
+      const categoria = (despesa.categoria || '').toLowerCase();
+      
+      if (categoria.includes('fixa')) {
+        categories.fixas += valor;
+      } else if (categoria.includes('insumo')) {
+        categories.insumos += valor;
+      } else if (categoria.includes('variá')) {
+        categories.variaveis += valor;
+      } else if (categoria.includes('atrasado')) {
+        categories.atrasados += valor;
+      } else if (categoria.includes('retirada')) {
+        categories.retiradas += valor;
+      } else {
+        categories.sem_categoria += valor;
+      }
+    });
+
+    totals[company] = {
+      total,
+      expenses: companyExpenses,
+      categories
+    };
+  });
+
+  return totals;
+};
+
+export const debugCompanies = (despesas: any[]) => {
+  console.log('\n🔍 === DEBUG EMPRESAS ===');
+  const empresasUnicas = [...new Set(despesas.map(d => d.empresa))];
+  console.log('Empresas encontradas:', empresasUnicas);
+  
+  empresasUnicas.forEach(empresa => {
+    const count = despesas.filter(d => d.empresa === empresa).length;
+    console.log(`${empresa}: ${count} despesas`);
+  });
+};
+
+export const verifyDataIntegrity = (despesas: any[]) => {
+  const withoutCompany = despesas.filter(d => !d.empresa).length;
+  const withoutValue = despesas.filter(d => !d.valor && !d.valor_total).length;
+  
+  return {
+    total: despesas.length,
+    withoutCompany,
+    withoutValue,
+    valid: despesas.length - withoutCompany - withoutValue
+  };
 };
