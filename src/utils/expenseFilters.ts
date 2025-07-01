@@ -1,6 +1,12 @@
 
 import { Despesa } from '@/hooks/useDespesas';
 
+// Função para obter o valor correto de uma despesa (prioriza valor_total que inclui juros)
+export const getExpenseValue = (despesa: Despesa): number => {
+  // Priorizar valor_total se existir e for maior que 0, senão usar valor
+  return despesa.valor_total && despesa.valor_total > 0 ? despesa.valor_total : (despesa.valor || 0);
+};
+
 // Função para filtrar despesas excluindo maio de 2025
 export const filterExpensesExcludingMay2025 = (despesas: Despesa[]): Despesa[] => {
   return despesas.filter(despesa => {

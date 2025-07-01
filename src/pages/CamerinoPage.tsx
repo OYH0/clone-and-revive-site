@@ -15,6 +15,7 @@ import NextActions from '@/components/NextActions';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import { filterDataByPeriod } from '@/components/dashboard/utils';
 import { calculateProfitByPeriod } from '@/utils/dateUtils';
+import { getExpenseValue } from '@/utils/expenseFilters';
 
 const CamerinoPage = () => {
   const { data: despesas } = useDespesas();
@@ -49,7 +50,7 @@ const CamerinoPage = () => {
   }, {} as Record<string, number>));
 
   // Calcular estatísticas - usar nova lógica de lucro por período
-  const totalDespesasPeriodo = filteredDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
+  const totalDespesasPeriodo = filteredDespesas.reduce((sum, d) => sum + getExpenseValue(d), 0);
   const totalReceitasPeriodo = filteredReceitas.reduce((sum, r) => sum + r.valor, 0);
   
   // NOVO: Calcular lucro baseado no período selecionado
@@ -57,7 +58,7 @@ const CamerinoPage = () => {
   const margemLucro = totalReceitasPeriodo > 0 ? (lucroCalculado / totalReceitasPeriodo) * 100 : 0;
 
   // Para os indicadores (ROI e Break Even), usar dados acumulados totais
-  const totalDespesasAcumulado = camerinoDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
+  const totalDespesasAcumulado = camerinoDespesas.reduce((sum, d) => sum + getExpenseValue(d), 0);
   const totalReceitasAcumulado = camerinoReceitas.reduce((sum, r) => sum + r.valor, 0);
 
   const evolucaoMensal = React.useMemo(() => {
@@ -84,7 +85,7 @@ const CamerinoPage = () => {
         }
         
         return isCurrentMonth;
-      }).reduce((sum, d) => sum + (d.valor_total || d.valor), 0) || 0;
+      }).reduce((sum, d) => sum + getExpenseValue(d), 0) || 0;
       
       const monthReceitas = filteredReceitas?.filter(r => {
         if (!r.data) return false;
