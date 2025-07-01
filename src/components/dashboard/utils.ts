@@ -45,42 +45,52 @@ export const filterDataByPeriod = (data: any[], period: string) => {
   }
 
   const filtered = data.filter(item => {
-    // Parse da data - PRIORIZAR data_vencimento para despesas
+    // Parse da data - CORREÇÃO para receitas e despesas
     let itemDate: Date;
     
-    // Para despesas, usar data_vencimento primeiro, depois data
-    if (item.data_vencimento) {
-      if (item.data_vencimento.includes('/')) {
-        // Formato DD/MM/YYYY
-        const [dia, mes, ano] = item.data_vencimento.split('/');
-        itemDate = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
+    // Para receitas, usar SEMPRE a data principal, não data_recebimento
+    if (item.valor && !item.categoria?.includes('DESPESA')) {
+      // É uma receita - usar data principal
+      if (item.data) {
+        if (item.data.includes('/')) {
+          // Formato DD/MM/YYYY
+          const [dia, mes, ano] = item.data.split('/');
+          itemDate = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
+        } else {
+          // Formato YYYY-MM-DD
+          itemDate = new Date(item.data + 'T00:00:00');
+        }
+        console.log('RECEITA - Usando data:', item.data, 'para:', item.descricao || item.empresa);
       } else {
-        // Formato YYYY-MM-DD
-        itemDate = new Date(item.data_vencimento + 'T00:00:00');
+        console.log('RECEITA sem data válida:', item);
+        return false;
       }
-      console.log('Usando data_vencimento:', item.data_vencimento, 'para item:', item.descricao || item.empresa);
-    } else if (item.data) {
-      if (item.data.includes('/')) {
-        // Formato DD/MM/YYYY
-        const [dia, mes, ano] = item.data.split('/');
-        itemDate = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
-      } else {
-        // Formato YYYY-MM-DD
-        itemDate = new Date(item.data + 'T00:00:00');
-      }
-      console.log('Usando data:', item.data, 'para item:', item.descricao || item.empresa);
-    } else if (item.data_pagamento) {
-      // Usar data_pagamento apenas se não houver data_vencimento nem data
-      if (item.data_pagamento.includes('/')) {
-        const [dia, mes, ano] = item.data_pagamento.split('/');
-        itemDate = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
-      } else {
-        itemDate = new Date(item.data_pagamento + 'T00:00:00');
-      }
-      console.log('Usando data_pagamento:', item.data_pagamento, 'para item:', item.descricao || item.empresa);
     } else {
-      console.log('Item sem data válida:', item);
-      return false;
+      // Para despesas, usar data_vencimento primeiro, depois data
+      if (item.data_vencimento) {
+        if (item.data_vencimento.includes('/')) {
+          // Formato DD/MM/YYYY
+          const [dia, mes, ano] = item.data_vencimento.split('/');
+          itemDate = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
+        } else {
+          // Formato YYYY-MM-DD
+          itemDate = new Date(item.data_vencimento + 'T00:00:00');
+        }
+        console.log('DESPESA - Usando data_vencimento:', item.data_vencimento, 'para:', item.descricao || item.empresa);
+      } else if (item.data) {
+        if (item.data.includes('/')) {
+          // Formato DD/MM/YYYY
+          const [dia, mes, ano] = item.data.split('/');
+          itemDate = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
+        } else {
+          // Formato YYYY-MM-DD
+          itemDate = new Date(item.data + 'T00:00:00');
+        }
+        console.log('DESPESA - Usando data:', item.data, 'para:', item.descricao || item.empresa);
+      } else {
+        console.log('Item sem data válida:', item);
+        return false;
+      }
     }
     
     if (period === 'today') {
@@ -90,7 +100,7 @@ export const filterDataByPeriod = (data: any[], period: string) => {
       const match = itemDateOnly.getTime() === todayOnly.getTime();
       
       if (match) {
-        console.log('Item de HOJE encontrado:', item.data_vencimento || item.data || item.data_pagamento, item.descricao || item.empresa);
+        console.log('Item de HOJE encontrado:', item.data_vencimento || item.data, item.descricao || item.empresa);
       }
       
       return match;
@@ -99,7 +109,7 @@ export const filterDataByPeriod = (data: any[], period: string) => {
     const match = itemDate >= startDate && itemDate <= endDate;
     
     if (match) {
-      console.log(`Item do período ${period} encontrado:`, item.data_vencimento || item.data || item.data_pagamento, item.descricao || item.empresa);
+      console.log(`Item do período ${period} encontrado:`, item.data_vencimento || item.data, item.descricao || item.empresa);
     }
     
     return match;

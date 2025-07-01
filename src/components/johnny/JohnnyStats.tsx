@@ -7,6 +7,7 @@ import { Receita } from '@/hooks/useReceitas';
 import { useDespesas } from '@/hooks/useDespesas';
 import { useReceitas } from '@/hooks/useReceitas';
 import { calculateProfitByPeriod } from '@/utils/dateUtils';
+import { getExpenseValue } from '@/utils/expenseFilters';
 
 interface JohnnyStatsProps {
   despesas: Despesa[];
@@ -36,7 +37,7 @@ const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas, selectedP
   }) || [];
 
   // Usar valor_total que inclui juros, ou valor como fallback - PERÍODO SELECIONADO
-  const totalDespesasPeriodo = despesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
+  const totalDespesasPeriodo = despesas.reduce((sum, d) => sum + getExpenseValue(d), 0);
   const totalReceitasPeriodo = receitas.reduce((sum, r) => sum + r.valor, 0);
   
   // NOVO: Calcular lucro baseado no período selecionado
@@ -53,6 +54,15 @@ const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas, selectedP
       default: return 'Lucro Líquido';
     }
   };
+
+  console.log('Johnny Stats - Total despesas período:', totalDespesasPeriodo);
+  console.log('Johnny Stats - Despesas detalhadas:', despesas.map(d => ({
+    id: d.id,
+    descricao: d.descricao,
+    valor: d.valor,
+    valor_total: d.valor_total,
+    valor_usado: getExpenseValue(d)
+  })));
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

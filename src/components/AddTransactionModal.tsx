@@ -1,122 +1,119 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { companies, getSubcategoriesByCategory } from '@/utils/subcategories';
 
 interface AddTransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onTransactionAdded: () => void;
-  defaultEmpresa?: string;
 }
 
 const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   isOpen,
   onClose,
-  onTransactionAdded,
-  defaultEmpresa
+  onTransactionAdded
 }) => {
   const [formData, setFormData] = useState({
-    data: '', // This will now be empty by default (payment date)
+    data_vencimento: '',
     valor: '',
     empresa: '',
+    categoria: '',
+    subcategoria: '',
     descricao: '',
-    categoria: 'INSUMOS',
-    data_vencimento: '',
     valor_juros: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const categories = ['INSUMOS', 'FIXAS', 'VARIÁVEIS', 'ATRASADOS', 'RETIRADAS'];
-  const companies = ['Churrasco', 'Johnny', 'Camerino'];
-
-  // Set default empresa when modal opens
-  useEffect(() => {
-    if (defaultEmpresa && isOpen) {
-      setFormData(prev => ({ ...prev, empresa: defaultEmpresa }));
-    }
-  }, [defaultEmpresa, isOpen]);
+  const categories = [
+    { value: 'INSUMOS', label: 'Insumos' },
+    { value: 'FIXAS', label: 'Fixas' },
+    { value: 'VARIÁVEIS', label: 'Variáveis' },
+    { value: 'ATRASADOS', label: 'Atrasados' },
+    { value: 'RETIRADAS', label: 'Retiradas' }
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!user) {
+    if (!user) return;
+
+    if (!formData.data_vencimento) {
       toast({
         title: "Erro",
-        description: "Você precisa estar logado para adicionar transações.",
+        description: "Data de vencimento é obrigatória.",
         variant: "destructive"
       });
       return;
     }
-    
-    if (!formData.valor || !formData.empresa || !formData.data_vencimento) {
+
+    if (!formData.valor || parseFloat(formData.valor) <= 0) {
       toast({
         title: "Erro",
-        description: "Por favor, preencha todos os campos obrigatórios (Valor, Empresa e Data de Vencimento).",
+        description: "Valor deve ser maior que zero.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!formData.empresa) {
+      toast({
+        title: "Erro",
+        description: "Empresa é obrigatória.",
         variant: "destructive"
       });
       return;
     }
 
     setIsLoading(true);
-    
     try {
-      const insertData: any = {
-        data: formData.data || null, // Leave empty if not provided - will be filled when marked as paid
-        valor: parseFloat(formData.valor),
-        empresa: formData.empresa,
-        descricao: formData.descricao || 'Sem descrição',
-        categoria: formData.categoria,
-        data_vencimento: formData.data_vencimento,
-        valor_juros: formData.valor_juros ? parseFloat(formData.valor_juros) : 0,
-        user_id: user.id
-      };
-
       const { error } = await supabase
         .from('despesas')
-        .insert([insertData]);
+        .insert([{
+          data_vencimento: formData.data_vencimento,
+          valor: parseFloat(formData.valor),
+          empresa: formData.empresa,
+          categoria: formData.categoria || 'VARIÁVEIS',
+          subcategoria: formData.subcategoria || null,
+          descricao: formData.descricao,
+          valor_juros: formData.valor_juros ? parseFloat(formData.valor_juros) : 0,
+          user_id: user.id
+        }]);
 
-      if (error) {
-        console.error('Error inserting despesa:', error);
-        toast({
-          title: "Erro",
-          description: "Erro ao adicionar transação. Tente novamente.",
-          variant: "destructive"
-        });
-        return;
-      }
+      if (error) throw error;
 
       toast({
-        title: "Sucesso!",
-        description: "Transação adicionada com sucesso.",
+        title: "Sucesso",
+        description: "Despesa criada com sucesso!",
       });
 
       // Reset form
       setFormData({
-        data: '',
-        valor: '',
-        empresa: defaultEmpresa || '',
-        descricao: '',
-        categoria: 'INSUMOS',
         data_vencimento: '',
+        valor: '',
+        empresa: '',
+        categoria: '',
+        subcategoria: '',
+        descricao: '',
         valor_juros: ''
       });
 
       onTransactionAdded();
-      onClose();
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Erro ao criar despesa:', error);
       toast({
         title: "Erro",
-        description: "Erro inesperado. Tente novamente.",
-        variant: "destructive"
+        description: "Erro ao criar despesa. Tente novamente.",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -124,33 +121,29 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setFormData(prev => {
+      const newData = { ...prev, [field]: value };
+      
+      // Limpar subcategoria quando categoria muda
+      if (field === 'categoria') {
+        newData.subcategoria = '';
+      }
+      
+      return newData;
+    });
   };
+
+  const availableSubcategories = getSubcategoriesByCategory(formData.categoria);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] rounded-3xl">
+      <DialogContent className="max-w-md rounded-3xl">
         <DialogHeader>
-          <DialogTitle>Nova Transação</DialogTitle>
+          <DialogTitle>Nova Despesa</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="data">Data de Pagamento</Label>
-            <Input
-              id="data"
-              type="date"
-              value={formData.data}
-              onChange={(e) => handleInputChange('data', e.target.value)}
-              className="rounded-full"
-            />
-            <p className="text-xs text-gray-500">Deixe vazio se ainda não foi paga. Será preenchida automaticamente ao marcar como paga.</p>
-          </div>
-
-          <div className="space-y-2">
+          <div>
             <Label htmlFor="data_vencimento">Data de Vencimento *</Label>
             <Input
               id="data_vencimento"
@@ -162,13 +155,12 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="valor">Valor (R$) *</Label>
+          <div>
+            <Label htmlFor="valor">Valor *</Label>
             <Input
               id="valor"
               type="number"
               step="0.01"
-              placeholder="0.00"
               value={formData.valor}
               onChange={(e) => handleInputChange('valor', e.target.value)}
               required
@@ -176,54 +168,72 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="valor_juros">Valor dos Juros (R$)</Label>
+          <div>
+            <Label htmlFor="valor_juros">Valor dos Juros</Label>
             <Input
               id="valor_juros"
               type="number"
               step="0.01"
-              placeholder="0.00"
               value={formData.valor_juros}
               onChange={(e) => handleInputChange('valor_juros', e.target.value)}
               className="rounded-full"
             />
           </div>
 
-          <div className="space-y-2">
+          <div>
             <Label htmlFor="empresa">Empresa *</Label>
-            <select
-              id="empresa"
-              value={formData.empresa}
-              onChange={(e) => handleInputChange('empresa', e.target.value)}
-              className="flex h-10 w-full rounded-full border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              required
-            >
-              <option value="">Selecione uma empresa</option>
-              {companies.map(company => (
-                <option key={company} value={company}>{company}</option>
-              ))}
-            </select>
+            <Select value={formData.empresa} onValueChange={(value) => handleInputChange('empresa', value)}>
+              <SelectTrigger className="rounded-full">
+                <SelectValue placeholder="Selecione uma empresa" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl">
+                {companies.map(company => (
+                  <SelectItem key={company.value} value={company.value}>
+                    {company.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="space-y-2">
+          <div>
             <Label htmlFor="categoria">Categoria</Label>
-            <select
-              id="categoria"
-              value={formData.categoria}
-              onChange={(e) => handleInputChange('categoria', e.target.value)}
-              className="flex h-10 w-full rounded-full border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {categories.map(category => (
-                <option key={category} value={category}>{category}</option>
-              ))}
-            </select>
+            <Select value={formData.categoria} onValueChange={(value) => handleInputChange('categoria', value)}>
+              <SelectTrigger className="rounded-full">
+                <SelectValue placeholder="Selecione uma categoria" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl">
+                {categories.map(category => (
+                  <SelectItem key={category.value} value={category.value}>
+                    {category.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="space-y-2">
+          {availableSubcategories.length > 0 && (
+            <div>
+              <Label htmlFor="subcategoria">Subcategoria</Label>
+              <Select value={formData.subcategoria} onValueChange={(value) => handleInputChange('subcategoria', value)}>
+                <SelectTrigger className="rounded-full">
+                  <SelectValue placeholder="Selecione uma subcategoria" />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl">
+                  {availableSubcategories.map(subcategory => (
+                    <SelectItem key={subcategory.value} value={subcategory.value}>
+                      {subcategory.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          <div>
             <Label htmlFor="descricao">Descrição</Label>
             <Textarea
               id="descricao"
-              placeholder="Descrição da despesa..."
               value={formData.descricao}
               onChange={(e) => handleInputChange('descricao', e.target.value)}
               rows={3}
@@ -231,18 +241,12 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={isLoading}
-              className="rounded-full"
-            >
+          <div className="flex gap-3 pt-4">
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1 rounded-full">
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading} className="rounded-full">
-              {isLoading ? 'Salvando...' : 'Salvar Transação'}
+            <Button type="submit" disabled={isLoading} className="flex-1 rounded-full">
+              {isLoading ? 'Criando...' : 'Criar Despesa'}
             </Button>
           </div>
         </form>
