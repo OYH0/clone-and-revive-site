@@ -63,9 +63,9 @@ const ExpenseDistribution: React.FC<ExpenseDistributionProps> = ({ despesas, emp
           {Object.keys(subcategoryTotals).length > 0 && (
             <div className="border-t pt-2 mt-2">
               <p className="text-xs font-medium text-gray-700 mb-1">Subcategorias:</p>
-              {Object.entries(subcategoryTotals).map(([key, { label, value }]) => (
+              {Object.entries(subcategoryTotals).map(([key, subcategoryData]) => (
                 <p key={key} className="text-xs text-gray-600">
-                  • {label}: R$ {value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  • {subcategoryData.label}: R$ {subcategoryData.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </p>
               ))}
             </div>
