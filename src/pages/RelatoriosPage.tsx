@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { FileText, Download, TrendingUp, DollarSign, Calendar, PieChart as PieChartIcon } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -18,52 +19,45 @@ const RelatoriosPage = () => {
   const { data: receitas } = useReceitas();
   const { toast } = useToast();
 
-  // Dados para gráfico de evolução mensal - CORRIGIDO
+  // Dados para gráfico de evolução mensal
   const monthlyData = React.useMemo(() => {
     const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
     const currentYear = new Date().getFullYear();
     
-    console.log('=== DEBUG EVOLUÇÃO MENSAL - CORRIGIDO ===');
+    console.log('=== DEBUG EVOLUÇÃO MENSAL ===');
     console.log('Ano atual:', currentYear);
     console.log('Total de receitas:', receitas?.length || 0);
+    console.log('Primeiras 5 receitas:', receitas?.slice(0, 5).map(r => ({
+      id: r.id,
+      data: r.data,
+      valor: r.valor,
+      empresa: r.empresa
+    })));
     
     return months.map((month, index) => {
       const monthDespesas = despesas?.filter(d => {
-        const dateString = d.data_vencimento || d.data;
-        if (!dateString) return false;
-        
-        // Parsing corrigido - criar date de forma consistente
-        const dateParts = dateString.split('-');
-        const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+        const date = d.data_vencimento ? new Date(d.data_vencimento + 'T12:00:00') : d.data ? new Date(d.data + 'T12:00:00') : null;
+        if (!date) return false;
         
         const isCurrentMonth = date.getMonth() === index && date.getFullYear() === currentYear;
         
-        if (index === 4 || index === 5) { // Debug para Mai e Jun
-          console.log(`Despesa - ${month}: data=${dateString}, parsedMonth=${date.getMonth()}, isCurrentMonth=${isCurrentMonth}`);
+        if (index === 0 || index === 5) { // Debug para Jan e Jun
+          console.log(`Despesa - ${month}: data=${d.data_vencimento || d.data}, parsedDate=${date.toISOString()}, month=${date.getMonth()}, isCurrentMonth=${isCurrentMonth}`);
         }
         
         return isCurrentMonth;
       }).reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0) || 0;
       
       const monthReceitas = receitas?.filter(r => {
-        if (!r.data) return false;
-        
-        // Parsing corrigido - criar date de forma consistente
-        const dateParts = r.data.split('-');
-        const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
-        
+        const date = new Date(r.data + 'T12:00:00');
         const isCurrentMonth = date.getMonth() === index && date.getFullYear() === currentYear;
         
-        if (index === 4 || index === 5) { // Debug para Mai e Jun
-          console.log(`Receita - ${month}: data=${r.data}, parsedMonth=${date.getMonth()}, isCurrentMonth=${isCurrentMonth}, valor=${r.valor}, empresa=${r.empresa}`);
+        if (index === 0 || index === 5) { // Debug para Jan e Jun
+          console.log(`Receita - ${month}: data=${r.data}, parsedDate=${date.toISOString()}, month=${date.getMonth()}, isCurrentMonth=${isCurrentMonth}, valor=${r.valor}`);
         }
         
         return isCurrentMonth;
       }).reduce((sum, r) => sum + (r.valor || 0), 0) || 0;
-      
-      if (index === 4 || index === 5) {
-        console.log(`Total ${month}: Receitas=${monthReceitas}, Despesas=${monthDespesas}`);
-      }
       
       return {
         month,
@@ -74,7 +68,7 @@ const RelatoriosPage = () => {
     });
   }, [despesas, receitas]);
 
-  // Dados para gráfico de distribuição por categoria
+  // Dados para gráfico de distribuição por categoria (usando valor_total)
   const categoryData = React.useMemo(() => {
     const categories = ['INSUMOS', 'FIXAS', 'VARIAVEIS', 'ATRASADOS', 'RETIRADAS'];
     const colors = ['#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#10b981'];

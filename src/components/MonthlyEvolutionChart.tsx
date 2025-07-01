@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { normalizeCompanyName, getTransactionValue } from '@/utils/dashboardCalculations';
@@ -23,9 +24,7 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
       const hours = Array.from({ length: 24 }, (_, i) => i);
       return hours.map(hour => {
         const hourData = despesas.filter(d => {
-          // Parsing corrigido para evitar problemas de timezone
-          const dateParts = d.data.split('-');
-          const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+          const date = new Date(d.data);
           return date.getHours() === hour;
         });
         
@@ -55,9 +54,7 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
       const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
       return days.map((day, index) => {
         const dayData = despesas.filter(d => {
-          // Parsing corrigido para evitar problemas de timezone
-          const dateParts = d.data.split('-');
-          const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+          const date = new Date(d.data);
           return date.getDay() === index;
         });
         
@@ -91,9 +88,7 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
       
       return months.map((month, index) => {
         const monthData = despesas.filter(d => {
-          // Parsing corrigido para evitar problemas de timezone
-          const dateParts = d.data.split('-');
-          const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+          const date = new Date(d.data);
           return date.getMonth() === index;
         });
         
@@ -133,9 +128,7 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
     }));
     
     despesas.forEach(despesa => {
-      // Parsing corrigido para evitar problemas de timezone
-      const dateParts = despesa.data.split('-');
-      const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+      const date = new Date(despesa.data);
       const monthIndex = date.getMonth();
       const valor = getTransactionValue(despesa);
       const empresa = normalizeCompanyName(despesa.empresa);

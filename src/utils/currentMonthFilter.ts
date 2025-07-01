@@ -20,7 +20,7 @@ export const getCurrentMonthDateRange = () => {
 export const isCurrentMonth = (dateString: string): boolean => {
   if (!dateString) return false;
   
-  // Parsing de data corrigido - evitar problemas de timezone
+  // Criar a data de forma consistente para evitar problemas de timezone
   const dateParts = dateString.split('-');
   const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
   
@@ -89,27 +89,23 @@ export const filterDespesasCurrentMonth = (despesas: any[], dateFrom?: string, d
 };
 
 export const filterReceitasCurrentMonth = (receitas: any[], dateFrom?: string, dateTo?: string) => {
-  console.log('\n=== FILTRO DE RECEITAS - CORRIGIDO ===');
+  console.log('\n=== FILTRO DE RECEITAS ===');
   console.log('Total de receitas para filtrar:', receitas.length);
   console.log('Filtros manuais - De:', dateFrom, 'Até:', dateTo);
   
-  // Se há filtros de data manuais, usar eles - CORRIGIDO para comparação correta
+  // Se há filtros de data manuais, usar eles
   if (dateFrom || dateTo) {
     const filtered = receitas.filter(receita => {
-      const dataReceita = receita.data; // Usar sempre a data principal
+      const dataReceita = receita.data_recebimento || receita.data;
       let matchesDateFrom = true;
       let matchesDateTo = true;
       
       if (dateFrom && dataReceita) {
-        // Comparação correta de datas - usar >= e <= sem conversão de timezone
         matchesDateFrom = dataReceita >= dateFrom;
-        console.log(`Filtro dateFrom: ${dataReceita} >= ${dateFrom} = ${matchesDateFrom}`);
       }
       
       if (dateTo && dataReceita) {
-        // Comparação correta de datas
         matchesDateTo = dataReceita <= dateTo;
-        console.log(`Filtro dateTo: ${dataReceita} <= ${dateTo} = ${matchesDateTo}`);
       }
       
       const matches = matchesDateFrom && matchesDateTo;
