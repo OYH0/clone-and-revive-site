@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend, CartesianGrid } from 'recharts';
 import ExpenseDistribution from '@/components/ExpenseDistribution';
 import { useDespesas } from '@/hooks/useDespesas';
 import { useReceitas } from '@/hooks/useReceitas';
@@ -68,6 +68,7 @@ const CamerinoCharts: React.FC<CamerinoChartsProps> = ({ despesas, receitas }) =
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={evolucaoMensal}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" horizontal={true} vertical={false} />
                 <XAxis dataKey="month" />
                 <YAxis />
                 <Tooltip formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
