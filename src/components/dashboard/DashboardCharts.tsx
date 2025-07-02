@@ -1,39 +1,38 @@
 
 import React from 'react';
-import ExpenseDistributionChart from '../ExpenseDistributionChart';
-import MonthlyEvolutionChart from '../MonthlyEvolutionChart';
-import { Card } from '@/components/ui/card';
-import { Despesa } from '@/hooks/useDespesas';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import ExpenseDistributionChart from '@/components/ExpenseDistributionChart';
+import MonthlyEvolutionChart from '@/components/MonthlyEvolutionChart';
 
 interface DashboardChartsProps {
-  despesas: Despesa[];
-  selectedPeriod: 'today' | 'week' | 'month' | 'year';
+  despesas: any[];
+  selectedPeriod: 'today' | 'week' | 'month' | 'year' | 'custom';
 }
 
 const DashboardCharts: React.FC<DashboardChartsProps> = ({ despesas, selectedPeriod }) => {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-800 mb-6">Distribuição de Despesas</h3>
-        {despesas && despesas.length > 0 ? (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      {/* Distribuição por Categoria */}
+      <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+        <CardHeader>
+          <CardTitle className="text-xl text-gray-800">Distribuição por Categoria</CardTitle>
+          <CardDescription>Despesas por categoria</CardDescription>
+        </CardHeader>
+        <CardContent>
           <ExpenseDistributionChart despesas={despesas} />
-        ) : (
-          <Card className="p-6 text-center text-gray-600">
-            <p>Não há dados suficientes para gerar o gráfico de distribuição.</p>
-          </Card>
-        )}
-      </div>
-      
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-800 mb-6">Evolução Mensal</h3>
-        {despesas && despesas.length > 0 ? (
-          <MonthlyEvolutionChart despesas={despesas} selectedPeriod={selectedPeriod} />
-        ) : (
-          <Card className="p-6 text-center text-gray-600">
-            <p>Não há dados suficientes para gerar o gráfico de evolução.</p>
-          </Card>
-        )}
-      </div>
+        </CardContent>
+      </Card>
+
+      {/* Evolução Mensal */}
+      <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+        <CardHeader>
+          <CardTitle className="text-xl text-gray-800">Evolução Mensal</CardTitle>
+          <CardDescription>Gastos ao longo dos meses</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <MonthlyEvolutionChart despesas={despesas} />
+        </CardContent>
+      </Card>
     </div>
   );
 };
