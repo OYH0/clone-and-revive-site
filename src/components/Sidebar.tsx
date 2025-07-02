@@ -1,20 +1,23 @@
-
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Settings, FileText, DollarSign, LogOut, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { useTabPermissions } from '@/hooks/useTabPermissions';
 
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { signOut, user } = useAuth();
+  const { getMyTabVisibility } = useTabPermissions();
+
+  const tabVisibility = getMyTabVisibility();
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/' },
-    { id: 'camerino', label: 'Camerino', icon: Settings, path: '/camerino' },
-    { id: 'companhia', label: 'Companhia do Churrasco', icon: Settings, path: '/companhia' },
-    { id: 'johnny', label: 'Johnny Rockets', icon: Settings, path: '/johnny' },
+    ...(tabVisibility.camerino ? [{ id: 'camerino', label: 'Camerino', icon: Settings, path: '/camerino' }] : []),
+    ...(tabVisibility.companhia ? [{ id: 'companhia', label: 'Companhia do Churrasco', icon: Settings, path: '/companhia' }] : []),
+    ...(tabVisibility.johnny ? [{ id: 'johnny', label: 'Johnny Rockets', icon: Settings, path: '/johnny' }] : []),
     { id: 'despesas', label: 'Despesas', icon: DollarSign, path: '/despesas' },
     { id: 'receitas', label: 'Receitas', icon: DollarSign, path: '/receitas' },
     { id: 'relatorios', label: 'Relatórios', icon: FileText, path: '/relatorios' },
