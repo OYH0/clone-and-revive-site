@@ -16,7 +16,7 @@ interface MonthlyGoalsProps {
 }
 
 const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
-  const { data: metas = [] } = useMetasMensais(empresa);
+  const { data: allMetas = [] } = useMetasMensais(empresa);
   const { data: receitas = [] } = useReceitas();
   const createMeta = useCreateMetaMensal();
   const updateMeta = useUpdateMetaMensal();
@@ -34,14 +34,19 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
 
-  // Calcular receitas do mês atual para a empresa e categoria específica
-  const calcularValorAtual = (categoriaReceita: string) => {
+  // Filtrar metas apenas do mês atual
+  const metas = allMetas.filter(meta => 
+    meta.mes === currentMonth && meta.ano === currentYear
+  );
+
+  // Calcular receitas baseado no mês e ano específico de cada meta
+  const calcularValorAtual = (categoriaReceita: string, mes: number, ano: number) => {
     const receitasDoMes = receitas.filter(r => {
-      const receitaDate = new Date(r.data + 'T00:00:00'); // Adicionar horário para evitar problemas de timezone
+      const receitaDate = new Date(r.data + 'T00:00:00');
       return r.empresa === empresa && 
              r.categoria === categoriaReceita &&
-             receitaDate.getMonth() + 1 === currentMonth && 
-             receitaDate.getFullYear() === currentYear;
+             receitaDate.getMonth() + 1 === mes && 
+             receitaDate.getFullYear() === ano;
     });
     
     return receitasDoMes.reduce((sum, r) => sum + r.valor, 0);
@@ -60,7 +65,7 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
 
   const handleSaveMeta = async () => {
     try {
-      const valorAtual = calcularValorAtual(formData.categoria_receita);
+      const valorAtual = calcularValorAtual(formData.categoria_receita, currentMonth, currentYear);
       
       const metaData = {
         nome_meta: formData.nome_meta,
@@ -148,7 +153,7 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
           </div>
         ) : (
           metas.map((meta) => {
-            const valorAtual = calcularValorAtual(meta.categoria_receita || 'VENDAS');
+            const valorAtual = calcularValorAtual(meta.categoria_receita || 'VENDAS', meta.mes, meta.ano);
             const progress = getProgress(meta.valor_meta, valorAtual);
             return (
               <div key={meta.id} className="space-y-2">
@@ -241,7 +246,7 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
               </div>
               <div className="p-3 bg-blue-50 rounded-lg">
                 <p className="text-sm text-blue-700">
-                  <strong>Valor atual calculado:</strong> R$ {calcularValorAtual(formData.categoria_receita).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  <strong>Valor atual calculado:</strong> R$ {calcularValorAtual(formData.categoria_receita, currentMonth, currentYear).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </p>
                 <p className="text-xs text-blue-600 mt-1">
                   Baseado nas receitas de {empresa} na categoria "{formData.categoria_receita}" do mês atual
