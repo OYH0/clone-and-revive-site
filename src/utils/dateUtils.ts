@@ -66,11 +66,6 @@ export const calculateProfitByPeriod = (
   let startDate: Date;
   let endDate: Date;
 
-  console.log('=== CALCULATE PROFIT BY PERIOD ===');
-  console.log('Período selecionado:', selectedPeriod);
-  console.log('Mês personalizado:', customMonth);
-  console.log('Ano personalizado:', customYear);
-
   switch (selectedPeriod) {
     case 'today':
       // Apenas hoje
@@ -102,13 +97,11 @@ export const calculateProfitByPeriod = (
       break;
     
     case 'custom':
-      // Período personalizado - ACUMULADO desde janeiro até o mês selecionado
+      // Período personalizado
       if (customMonth && customYear) {
-        startDate = new Date(customYear, 0, 1); // 1º de janeiro do ano selecionado
-        endDate = new Date(customYear, customMonth, 0, 23, 59, 59, 999); // Último dia do mês selecionado
-        console.log('Período personalizado - De:', startDate.toLocaleDateString('pt-BR'), 'até:', endDate.toLocaleDateString('pt-BR'));
+        startDate = new Date(customYear, customMonth - 1, 1);
+        endDate = new Date(customYear, customMonth, 0, 23, 59, 59, 999);
       } else {
-        console.log('Período personalizado sem dados válidos');
         return 0;
       }
       break;
@@ -116,9 +109,6 @@ export const calculateProfitByPeriod = (
     default:
       return 0;
   }
-
-  console.log('Data início:', startDate.toLocaleDateString('pt-BR'));
-  console.log('Data fim:', endDate.toLocaleDateString('pt-BR'));
 
   // Filtrar despesas
   const filteredDespesas = allDespesas.filter(item => {
@@ -132,17 +122,7 @@ export const calculateProfitByPeriod = (
       return false;
     }
     
-    const isInRange = itemDate >= startDate && itemDate <= endDate;
-    if (isInRange && selectedPeriod === 'custom') {
-      console.log('Despesa incluída:', {
-        data: item.data_vencimento || item.data,
-        empresa: item.empresa,
-        valor: item.valor_total || item.valor,
-        descricao: item.descricao
-      });
-    }
-    
-    return isInRange;
+    return itemDate >= startDate && itemDate <= endDate;
   });
 
   // Filtrar receitas
@@ -157,27 +137,11 @@ export const calculateProfitByPeriod = (
       return false;
     }
     
-    const isInRange = itemDate >= startDate && itemDate <= endDate;
-    if (isInRange && selectedPeriod === 'custom') {
-      console.log('Receita incluída:', {
-        data: item.data || item.data_recebimento,
-        empresa: item.empresa,
-        valor: item.valor,
-        descricao: item.descricao
-      });
-    }
-    
-    return isInRange;
+    return itemDate >= startDate && itemDate <= endDate;
   });
 
   const totalDespesas = filteredDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
   const totalReceitas = filteredReceitas.reduce((sum, r) => sum + r.valor, 0);
   
-  const lucro = totalReceitas - totalDespesas;
-  
-  console.log('Despesas filtradas:', filteredDespesas.length, 'Total:', totalDespesas);
-  console.log('Receitas filtradas:', filteredReceitas.length, 'Total:', totalReceitas);
-  console.log('Lucro calculado:', lucro);
-  
-  return lucro;
+  return totalReceitas - totalDespesas;
 };
