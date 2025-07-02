@@ -1,15 +1,18 @@
+
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Settings, FileText, DollarSign, LogOut, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { useTabPermissions } from '@/hooks/useTabPermissions';
+import { useUserRole } from '@/hooks/useUserRole';
 
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { signOut, user } = useAuth();
   const { getMyTabVisibility } = useTabPermissions();
+  const { canAccessAdmin } = useUserRole();
 
   const tabVisibility = getMyTabVisibility();
 
@@ -62,17 +65,19 @@ const Sidebar: React.FC = () => {
           );
         })}
         
-        <button
-          onClick={() => navigate('/admin')}
-          className={`w-full flex items-center gap-3 p-3 rounded-xl mb-2 text-left transition-all duration-200 ${
-            location.pathname === '/admin'
-              ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm' 
-              : 'hover:bg-white/10 text-blue-100 hover:text-white'
-          }`}
-        >
-          <Shield size={18} />
-          <span className="text-sm">Admin</span>
-        </button>
+        {canAccessAdmin && (
+          <button
+            onClick={() => navigate('/admin')}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl mb-2 text-left transition-all duration-200 ${
+              location.pathname === '/admin'
+                ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm' 
+                : 'hover:bg-white/10 text-blue-100 hover:text-white'
+            }`}
+          >
+            <Shield size={18} />
+            <span className="text-sm">Admin</span>
+          </button>
+        )}
       </nav>
       
       <div className="p-4 border-t border-blue-500/30">
