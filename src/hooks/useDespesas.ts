@@ -12,6 +12,7 @@ export interface Despesa {
   empresa: string;
   descricao: string;
   categoria: string;
+  subcategoria?: string;
   data_vencimento?: string;
   comprovante?: string;
   status?: string;
