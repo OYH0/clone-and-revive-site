@@ -7,11 +7,13 @@ import { Label } from '@/components/ui/label';
 import { Settings, Users, Eye, EyeOff } from 'lucide-react';
 import { useTabPermissions } from '@/hooks/useTabPermissions';
 
+type UserRole = 'admin' | 'financeiro' | 'visualizador';
+
 interface Profile {
   id: string;
   email: string;
   is_admin: boolean;
-  role: 'admin' | 'financeiro' | 'visualizador';
+  role: UserRole;
   created_at: string;
 }
 
@@ -32,7 +34,7 @@ const TabPermissionsManager: React.FC<TabPermissionsManagerProps> = ({ profiles 
     await updateTabPermission(userId, tabName, isVisible);
   };
 
-  const getRoleLabel = (role: 'admin' | 'financeiro' | 'visualizador') => {
+  const getRoleLabel = (role: UserRole) => {
     switch (role) {
       case 'admin':
         return 'Administrador';
@@ -45,7 +47,7 @@ const TabPermissionsManager: React.FC<TabPermissionsManagerProps> = ({ profiles 
     }
   };
 
-  const getRoleBadgeColor = (role: 'admin' | 'financeiro' | 'visualizador') => {
+  const getRoleBadgeColor = (role: UserRole) => {
     switch (role) {
       case 'admin':
         return 'bg-red-100 text-red-800';

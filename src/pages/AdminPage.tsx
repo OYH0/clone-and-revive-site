@@ -27,6 +27,7 @@ const AdminPage = () => {
   const fetchProfiles = async () => {
     try {
       setLoading(true);
+      console.log('Fetching profiles...');
       const { data, error } = await supabase
         .from('profiles')
         .select('id, email, is_admin, role, created_at')
@@ -40,6 +41,7 @@ const AdminPage = () => {
           variant: "destructive"
         });
       } else {
+        console.log('Profiles fetched:', data);
         setProfiles(data || []);
       }
     } catch (error) {

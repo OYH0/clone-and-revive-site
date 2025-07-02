@@ -35,6 +35,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ profiles, loading, onRe
 
   const updateUserRole = async (profileId: string, newRole: UserRole) => {
     try {
+      console.log('Updating user role to:', newRole);
       const { error } = await supabase
         .from('profiles')
         .update({ 
@@ -47,7 +48,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ profiles, loading, onRe
         console.error('Error updating user role:', error);
         toast({
           title: "Erro",
-          description: "Erro ao atualizar papel do usuário",
+          description: "Erro ao atualizar papel do usuário: " + error.message,
           variant: "destructive"
         });
       } else {

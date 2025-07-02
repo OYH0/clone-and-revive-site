@@ -19,6 +19,7 @@ export const useUserRole = () => {
     }
 
     try {
+      console.log('Fetching user role for:', user.id);
       const { data, error } = await supabase
         .from('profiles')
         .select('role, is_admin')
@@ -33,6 +34,7 @@ export const useUserRole = () => {
           variant: "destructive"
         });
       } else {
+        console.log('User role fetched:', data);
         setRole(data?.role || 'financeiro');
       }
     } catch (error) {
