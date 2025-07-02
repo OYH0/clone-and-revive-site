@@ -28,7 +28,9 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
     nome_meta: '',
     valor_meta: '',
     categoria_receita: 'VENDAS',
-    cor: '#8b5cf6'
+    cor: '#8b5cf6',
+    mes: new Date().getMonth() + 1,
+    ano: new Date().getFullYear()
   });
 
   const currentMonth = new Date().getMonth() + 1;
@@ -58,14 +60,16 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
       nome_meta: meta.nome_meta,
       valor_meta: (meta.valor_meta).toString(),
       categoria_receita: meta.categoria_receita || 'VENDAS',
-      cor: meta.cor
+      cor: meta.cor,
+      mes: meta.mes,
+      ano: meta.ano
     });
     setIsDialogOpen(true);
   };
 
   const handleSaveMeta = async () => {
     try {
-      const valorAtual = calcularValorAtual(formData.categoria_receita, currentMonth, currentYear);
+      const valorAtual = calcularValorAtual(formData.categoria_receita, formData.mes, formData.ano);
       
       const metaData = {
         nome_meta: formData.nome_meta,
@@ -74,8 +78,8 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
         categoria_receita: formData.categoria_receita,
         cor: formData.cor,
         empresa,
-        mes: currentMonth,
-        ano: currentYear
+        mes: formData.mes,
+        ano: formData.ano
       };
 
       if (editingMeta) {
@@ -90,7 +94,9 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
         nome_meta: '',
         valor_meta: '',
         categoria_receita: 'VENDAS',
-        cor: '#8b5cf6'
+        cor: '#8b5cf6',
+        mes: new Date().getMonth() + 1,
+        ano: new Date().getFullYear()
       });
     } catch (error) {
       console.error('Error saving meta:', error);
@@ -103,7 +109,9 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
       nome_meta: '',
       valor_meta: '',
       categoria_receita: 'VENDAS',
-      cor: '#8b5cf6'
+      cor: '#8b5cf6',
+      mes: new Date().getMonth() + 1,
+      ano: new Date().getFullYear()
     });
     setIsDialogOpen(true);
   };
@@ -118,6 +126,14 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
 
   const getProgress = (target: number, valorAtual: number) => {
     return Math.min(100, Math.max(0, (valorAtual / target) * 100));
+  };
+
+  const getMonthName = (monthNumber: number) => {
+    const months = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+    return months[monthNumber - 1];
   };
 
   return (
@@ -216,6 +232,44 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
                   placeholder="Ex: Meta de Vendas Mensais"
                 />
               </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="mes">Mês</Label>
+                  <Select 
+                    value={formData.mes.toString()} 
+                    onValueChange={(value) => setFormData({ ...formData, mes: parseInt(value) })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o mês" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
+                        <SelectItem key={month} value={month.toString()}>
+                          {getMonthName(month)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="ano">Ano</Label>
+                  <Select 
+                    value={formData.ano.toString()} 
+                    onValueChange={(value) => setFormData({ ...formData, ano: parseInt(value) })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o ano" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() + i - 2).map((year) => (
+                        <SelectItem key={year} value={year.toString()}>
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
               <div>
                 <Label htmlFor="goalTarget">Valor Meta (R$)</Label>
                 <Input
@@ -246,10 +300,10 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
               </div>
               <div className="p-3 bg-blue-50 rounded-lg">
                 <p className="text-sm text-blue-700">
-                  <strong>Valor atual calculado:</strong> R$ {calcularValorAtual(formData.categoria_receita, currentMonth, currentYear).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  <strong>Valor atual calculado:</strong> R$ {calcularValorAtual(formData.categoria_receita, formData.mes, formData.ano).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </p>
                 <p className="text-xs text-blue-600 mt-1">
-                  Baseado nas receitas de {empresa} na categoria "{formData.categoria_receita}" do mês atual
+                  Baseado nas receitas de {empresa} na categoria "{formData.categoria_receita}" para {getMonthName(formData.mes)}/{formData.ano}
                 </p>
               </div>
               <div>
