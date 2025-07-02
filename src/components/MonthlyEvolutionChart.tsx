@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { normalizeCompanyName, getTransactionValue } from '@/utils/dashboardCalculations';
 
 interface MonthlyEvolutionChartProps {
   despesas?: any[];
-  selectedPeriod: 'today' | 'week' | 'month' | 'year';
+  selectedPeriod: 'today' | 'week' | 'month' | 'year' | 'custom';
 }
 
 const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas, selectedPeriod }) => {
@@ -113,7 +112,7 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
       });
     }
 
-    // Default: show last 6 months including current month
+    // Default: show last 6 months including current month (for 'month' and 'custom' periods)
     const months = [
       'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 
       'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
