@@ -6,10 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Transaction } from '@/types/transaction';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { Transaction } from '@/types/transaction';
 
 interface EditTransactionModalProps {
   isOpen: boolean;
@@ -28,17 +28,16 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     data: '',
     valor: '',
     empresa: '',
+    descricao: '',
     categoria: '',
     subcategoria: '',
     data_vencimento: '',
-    descricao: '',
     valor_juros: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
 
-  // Categorias e subcategorias
   const categories = [
     { value: 'INSUMOS', label: 'Insumos' },
     { value: 'FIXAS', label: 'Fixas' },
@@ -68,66 +67,85 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
 
   const companies = ['Churrasco', 'Johnny', 'Camerino'];
 
+  // Update form data when transaction changes
   useEffect(() => {
-    if (transaction) {
+    if (transaction && isOpen) {
       setFormData({
         data: transaction.date || '',
-        valor: transaction.valor.toString(),
-        empresa: transaction.company,
-        categoria: transaction.category,
+        valor: transaction.valor?.toString() || '',
+        empresa: transaction.company || '',
+        descricao: transaction.description || '',
+        categoria: transaction.category || '',
         subcategoria: transaction.subcategoria || '',
         data_vencimento: transaction.data_vencimento || '',
-        descricao: transaction.description,
         valor_juros: transaction.valor_juros?.toString() || ''
       });
     }
-  }, [transaction]);
+  }, [transaction, isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!transaction || !user) return;
-
-    if (!formData.data_vencimento) {
+    
+    if (!user || !transaction) {
       toast({
         title: "Erro",
-        description: "Data de vencimento é obrigatória.",
+        description: "Erro ao carregar dados da transação.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!formData.valor || !formData.empresa || !formData.data_vencimento) {
+      toast({
+        title: "Erro",
+        description: "Por favor, preencha todos os campos obrigatórios.",
         variant: "destructive"
       });
       return;
     }
 
     setIsLoading(true);
+    
     try {
+      const updateData: any = {
+        data: formData.data || null,
+        valor: parseFloat(formData.valor),
+        empresa: formData.empresa,
+        descricao: formData.descricao,
+        categoria: formData.categoria,
+        subcategoria: formData.subcategoria || null,
+        data_vencimento: formData.data_vencimento,
+        valor_juros: formData.valor_juros ? parseFloat(formData.valor_juros) : 0
+      };
+
       const { error } = await supabase
         .from('despesas')
-        .update({
-          data: formData.data || null,
-          valor: parseFloat(formData.valor),
-          empresa: formData.empresa,
-          categoria: formData.categoria,
-          subcategoria: formData.subcategoria,
-          data_vencimento: formData.data_vencimento,
-          descricao: formData.descricao,
-          valor_juros: formData.valor_juros ? parseFloat(formData.valor_juros) : 0,
-          user_id: user.id
-        })
+        .update(updateData)
         .eq('id', transaction.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating despesa:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao atualizar transação. Tente novamente.",
+          variant: "destructive"
+        });
+        return;
+      }
 
       toast({
-        title: "Sucesso",
-        description: "Despesa atualizada com sucesso!",
+        title: "Sucesso!",
+        description: "Transação atualizada com sucesso.",
       });
 
       onTransactionUpdated();
       onClose();
     } catch (error) {
-      console.error('Erro ao atualizar despesa:', error);
+      console.error('Error:', error);
       toast({
         title: "Erro",
-        description: "Erro ao atualizar despesa. Tente novamente.",
-        variant: "destructive",
+        description: "Erro inesperado. Tente novamente.",
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
@@ -149,13 +167,13 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md rounded-3xl">
+      <DialogContent className="sm:max-w-[425px] rounded-3xl">
         <DialogHeader>
-          <DialogTitle>Editar Despesa</DialogTitle>
+          <DialogTitle>Editar Transação</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="data">Data de Pagamento</Label>
             <Input
               id="data"
@@ -164,10 +182,9 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
               onChange={(e) => handleInputChange('data', e.target.value)}
               className="rounded-full"
             />
-            <p className="text-xs text-gray-500 mt-1">Deixe vazio se ainda não foi paga. Será preenchida automaticamente ao marcar como paga.</p>
           </div>
 
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="data_vencimento">Data de Vencimento *</Label>
             <Input
               id="data_vencimento"
@@ -179,12 +196,13 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
             />
           </div>
 
-          <div>
-            <Label htmlFor="valor">Valor *</Label>
+          <div className="space-y-2">
+            <Label htmlFor="valor">Valor (R$) *</Label>
             <Input
               id="valor"
               type="number"
               step="0.01"
+              placeholder="0.00"
               value={formData.valor}
               onChange={(e) => handleInputChange('valor', e.target.value)}
               required
@@ -192,19 +210,20 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
             />
           </div>
 
-          <div>
-            <Label htmlFor="valor_juros">Valor dos Juros</Label>
+          <div className="space-y-2">
+            <Label htmlFor="valor_juros">Valor dos Juros (R$)</Label>
             <Input
               id="valor_juros"
               type="number"
               step="0.01"
+              placeholder="0.00"
               value={formData.valor_juros}
               onChange={(e) => handleInputChange('valor_juros', e.target.value)}
               className="rounded-full"
             />
           </div>
 
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="empresa">Empresa *</Label>
             <Select value={formData.empresa} onValueChange={(value) => handleInputChange('empresa', value)}>
               <SelectTrigger className="rounded-full">
@@ -220,7 +239,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
             </Select>
           </div>
 
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="categoria">Categoria</Label>
             <Select value={formData.categoria} onValueChange={(value) => handleInputChange('categoria', value)}>
               <SelectTrigger className="rounded-full">
@@ -237,7 +256,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
           </div>
 
           {formData.categoria && subcategories[formData.categoria as keyof typeof subcategories]?.length > 0 && (
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="subcategoria">Subcategoria</Label>
               <Select value={formData.subcategoria} onValueChange={(value) => handleInputChange('subcategoria', value)}>
                 <SelectTrigger className="rounded-full">
@@ -254,10 +273,11 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
             </div>
           )}
 
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="descricao">Descrição</Label>
             <Textarea
               id="descricao"
+              placeholder="Descrição da despesa..."
               value={formData.descricao}
               onChange={(e) => handleInputChange('descricao', e.target.value)}
               rows={3}
@@ -265,12 +285,18 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
             />
           </div>
 
-          <div className="flex gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1 rounded-full">
+          <div className="flex justify-end gap-2 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={isLoading}
+              className="rounded-full"
+            >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading} className="flex-1 rounded-full">
-              {isLoading ? 'Salvando...' : 'Salvar'}
+            <Button type="submit" disabled={isLoading} className="rounded-full">
+              {isLoading ? 'Salvando...' : 'Salvar Alterações'}
             </Button>
           </div>
         </form>

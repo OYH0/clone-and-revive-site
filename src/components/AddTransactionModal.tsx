@@ -103,7 +103,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         empresa: formData.empresa,
         descricao: formData.descricao || 'Sem descrição',
         categoria: formData.categoria,
-        subcategoria: formData.subcategoria,
+        subcategoria: formData.subcategoria || null,
         data_vencimento: formData.data_vencimento,
         valor_juros: formData.valor_juros ? parseFloat(formData.valor_juros) : 0,
         user_id: user.id

@@ -19,6 +19,7 @@ export type Database = {
           empresa: string | null
           id: number
           status: string | null
+          subcategoria: string | null
           user_id: string
           valor: number | null
           valor_juros: number | null
@@ -33,6 +34,7 @@ export type Database = {
           empresa?: string | null
           id?: number
           status?: string | null
+          subcategoria?: string | null
           user_id: string
           valor?: number | null
           valor_juros?: number | null
@@ -47,6 +49,7 @@ export type Database = {
           empresa?: string | null
           id?: number
           status?: string | null
+          subcategoria?: string | null
           user_id?: string
           valor?: number | null
           valor_juros?: number | null
