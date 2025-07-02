@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Building2, TrendingUp, DollarSign, Users, BarChart3 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -248,8 +247,13 @@ const CompanhiaPage = () => {
               </CardContent>
             </Card>
 
-            {/* Metas e Objetivos */}
-            <MonthlyGoals empresa="Churrasco" />
+            {/* Metas e Objetivos - Now properly connected to period selection */}
+            <MonthlyGoals 
+              empresa="Churrasco" 
+              selectedPeriod={selectedPeriod}
+              customMonth={customMonth}
+              customYear={customYear}
+            />
 
             {/* Próximas Ações */}
             <NextActions empresa="Companhia do Churrasco" />

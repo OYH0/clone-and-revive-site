@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,9 +12,17 @@ import { useReceitas } from '@/hooks/useReceitas';
 
 interface MonthlyGoalsProps {
   empresa: string;
+  selectedPeriod?: 'today' | 'week' | 'month' | 'year' | 'custom';
+  customMonth?: number;
+  customYear?: number;
 }
 
-const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
+const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ 
+  empresa, 
+  selectedPeriod = 'month', 
+  customMonth = new Date().getMonth() + 1, 
+  customYear = new Date().getFullYear() 
+}) => {
   const { data: allMetas = [] } = useMetasMensais(empresa);
   const { data: receitas = [] } = useReceitas();
   const createMeta = useCreateMetaMensal();
@@ -33,12 +40,20 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
     ano: new Date().getFullYear()
   });
 
-  const currentMonth = new Date().getMonth() + 1;
-  const currentYear = new Date().getFullYear();
+  // Determinar o mês e ano a serem exibidos baseado no período selecionado
+  const getDisplayMonthYear = () => {
+    if (selectedPeriod === 'custom') {
+      return { month: customMonth, year: customYear };
+    }
+    // Para outros períodos, usar o mês e ano atual
+    return { month: new Date().getMonth() + 1, year: new Date().getFullYear() };
+  };
 
-  // Filtrar metas apenas do mês atual
+  const { month: displayMonth, year: displayYear } = getDisplayMonthYear();
+
+  // Filtrar metas baseado no período selecionado
   const metas = allMetas.filter(meta => 
-    meta.mes === currentMonth && meta.ano === currentYear
+    meta.mes === displayMonth && meta.ano === displayYear
   );
 
   // Calcular receitas baseado no mês e ano específico de cada meta
@@ -95,8 +110,8 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
         valor_meta: '',
         categoria_receita: 'VENDAS',
         cor: '#8b5cf6',
-        mes: new Date().getMonth() + 1,
-        ano: new Date().getFullYear()
+        mes: displayMonth,
+        ano: displayYear
       });
     } catch (error) {
       console.error('Error saving meta:', error);
@@ -110,8 +125,8 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
       valor_meta: '',
       categoria_receita: 'VENDAS',
       cor: '#8b5cf6',
-      mes: new Date().getMonth() + 1,
-      ano: new Date().getFullYear()
+      mes: displayMonth,
+      ano: displayYear
     });
     setIsDialogOpen(true);
   };
@@ -146,7 +161,7 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
               Metas do Mês
             </CardTitle>
             <CardDescription>
-              {new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+              {getMonthName(displayMonth)} {displayYear}
             </CardDescription>
           </div>
           <Button 
@@ -164,7 +179,7 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({ empresa }) => {
         {metas.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>Nenhuma meta definida para este mês</p>
+            <p>Nenhuma meta definida para {getMonthName(displayMonth)} {displayYear}</p>
             <p className="text-sm">Clique em "Adicionar" para criar uma meta</p>
           </div>
         ) : (
