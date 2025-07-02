@@ -4,7 +4,6 @@ import { Edit, Trash2, CheckCircle, Paperclip, Eye, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Transaction } from '@/types/transaction';
 import { getTransactionStatus } from '@/utils/transactionUtils';
-import { useUserRole } from '@/hooks/useUserRole';
 
 interface ActionsCellProps {
   transaction: Transaction;
@@ -13,6 +12,8 @@ interface ActionsCellProps {
   onMarkAsPaid: (transaction: Transaction) => void;
   onAttachReceipt: (transaction: Transaction) => void;
   onViewReceipt: (transaction: Transaction) => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
 }
 
 const ActionsCell: React.FC<ActionsCellProps> = ({
@@ -22,12 +23,10 @@ const ActionsCell: React.FC<ActionsCellProps> = ({
   onMarkAsPaid,
   onAttachReceipt,
   onViewReceipt,
+  canEdit = true,
+  canDelete = true
 }) => {
-  const { canManageFinances, canOnlyView } = useUserRole();
   const status = getTransactionStatus(transaction);
-
-  const canEdit = canManageFinances && !canOnlyView;
-  const canDeleteTx = canManageFinances && !canOnlyView;
 
   return (
     <div className="flex gap-1">
@@ -53,7 +52,7 @@ const ActionsCell: React.FC<ActionsCellProps> = ({
         </Button>
       )}
 
-      {canDeleteTx ? (
+      {canDelete ? (
         <Button
           variant="ghost"
           size="sm"

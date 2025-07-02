@@ -4,16 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Settings, Users, Eye, EyeOff } from 'lucide-react';
 import { useTabPermissions } from '@/hooks/useTabPermissions';
-
-type UserRole = 'admin' | 'financeiro' | 'visualizador';
 
 interface Profile {
   id: string;
   email: string;
   is_admin: boolean;
-  role: UserRole;
   created_at: string;
 }
 
@@ -32,32 +30,6 @@ const TabPermissionsManager: React.FC<TabPermissionsManagerProps> = ({ profiles 
 
   const handlePermissionChange = async (userId: string, tabName: string, isVisible: boolean) => {
     await updateTabPermission(userId, tabName, isVisible);
-  };
-
-  const getRoleLabel = (role: UserRole) => {
-    switch (role) {
-      case 'admin':
-        return 'Administrador';
-      case 'financeiro':
-        return 'Financeiro';
-      case 'visualizador':
-        return 'Visualizador';
-      default:
-        return 'Financeiro';
-    }
-  };
-
-  const getRoleBadgeColor = (role: UserRole) => {
-    switch (role) {
-      case 'admin':
-        return 'bg-red-100 text-red-800';
-      case 'financeiro':
-        return 'bg-blue-100 text-blue-800';
-      case 'visualizador':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-blue-100 text-blue-800';
-    }
   };
 
   if (loading) {
@@ -100,9 +72,10 @@ const TabPermissionsManager: React.FC<TabPermissionsManagerProps> = ({ profiles 
                       <p className="font-medium text-gray-900">{profile.email}</p>
                       <div className="flex items-center gap-2">
                         <Badge 
-                          className={getRoleBadgeColor(profile.role || 'financeiro')}
+                          variant={profile.is_admin ? "default" : "secondary"}
+                          className={profile.is_admin ? "bg-green-100 text-green-800" : ""}
                         >
-                          {getRoleLabel(profile.role || 'financeiro')}
+                          {profile.is_admin ? 'Administrador' : 'Usuário'}
                         </Badge>
                       </div>
                     </div>

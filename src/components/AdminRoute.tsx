@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useUserRole } from '@/hooks/useUserRole';
+import { useAdminAccess } from '@/hooks/useAdminAccess';
 import { Shield, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -9,7 +9,7 @@ interface AdminRouteProps {
 }
 
 const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
-  const { canAccessAdmin, loading } = useUserRole();
+  const { isAdmin, loading } = useAdminAccess();
 
   if (loading) {
     return (
@@ -25,7 +25,7 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     );
   }
 
-  if (!canAccessAdmin) {
+  if (!isAdmin) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 via-red-50 to-pink-100 p-8">
         <Card className="max-w-md mx-auto bg-white/80 backdrop-blur-sm border-white/20 shadow-xl">

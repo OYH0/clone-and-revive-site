@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Transaction } from '@/types/transaction';
 import EditTransactionModal from './EditTransactionModal';
@@ -255,6 +256,8 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
                     onMarkAsPaid={handleMarkAsPaidRequest}
                     onAttachReceipt={handleAttachReceipt}
                     onViewReceipt={handleViewReceipt}
+                    canEdit={isAdmin || transaction.user_id === user?.id}
+                    canDelete={isAdmin || transaction.user_id === user?.id}
                   />
                 </td>
               </tr>
