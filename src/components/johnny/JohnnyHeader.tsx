@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 
 interface JohnnyHeaderProps {
   onModalOpen: (modal: string) => void;
-  selectedPeriod: 'today' | 'week' | 'month' | 'year';
-  onPeriodChange: (period: 'today' | 'week' | 'month' | 'year') => void;
+  selectedPeriod: 'today' | 'week' | 'month' | 'year' | 'custom';
+  onPeriodChange: (period: 'today' | 'week' | 'month' | 'year' | 'custom') => void;
 }
 
 const JohnnyHeader: React.FC<JohnnyHeaderProps> = ({ onModalOpen, selectedPeriod, onPeriodChange }) => {

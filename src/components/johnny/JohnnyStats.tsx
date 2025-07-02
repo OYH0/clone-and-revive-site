@@ -1,61 +1,33 @@
 
 import React from 'react';
-import { TrendingUp, DollarSign, Users, BarChart3 } from 'lucide-react';
+import { TrendingUp, DollarSign, BarChart3 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Despesa } from '@/hooks/useDespesas';
-import { Receita } from '@/hooks/useReceitas';
-import { useDespesas } from '@/hooks/useDespesas';
-import { useReceitas } from '@/hooks/useReceitas';
-import { calculateProfitByPeriod } from '@/utils/dateUtils';
 
 interface JohnnyStatsProps {
-  despesas: Despesa[];
-  receitas: Receita[];
-  selectedPeriod: 'today' | 'week' | 'month' | 'year';
+  despesas: any[];
+  receitas: any[];
+  selectedPeriod: 'today' | 'week' | 'month' | 'year' | 'custom';
 }
 
 const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas, selectedPeriod }) => {
-  const { data: todasDespesas } = useDespesas();
-  const { data: todasReceitas } = useReceitas();
+  const totalDespesas = despesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
+  const totalReceitas = receitas.reduce((sum, r) => sum + r.valor, 0);
+  const lucroLiquido = totalReceitas - totalDespesas;
+  const margemLucro = totalReceitas > 0 ? (lucroLiquido / totalReceitas) * 100 : 0;
 
-  // Filtrar TODOS os dados do Johnny para cálculos
-  const johnnyDespesasCompleto = todasDespesas?.filter(d => {
-    const empresa = d.empresa?.toLowerCase().trim() || '';
-    return empresa === 'johnny' || 
-           empresa === 'johnny rockets' || 
-           empresa === 'johnny rocket' ||
-           empresa.includes('johnny');
-  }) || [];
-  
-  const johnnyReceitasCompleto = todasReceitas?.filter(r => {
-    const empresa = r.empresa?.toLowerCase().trim() || '';
-    return empresa === 'johnny' || 
-           empresa === 'johnny rockets' || 
-           empresa === 'johnny rocket' ||
-           empresa.includes('johnny');
-  }) || [];
-
-  // Usar valor_total que inclui juros, ou valor como fallback - PERÍODO SELECIONADO
-  const totalDespesasPeriodo = despesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
-  const totalReceitasPeriodo = receitas.reduce((sum, r) => sum + r.valor, 0);
-  
-  // NOVO: Calcular lucro baseado no período selecionado
-  const lucroCalculado = calculateProfitByPeriod(johnnyDespesasCompleto, johnnyReceitasCompleto, selectedPeriod);
-  const margemLucro = totalReceitasPeriodo > 0 ? (lucroCalculado / totalReceitasPeriodo) * 100 : 0;
-
-  // Determinar o label do lucro baseado no período
-  const getLucroLabel = () => {
+  const getPeriodLabel = () => {
     switch (selectedPeriod) {
-      case 'today': return 'Lucro Líquido Hoje';
-      case 'week': return 'Lucro Líquido Semanal';
-      case 'month': return 'Lucro Líquido Acumulado';
-      case 'year': return 'Lucro Líquido Anual';
-      default: return 'Lucro Líquido';
+      case 'today': return 'Hoje';
+      case 'week': return 'Esta Semana';
+      case 'month': return 'Este Mês';
+      case 'year': return 'Este Ano';
+      case 'custom': return 'Período Personalizado';
+      default: return 'Período';
     }
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
           <CardTitle className="text-sm font-medium text-gray-600">Receita Total</CardTitle>
@@ -65,9 +37,9 @@ const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas, selectedP
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-green-600">
-            R$ {totalReceitasPeriodo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </div>
-          <p className="text-xs text-gray-500 mt-1">{receitas.length} transações</p>
+          <p className="text-xs text-gray-500 mt-1">{getPeriodLabel()} • {receitas.length} transações</p>
         </CardContent>
       </Card>
 
@@ -80,41 +52,26 @@ const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas, selectedP
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-red-600">
-            R$ {totalDespesasPeriodo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </div>
-          <p className="text-xs text-gray-500 mt-1">{despesas.length} transações</p>
+          <p className="text-xs text-gray-500 mt-1">{getPeriodLabel()} • {despesas.length} transações</p>
         </CardContent>
       </Card>
 
       <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-sm font-medium text-gray-600">{getLucroLabel()}</CardTitle>
+          <CardTitle className="text-sm font-medium text-gray-600">Lucro Líquido</CardTitle>
           <div className="p-2 bg-gradient-to-r from-blue-100 to-blue-200 rounded-xl">
             <BarChart3 className="h-4 w-4 text-blue-600" />
           </div>
         </CardHeader>
         <CardContent>
-          <div className={`text-2xl font-bold ${lucroCalculado >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            R$ {lucroCalculado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          <div className={`text-2xl font-bold ${lucroLiquido >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            R$ {lucroLiquido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </div>
           <p className="text-xs text-gray-500 mt-1">
-            {lucroCalculado >= 0 ? '+' : ''}{margemLucro.toFixed(1)}% margem
+            {lucroLiquido >= 0 ? '+' : ''}{margemLucro.toFixed(1)}% margem • {getPeriodLabel()}
           </p>
-        </CardContent>
-      </Card>
-
-      <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-sm font-medium text-gray-600">Média de Vendas</CardTitle>
-          <div className="p-2 bg-gradient-to-r from-purple-100 to-purple-200 rounded-xl">
-            <Users className="h-4 w-4 text-purple-600" />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-purple-600">
-            R$ {receitas.length > 0 ? (totalReceitasPeriodo / receitas.length).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}
-          </div>
-          <p className="text-xs text-gray-500 mt-1">Por venda</p>
         </CardContent>
       </Card>
     </div>

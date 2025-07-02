@@ -1,5 +1,8 @@
+
 import React, { useState, useMemo } from 'react';
+import { Building2 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
+import { Button } from '@/components/ui/button';
 import { useDespesas } from '@/hooks/useDespesas';
 import { useReceitas } from '@/hooks/useReceitas';
 import AnalyseCostsModal from '@/components/AnalyseCostsModal';
@@ -115,8 +118,6 @@ const JohnnyPage = () => {
               </Button>
             </div>
           </div>
-          
-          <JohnnyHeader onModalOpen={setActiveModal} selectedPeriod={selectedPeriod} onPeriodChange={setSelectedPeriod} />
           
           <JohnnyStats despesas={filteredDespesas} receitas={filteredReceitas} selectedPeriod={selectedPeriod} />
           <JohnnyCharts despesas={filteredDespesas} receitas={filteredReceitas} />
