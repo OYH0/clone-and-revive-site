@@ -30,7 +30,7 @@ const DashboardCharts: React.FC<DashboardChartsProps> = ({ despesas, selectedPer
           <CardDescription>Gastos ao longo dos meses</CardDescription>
         </CardHeader>
         <CardContent>
-          <MonthlyEvolutionChart despesas={despesas} />
+          <MonthlyEvolutionChart despesas={despesas} selectedPeriod={selectedPeriod} />
         </CardContent>
       </Card>
     </div>
