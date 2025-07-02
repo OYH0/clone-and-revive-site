@@ -12,11 +12,11 @@ interface CamerinoChartsProps {
 }
 
 const CamerinoCharts: React.FC<CamerinoChartsProps> = ({ despesas, receitas }) => {
-  // Buscar dados completos diretamente dos hooks, ignorando filtros
+  // Buscar dados completos diretamente dos hooks para o gráfico de evolução mensal (que sempre mostra dados anuais)
   const { data: todasDespesas } = useDespesas();
   const { data: todasReceitas } = useReceitas();
 
-  // Filtrar dados apenas para Camerino
+  // Filtrar dados apenas para Camerino para evolução mensal
   const despesasCamerino = React.useMemo(() => {
     return todasDespesas?.filter(d => {
       const empresa = d.empresa?.toLowerCase().trim() || '';
@@ -82,14 +82,14 @@ const CamerinoCharts: React.FC<CamerinoChartsProps> = ({ despesas, receitas }) =
         </CardContent>
       </Card>
 
-      {/* Distribuição de Despesas */}
+      {/* Distribuição de Despesas - Agora usa dados filtrados */}
       <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
         <CardHeader>
           <CardTitle className="text-xl text-gray-800">Distribuição de Despesas</CardTitle>
-          <CardDescription>Categorias de gastos</CardDescription>
+          <CardDescription>Categorias de gastos no período selecionado</CardDescription>
         </CardHeader>
         <CardContent>
-          <ExpenseDistribution despesas={despesasCamerino} empresa="Camerino" />
+          <ExpenseDistribution despesas={despesas} empresa="Camerino" />
         </CardContent>
       </Card>
     </div>

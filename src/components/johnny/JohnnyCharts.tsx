@@ -7,16 +7,16 @@ import { useDespesas } from '@/hooks/useDespesas';
 import { useReceitas } from '@/hooks/useReceitas';
 
 interface JohnnyChartsProps {
-  despesas: any[]; // Mantém para compatibilidade, mas não será usado
-  receitas: any[]; // Mantém para compatibilidade, mas não será usado
+  despesas: any[];
+  receitas: any[];
 }
 
 const JohnnyCharts: React.FC<JohnnyChartsProps> = ({ despesas, receitas }) => {
-  // Buscar dados completos diretamente dos hooks, ignorando filtros
+  // Buscar dados completos diretamente dos hooks para o gráfico de evolução mensal (que sempre mostra dados anuais)
   const { data: todasDespesas } = useDespesas();
   const { data: todasReceitas } = useReceitas();
 
-  // Filtrar dados apenas para Johnny Rockets
+  // Filtrar dados apenas para Johnny Rockets para evolução mensal
   const despesasJohnny = React.useMemo(() => {
     return todasDespesas?.filter(d => {
       const empresa = d.empresa?.toLowerCase().trim() || '';
@@ -82,14 +82,14 @@ const JohnnyCharts: React.FC<JohnnyChartsProps> = ({ despesas, receitas }) => {
         </CardContent>
       </Card>
 
-      {/* Distribuição de Despesas */}
+      {/* Distribuição de Despesas - Agora usa dados filtrados */}
       <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
         <CardHeader>
           <CardTitle className="text-xl text-gray-800">Distribuição de Despesas</CardTitle>
-          <CardDescription>Categorias de gastos</CardDescription>
+          <CardDescription>Categorias de gastos no período selecionado</CardDescription>
         </CardHeader>
         <CardContent>
-          <ExpenseDistribution despesas={despesasJohnny} empresa="Johnny Rockets" />
+          <ExpenseDistribution despesas={despesas} empresa="Johnny Rockets" />
         </CardContent>
       </Card>
     </div>
