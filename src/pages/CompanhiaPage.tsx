@@ -1,21 +1,20 @@
+
 import React, { useState, useMemo } from 'react';
 import { Building2, TrendingUp, DollarSign, Users, BarChart3 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import PeriodSelector from '@/components/PeriodSelector';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { useDespesas } from '@/hooks/useDespesas';
 import { useReceitas } from '@/hooks/useReceitas';
 import AnalyseCostsModal from '@/components/AnalyseCostsModal';
 import ProjectionsModal from '@/components/ProjectionsModal';
 import ComparativeModal from '@/components/ComparativeModal';
-import ExpenseDistribution from '@/components/ExpenseDistribution';
 import MonthlyGoals from '@/components/MonthlyGoals';
 import NextActions from '@/components/NextActions';
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import { filterDataByPeriod } from '@/components/dashboard/utils';
 import { calculateProfitByPeriod } from '@/utils/dateUtils';
+import CompanhiaCharts from '@/components/companhia/CompanhiaCharts';
 
 const CompanhiaPage = () => {
   const { data: despesas } = useDespesas();
@@ -42,7 +41,7 @@ const CompanhiaPage = () => {
            empresa.includes('churrasco');
   }) || [];
 
-  // Aplicar filtro de período APENAS para exibição dos gráficos e distribuição
+  // Aplicar filtro de período APENAS para exibição dos cards de estatísticas
   const { filteredDespesas, filteredReceitas } = useMemo(() => {
     return {
       filteredDespesas: filterDataByPeriod(companhiaDespesas, selectedPeriod, customMonth, customYear),
@@ -74,28 +73,6 @@ const CompanhiaPage = () => {
   // Para os indicadores (ROI e Break Even), usar dados acumulados totais
   const totalDespesasAcumulado = companhiaDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
   const totalReceitasAcumulado = companhiaReceitas.reduce((sum, r) => sum + r.valor, 0);
-
-  const evolucaoMensal = React.useMemo(() => {
-    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
-    return months.map((month, index) => {
-      const monthDespesas = filteredDespesas.filter(d => {
-        const date = new Date(d.data);
-        return date.getMonth() === index;
-      }).reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
-      
-      const monthReceitas = filteredReceitas.filter(r => {
-        const date = new Date(r.data);
-        return date.getMonth() === index;
-      }).reduce((sum, r) => sum + r.valor, 0);
-      
-      return {
-        month,
-        despesas: monthDespesas,
-        receitas: monthReceitas,
-        lucro: monthReceitas - monthDespesas
-      };
-    });
-  }, [filteredDespesas, filteredReceitas]);
 
   // Determinar o label do lucro baseado no período
   const getLucroLabel = () => {
@@ -238,41 +215,8 @@ const CompanhiaPage = () => {
             </Card>
           </div>
 
-          {/* Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {/* Evolução Mensal */}
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader>
-                <CardTitle className="text-xl text-gray-800">Evolução Mensal</CardTitle>
-                <CardDescription>Performance financeira mês a mês</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={evolucaoMensal}>
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <Tooltip formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
-                      <Legend />
-                      <Bar dataKey="receitas" fill="#10b981" name="Receitas" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="despesas" fill="#ef4444" name="Despesas" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Distribuição de Despesas */}
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader>
-                <CardTitle className="text-xl text-gray-800">Distribuição de Despesas</CardTitle>
-                <CardDescription>Categorias de gastos</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ExpenseDistribution despesas={filteredDespesas} empresa="Companhia do Churrasco" />
-              </CardContent>
-            </Card>
-          </div>
+          {/* Charts Component */}
+          <CompanhiaCharts despesas={filteredDespesas} receitas={filteredReceitas} />
 
           {/* Informações Adicionais */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
