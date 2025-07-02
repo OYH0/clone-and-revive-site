@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Shield, Users, UserCheck, UserX, Search } from 'lucide-react';
+import { Shield, Users, UserCheck, UserX, Search, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import TabPermissionsManager from '@/components/TabPermissionsManager';
@@ -17,7 +17,7 @@ interface Profile {
   id: string;
   email: string;
   is_admin: boolean;
-  role: 'admin' | 'financeiro';
+  role: 'admin' | 'financeiro' | 'visualizador';
   created_at: string;
 }
 
@@ -65,7 +65,7 @@ const AdminPage = () => {
     profile.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const updateUserRole = async (profileId: string, newRole: 'admin' | 'financeiro') => {
+  const updateUserRole = async (profileId: string, newRole: 'admin' | 'financeiro' | 'visualizador') => {
     try {
       const { error } = await supabase
         .from('profiles')
@@ -85,7 +85,7 @@ const AdminPage = () => {
       } else {
         toast({
           title: "Sucesso",
-          description: `Papel do usuário atualizado para ${newRole === 'admin' ? 'Administrador' : 'Financeiro'}`,
+          description: `Papel do usuário atualizado para ${getRoleLabel(newRole)}`,
         });
         fetchProfiles();
       }
@@ -99,23 +99,27 @@ const AdminPage = () => {
     }
   };
 
-  const getRoleLabel = (role: 'admin' | 'financeiro') => {
+  const getRoleLabel = (role: 'admin' | 'financeiro' | 'visualizador') => {
     switch (role) {
       case 'admin':
         return 'Administrador';
       case 'financeiro':
         return 'Financeiro';
+      case 'visualizador':
+        return 'Visualizador';
       default:
         return 'Financeiro';
     }
   };
 
-  const getRoleBadgeColor = (role: 'admin' | 'financeiro') => {
+  const getRoleBadgeColor = (role: 'admin' | 'financeiro' | 'visualizador') => {
     switch (role) {
       case 'admin':
         return 'bg-red-100 text-red-800';
       case 'financeiro':
         return 'bg-blue-100 text-blue-800';
+      case 'visualizador':
+        return 'bg-green-100 text-green-800';
       default:
         return 'bg-blue-100 text-blue-800';
     }
@@ -144,7 +148,7 @@ const AdminPage = () => {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
               <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium text-gray-600">Total de Usuários</CardTitle>
@@ -183,6 +187,20 @@ const AdminPage = () => {
                       <UserCheck className="h-5 w-5 text-blue-500" />
                     </div>
                     <span className="text-3xl font-bold text-gray-800">{profiles.filter(p => p.role === 'financeiro').length}</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-gray-600">Visualizadores</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-r from-green-100 to-green-200 rounded-lg">
+                      <Eye className="h-5 w-5 text-green-500" />
+                    </div>
+                    <span className="text-3xl font-bold text-gray-800">{profiles.filter(p => p.role === 'visualizador').length}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -237,7 +255,7 @@ const AdminPage = () => {
                           </Badge>
                           <Select
                             value={profile.role || 'financeiro'}
-                            onValueChange={(value: 'admin' | 'financeiro') => updateUserRole(profile.id, value)}
+                            onValueChange={(value: 'admin' | 'financeiro' | 'visualizador') => updateUserRole(profile.id, value)}
                           >
                             <SelectTrigger className="w-40">
                               <SelectValue />
@@ -245,6 +263,7 @@ const AdminPage = () => {
                             <SelectContent>
                               <SelectItem value="admin">Administrador</SelectItem>
                               <SelectItem value="financeiro">Financeiro</SelectItem>
+                              <SelectItem value="visualizador">Visualizador</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>

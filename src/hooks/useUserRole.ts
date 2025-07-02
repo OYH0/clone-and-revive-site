@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-type UserRole = 'admin' | 'financeiro';
+type UserRole = 'admin' | 'financeiro' | 'visualizador';
 
 export const useUserRole = () => {
   const { user } = useAuth();
@@ -48,16 +48,20 @@ export const useUserRole = () => {
 
   const isAdmin = role === 'admin';
   const isFinanceiro = role === 'financeiro';
+  const isVisualizador = role === 'visualizador';
   const canAccessAdmin = isAdmin;
   const canManageFinances = isAdmin || isFinanceiro;
+  const canOnlyView = isVisualizador;
 
   return {
     role,
     loading,
     isAdmin,
     isFinanceiro,
+    isVisualizador,
     canAccessAdmin,
     canManageFinances,
+    canOnlyView,
     refetch: fetchUserRole
   };
 };
