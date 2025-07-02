@@ -71,7 +71,7 @@ const AdminPage = () => {
       const { error } = await supabase
         .from('profiles')
         .update({ 
-          role: newRole,
+          role: newRole as any, // Type cast to handle the database enum update
           is_admin: newRole === 'admin'
         })
         .eq('id', profileId);
