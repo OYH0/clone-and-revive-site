@@ -68,7 +68,7 @@ const CompanhiaCharts: React.FC<CompanhiaChartsProps> = ({ despesas, receitas })
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={evolucaoMensal}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" horizontal={true} vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" horizontal={true} vertical={true} />
                 <XAxis dataKey="month" />
                 <YAxis />
                 <Tooltip formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
