@@ -99,25 +99,25 @@ const AdminPage = () => {
     }
   };
 
-  const getRoleLabel = (role: string) => {
+  const getRoleLabel = (role: 'admin' | 'financeiro') => {
     switch (role) {
       case 'admin':
         return 'Administrador';
       case 'financeiro':
         return 'Financeiro';
       default:
-        return 'Usuário';
+        return 'Financeiro';
     }
   };
 
-  const getRoleBadgeColor = (role: string) => {
+  const getRoleBadgeColor = (role: 'admin' | 'financeiro') => {
     switch (role) {
       case 'admin':
         return 'bg-red-100 text-red-800';
       case 'financeiro':
         return 'bg-blue-100 text-blue-800';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-blue-100 text-blue-800';
     }
   };
 
@@ -144,7 +144,7 @@ const AdminPage = () => {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium text-gray-600">Total de Usuários</CardTitle>
@@ -183,20 +183,6 @@ const AdminPage = () => {
                       <UserCheck className="h-5 w-5 text-blue-500" />
                     </div>
                     <span className="text-3xl font-bold text-gray-800">{profiles.filter(p => p.role === 'financeiro').length}</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-gray-600">Usuários Comuns</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg">
-                      <UserX className="h-5 w-5 text-gray-500" />
-                    </div>
-                    <span className="text-3xl font-bold text-gray-800">{profiles.filter(p => !p.role || p.role === 'user').length}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -246,8 +232,8 @@ const AdminPage = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <Badge className={getRoleBadgeColor(profile.role || 'user')}>
-                            {getRoleLabel(profile.role || 'user')}
+                          <Badge className={getRoleBadgeColor(profile.role || 'financeiro')}>
+                            {getRoleLabel(profile.role || 'financeiro')}
                           </Badge>
                           <Select
                             value={profile.role || 'financeiro'}
