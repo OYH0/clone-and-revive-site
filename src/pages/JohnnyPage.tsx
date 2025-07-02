@@ -119,7 +119,11 @@ const JohnnyPage = () => {
             </div>
           </div>
           
-          <JohnnyStats despesas={filteredDespesas} receitas={filteredReceitas} selectedPeriod={selectedPeriod} />
+          <JohnnyStats 
+            despesas={filteredDespesas} 
+            receitas={filteredReceitas} 
+            selectedPeriod={selectedPeriod} 
+          />
           <JohnnyCharts despesas={filteredDespesas} receitas={filteredReceitas} />
           <JohnnyInsights despesas={filteredDespesas} receitas={filteredReceitas} />
         </div>
