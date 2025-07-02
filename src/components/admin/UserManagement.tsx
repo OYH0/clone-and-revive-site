@@ -39,7 +39,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ profiles, loading, onRe
       const { error } = await supabase
         .from('profiles')
         .update({ 
-          role: newRole,
+          role: newRole as any, // Temporary cast until types are regenerated
           is_admin: newRole === 'admin'
         })
         .eq('id', profileId);
