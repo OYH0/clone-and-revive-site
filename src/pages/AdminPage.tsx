@@ -12,11 +12,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import TabPermissionsManager from '@/components/TabPermissionsManager';
 
+type UserRole = 'admin' | 'financeiro' | 'visualizador';
+
 interface Profile {
   id: string;
   email: string;
   is_admin: boolean;
-  role: 'admin' | 'financeiro' | 'visualizador';
+  role: UserRole;
   created_at: string;
 }
 
@@ -64,7 +66,7 @@ const AdminPage = () => {
     profile.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const updateUserRole = async (profileId: string, newRole: 'admin' | 'financeiro' | 'visualizador') => {
+  const updateUserRole = async (profileId: string, newRole: UserRole) => {
     try {
       const { error } = await supabase
         .from('profiles')
@@ -98,7 +100,7 @@ const AdminPage = () => {
     }
   };
 
-  const getRoleLabel = (role: 'admin' | 'financeiro' | 'visualizador') => {
+  const getRoleLabel = (role: UserRole) => {
     switch (role) {
       case 'admin':
         return 'Administrador';
@@ -111,7 +113,7 @@ const AdminPage = () => {
     }
   };
 
-  const getRoleBadgeColor = (role: 'admin' | 'financeiro' | 'visualizador') => {
+  const getRoleBadgeColor = (role: UserRole) => {
     switch (role) {
       case 'admin':
         return 'bg-red-100 text-red-800';
@@ -254,7 +256,7 @@ const AdminPage = () => {
                           </Badge>
                           <Select
                             value={profile.role || 'financeiro'}
-                            onValueChange={(value: 'admin' | 'financeiro' | 'visualizador') => updateUserRole(profile.id, value)}
+                            onValueChange={(value: UserRole) => updateUserRole(profile.id, value)}
                           >
                             <SelectTrigger className="w-40">
                               <SelectValue />
