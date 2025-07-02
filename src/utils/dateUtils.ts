@@ -66,6 +66,13 @@ export const calculateProfitByPeriod = (
   let startDate: Date;
   let endDate: Date;
 
+  console.log('=== CALCULANDO LUCRO POR PERÍODO ===');
+  console.log('Período selecionado:', selectedPeriod);
+  console.log('Mês personalizado:', customMonth);
+  console.log('Ano personalizado:', customYear);
+  console.log('Total despesas:', allDespesas?.length || 0);
+  console.log('Total receitas:', allReceitas?.length || 0);
+
   switch (selectedPeriod) {
     case 'today':
       // Apenas hoje
@@ -97,11 +104,13 @@ export const calculateProfitByPeriod = (
       break;
     
     case 'custom':
-      // Período personalizado
+      // Período personalizado - ACUMULADO desde janeiro até o mês selecionado
       if (customMonth && customYear) {
-        startDate = new Date(customYear, customMonth - 1, 1);
-        endDate = new Date(customYear, customMonth, 0, 23, 59, 59, 999);
+        startDate = new Date(customYear, 0, 1); // 1º de janeiro do ano selecionado
+        endDate = new Date(customYear, customMonth, 0, 23, 59, 59, 999); // Último dia do mês selecionado
+        console.log('Período personalizado definido - De:', startDate, 'até:', endDate);
       } else {
+        console.log('Dados insuficientes para período personalizado');
         return 0;
       }
       break;
@@ -109,6 +118,8 @@ export const calculateProfitByPeriod = (
     default:
       return 0;
   }
+
+  console.log('Período de cálculo - De:', startDate.toLocaleDateString('pt-BR'), 'até:', endDate.toLocaleDateString('pt-BR'));
 
   // Filtrar despesas
   const filteredDespesas = allDespesas.filter(item => {
@@ -122,7 +133,11 @@ export const calculateProfitByPeriod = (
       return false;
     }
     
-    return itemDate >= startDate && itemDate <= endDate;
+    const isInRange = itemDate >= startDate && itemDate <= endDate;
+    if (isInRange) {
+      console.log('Despesa incluída:', item.descricao, item.valor_total || item.valor, itemDate.toLocaleDateString('pt-BR'));
+    }
+    return isInRange;
   });
 
   // Filtrar receitas
@@ -137,11 +152,19 @@ export const calculateProfitByPeriod = (
       return false;
     }
     
-    return itemDate >= startDate && itemDate <= endDate;
+    const isInRange = itemDate >= startDate && itemDate <= endDate;
+    if (isInRange) {
+      console.log('Receita incluída:', item.descricao, item.valor, itemDate.toLocaleDateString('pt-BR'));
+    }
+    return isInRange;
   });
 
   const totalDespesas = filteredDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
   const totalReceitas = filteredReceitas.reduce((sum, r) => sum + r.valor, 0);
+  
+  console.log('Total despesas filtradas:', totalDespesas);
+  console.log('Total receitas filtradas:', totalReceitas);
+  console.log('Lucro calculado:', totalReceitas - totalDespesas);
   
   return totalReceitas - totalDespesas;
 };

@@ -61,8 +61,14 @@ const CompanhiaPage = () => {
   const totalDespesasPeriodo = filteredDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
   const totalReceitasPeriodo = filteredReceitas.reduce((sum, r) => sum + r.valor, 0);
   
-  // NOVO: Calcular lucro baseado no período selecionado
-  const lucroCalculado = calculateProfitByPeriod(companhiaDespesas, companhiaReceitas, selectedPeriod);
+  // NOVO: Calcular lucro baseado no período selecionado - passa os parâmetros customMonth e customYear
+  const lucroCalculado = calculateProfitByPeriod(
+    companhiaDespesas, 
+    companhiaReceitas, 
+    selectedPeriod, 
+    customMonth, 
+    customYear
+  );
   const margemLucro = totalReceitasPeriodo > 0 ? (lucroCalculado / totalReceitasPeriodo) * 100 : 0;
 
   // Para os indicadores (ROI e Break Even), usar dados acumulados totais
@@ -98,7 +104,7 @@ const CompanhiaPage = () => {
       case 'week': return 'Lucro Líquido Semanal';
       case 'month': return 'Lucro Líquido Acumulado';
       case 'year': return 'Lucro Líquido Anual';
-      case 'custom': return 'Lucro Líquido Personalizado';
+      case 'custom': return 'Lucro Líquido Acumulado';
       default: return 'Lucro Líquido';
     }
   };
