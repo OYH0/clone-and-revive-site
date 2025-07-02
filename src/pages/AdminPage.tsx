@@ -17,7 +17,7 @@ interface Profile {
   id: string;
   email: string;
   is_admin: boolean;
-  role: string;
+  role: 'admin' | 'financeiro';
   created_at: string;
 }
 
@@ -65,7 +65,7 @@ const AdminPage = () => {
     profile.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const updateUserRole = async (profileId: string, newRole: string) => {
+  const updateUserRole = async (profileId: string, newRole: 'admin' | 'financeiro') => {
     try {
       const { error } = await supabase
         .from('profiles')
@@ -251,7 +251,7 @@ const AdminPage = () => {
                           </Badge>
                           <Select
                             value={profile.role || 'financeiro'}
-                            onValueChange={(value) => updateUserRole(profile.id, value)}
+                            onValueChange={(value: 'admin' | 'financeiro') => updateUserRole(profile.id, value)}
                           >
                             <SelectTrigger className="w-40">
                               <SelectValue />
