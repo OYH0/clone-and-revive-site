@@ -12,11 +12,11 @@ interface CompanhiaChartsProps {
 }
 
 const CompanhiaCharts: React.FC<CompanhiaChartsProps> = ({ despesas, receitas }) => {
-  // Buscar dados completos diretamente dos hooks, ignorando filtros
+  // Buscar dados completos diretamente dos hooks para o gráfico de evolução mensal (que sempre mostra dados anuais)
   const { data: todasDespesas } = useDespesas();
   const { data: todasReceitas } = useReceitas();
 
-  // Filtrar dados apenas para Companhia do Churrasco
+  // Filtrar dados apenas para Companhia do Churrasco para evolução mensal
   const despesasCompanhia = React.useMemo(() => {
     return todasDespesas?.filter(d => {
       const empresa = d.empresa?.toLowerCase().trim() || '';
@@ -82,14 +82,14 @@ const CompanhiaCharts: React.FC<CompanhiaChartsProps> = ({ despesas, receitas })
         </CardContent>
       </Card>
 
-      {/* Distribuição de Despesas */}
+      {/* Distribuição de Despesas - Agora usa dados filtrados */}
       <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
         <CardHeader>
           <CardTitle className="text-xl text-gray-800">Distribuição de Despesas</CardTitle>
-          <CardDescription>Categorias de gastos</CardDescription>
+          <CardDescription>Categorias de gastos no período selecionado</CardDescription>
         </CardHeader>
         <CardContent>
-          <ExpenseDistribution despesas={despesasCompanhia} empresa="Companhia do Churrasco" />
+          <ExpenseDistribution despesas={despesas} empresa="Companhia do Churrasco" />
         </CardContent>
       </Card>
     </div>

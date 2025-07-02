@@ -12,9 +12,9 @@ interface ExpenseDistributionProps {
 const ExpenseDistribution: React.FC<ExpenseDistributionProps> = ({ despesas, empresa }) => {
   console.log('=== EXPENSE DISTRIBUTION ===');
   console.log('Empresa:', empresa);
-  console.log('Despesas recebidas:', despesas?.length || 0);
+  console.log('Despesas recebidas (já filtradas):', despesas?.length || 0);
 
-  // Usar função centralizada para calcular dados
+  // Usar os dados filtrados que foram passados como props
   const data = calculateDistributionData(despesas || []);
 
   console.log('Dados do gráfico de distribuição:', data);
@@ -52,7 +52,7 @@ const ExpenseDistribution: React.FC<ExpenseDistributionProps> = ({ despesas, emp
   if (data.length === 0) {
     return (
       <div className="flex items-center justify-center h-80 text-gray-500">
-        <p>Não há dados de despesas para exibir</p>
+        <p>Não há dados de despesas para exibir no período selecionado</p>
       </div>
     );
   }
