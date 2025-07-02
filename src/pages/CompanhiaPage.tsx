@@ -1,5 +1,6 @@
+
 import React, { useState, useMemo } from 'react';
-import { Building2, TrendingUp, DollarSign, Users, BarChart3 } from 'lucide-react';
+import { Building2, TrendingUp, DollarSign, Users, BarChart3, Package } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import PeriodSelector from '@/components/PeriodSelector';
 import { Button } from '@/components/ui/button';
@@ -68,6 +69,13 @@ const CompanhiaPage = () => {
     customYear
   );
   const margemLucro = totalReceitasPeriodo > 0 ? (lucroCalculado / totalReceitasPeriodo) * 100 : 0;
+
+  // Calcular CMV (Custo da Mercadoria Vendida) - apenas despesas de INSUMOS
+  const cmvTotal = filteredDespesas
+    .filter(d => d.categoria?.toUpperCase().includes('INSUMOS'))
+    .reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
+  
+  const percentualCMV = totalReceitasPeriodo > 0 ? (cmvTotal / totalReceitasPeriodo) * 100 : 0;
 
   // Para os indicadores (ROI e Break Even), usar dados acumulados totais
   const totalDespesasAcumulado = companhiaDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
@@ -200,16 +208,18 @@ const CompanhiaPage = () => {
 
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">Média de Vendas</CardTitle>
-                <div className="p-2 bg-gradient-to-r from-purple-100 to-purple-200 rounded-xl">
-                  <Users className="h-4 w-4 text-purple-600" />
+                <CardTitle className="text-sm font-medium text-gray-600">CMV (Insumos)</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-orange-100 to-orange-200 rounded-xl">
+                  <Package className="h-4 w-4 text-orange-600" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-purple-600">
-                  R$ {filteredReceitas.length > 0 ? (totalReceitasPeriodo / filteredReceitas.length).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}
+                <div className="text-2xl font-bold text-orange-600">
+                  R$ {cmvTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Por venda</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {percentualCMV.toFixed(1)}% das vendas
+                </p>
               </CardContent>
             </Card>
           </div>
