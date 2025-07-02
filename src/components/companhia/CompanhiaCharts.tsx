@@ -6,28 +6,28 @@ import ExpenseDistribution from '@/components/ExpenseDistribution';
 import { useDespesas } from '@/hooks/useDespesas';
 import { useReceitas } from '@/hooks/useReceitas';
 
-interface JohnnyChartsProps {
-  despesas: any[]; // Mantém para compatibilidade, mas não será usado
-  receitas: any[]; // Mantém para compatibilidade, mas não será usado
+interface CompanhiaChartsProps {
+  despesas: any[];
+  receitas: any[];
 }
 
-const JohnnyCharts: React.FC<JohnnyChartsProps> = ({ despesas, receitas }) => {
+const CompanhiaCharts: React.FC<CompanhiaChartsProps> = ({ despesas, receitas }) => {
   // Buscar dados completos diretamente dos hooks, ignorando filtros
   const { data: todasDespesas } = useDespesas();
   const { data: todasReceitas } = useReceitas();
 
-  // Filtrar dados apenas para Johnny Rockets
-  const despesasJohnny = React.useMemo(() => {
+  // Filtrar dados apenas para Companhia do Churrasco
+  const despesasCompanhia = React.useMemo(() => {
     return todasDespesas?.filter(d => {
       const empresa = d.empresa?.toLowerCase().trim() || '';
-      return empresa.includes('johnny') || empresa === 'johnny rockets' || empresa === 'johnny rocket';
+      return empresa.includes('churrasco') || empresa === 'companhia do churrasco' || empresa === 'cia do churrasco';
     }) || [];
   }, [todasDespesas]);
 
-  const receitasJohnny = React.useMemo(() => {
+  const receitasCompanhia = React.useMemo(() => {
     return todasReceitas?.filter(r => {
       const empresa = r.empresa?.toLowerCase().trim() || '';
-      return empresa.includes('johnny') || empresa === 'johnny rockets' || empresa === 'johnny rocket';
+      return empresa.includes('churrasco') || empresa === 'companhia do churrasco' || empresa === 'cia do churrasco';
     }) || [];
   }, [todasReceitas]);
 
@@ -36,13 +36,13 @@ const JohnnyCharts: React.FC<JohnnyChartsProps> = ({ despesas, receitas }) => {
     const currentYear = new Date().getFullYear();
     
     return months.map((month, index) => {
-      const monthDespesas = despesasJohnny.filter(d => {
+      const monthDespesas = despesasCompanhia.filter(d => {
         const date = d.data_vencimento ? new Date(d.data_vencimento + 'T00:00:00') : 
                       d.data ? new Date(d.data + 'T00:00:00') : null;
         return date && date.getMonth() === index && date.getFullYear() === currentYear;
       }).reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
       
-      const monthReceitas = receitasJohnny.filter(r => {
+      const monthReceitas = receitasCompanhia.filter(r => {
         const date = r.data ? new Date(r.data + 'T00:00:00') : null;
         return date && date.getMonth() === index && date.getFullYear() === currentYear;
       }).reduce((sum, r) => sum + (r.valor || 0), 0);
@@ -54,7 +54,7 @@ const JohnnyCharts: React.FC<JohnnyChartsProps> = ({ despesas, receitas }) => {
         lucro: monthReceitas - monthDespesas
       };
     });
-  }, [despesasJohnny, receitasJohnny]);
+  }, [despesasCompanhia, receitasCompanhia]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -88,11 +88,11 @@ const JohnnyCharts: React.FC<JohnnyChartsProps> = ({ despesas, receitas }) => {
           <CardDescription>Categorias de gastos</CardDescription>
         </CardHeader>
         <CardContent>
-          <ExpenseDistribution despesas={despesasJohnny} empresa="Johnny Rockets" />
+          <ExpenseDistribution despesas={despesasCompanhia} empresa="Companhia do Churrasco" />
         </CardContent>
       </Card>
     </div>
   );
 };
 
-export default JohnnyCharts;
+export default CompanhiaCharts;
