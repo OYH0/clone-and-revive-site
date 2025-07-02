@@ -161,23 +161,23 @@ export const calculateCompanyTotals = (despesas: Despesa[]) => {
   despesas.forEach(despesa => {
     const normalizedCompany = normalizeCompanyName(despesa.empresa);
     const valor = getTransactionValue(despesa);
-    const categoria = despesa.categoria?.toLowerCase() || 'sem_categoria';
+    const categoria = despesa.categoria?.toUpperCase() || 'SEM_CATEGORIA';
 
     if (companies[normalizedCompany as keyof typeof companies]) {
       const company = companies[normalizedCompany as keyof typeof companies];
       company.total += valor;
       company.expenses.push(despesa);
 
-      // Categorizar despesas
-      if (categoria.includes('fixa')) {
+      // Categorizar despesas - usando comparação exata com categorias corretas
+      if (categoria.includes('FIXAS')) {
         company.categories.fixas += valor;
-      } else if (categoria.includes('insumo')) {
+      } else if (categoria.includes('INSUMOS')) {
         company.categories.insumos += valor;
-      } else if (categoria.includes('variável') || categoria.includes('variaveis')) {
+      } else if (categoria === 'VARIÁVEIS') {
         company.categories.variaveis += valor;
-      } else if (categoria.includes('atrasado')) {
+      } else if (categoria.includes('ATRASADOS')) {
         company.categories.atrasados += valor;
-      } else if (categoria.includes('retirada')) {
+      } else if (categoria.includes('RETIRADAS')) {
         company.categories.retiradas += valor;
       } else {
         company.categories.sem_categoria += valor;
