@@ -56,7 +56,8 @@ export const useTabPermissions = () => {
               johnny: true
             };
           }
-          organized[perm.user_id][perm.tab_name as keyof typeof organized[perm.user_id]] = perm.is_visible;
+          const tabName = perm.tab_name as keyof typeof organized[string];
+          organized[perm.user_id][tabName] = perm.is_visible;
         });
         
         setUserPermissions(organized);
