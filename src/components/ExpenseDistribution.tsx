@@ -22,8 +22,6 @@ const ExpenseDistribution: React.FC<ExpenseDistributionProps> = ({ despesas, emp
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0];
-      const subcategorias = data.payload.subcategorias;
-      
       return (
         <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
           <p className="font-medium">{data.payload.name}</p>
@@ -33,16 +31,6 @@ const ExpenseDistribution: React.FC<ExpenseDistributionProps> = ({ despesas, emp
           <p className="text-sm text-gray-600">
             {((data.value / data.payload.total) * 100).toFixed(1)}%
           </p>
-          {subcategorias && Object.keys(subcategorias).length > 0 && (
-            <div className="mt-2 pt-2 border-t border-gray-200">
-              <p className="text-xs font-medium text-gray-700 mb-1">Subcategorias:</p>
-              {Object.entries(subcategorias).map(([subcat, valor]: [string, any]) => (
-                <p key={subcat} className="text-xs text-gray-600">
-                  {subcat}: R$ {valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </p>
-              ))}
-            </div>
-          )}
         </div>
       );
     }

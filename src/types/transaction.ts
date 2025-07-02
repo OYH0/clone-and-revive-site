@@ -6,13 +6,10 @@ export interface Transaction {
   company: string;
   description: string;
   category: string;
-  subcategoria?: string;
   data_vencimento?: string;
-  comprovante?: string;
   status?: string;
-  user_id: string;
+  comprovante?: string;
+  user_id?: string;
   valor_juros?: number;
   valor_total?: number;
 }
-
-export type TransactionStatus = 'PAGO' | 'PENDENTE' | 'ATRASADO';

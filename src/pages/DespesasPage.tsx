@@ -35,7 +35,6 @@ const DespesasPage = () => {
     company: despesa.empresa || 'Não informado',
     description: despesa.descricao || 'Sem descrição',
     category: despesa.categoria || 'Sem categoria',
-    subcategoria: despesa.subcategoria,
     data_vencimento: despesa.data_vencimento,
     comprovante: despesa.comprovante,
     status: despesa.status || null,

@@ -1,218 +1,298 @@
 
 import { Despesa } from '@/hooks/useDespesas';
 
-export const calculateDistributionData = (despesas: Despesa[]) => {
-  console.log('=== CALCULATING DISTRIBUTION DATA WITH SUBCATEGORIES ===');
-  console.log('Despesas para calcular:', despesas?.length || 0);
-
-  if (!despesas || despesas.length === 0) {
-    return [];
+// Função para normalizar nomes das categorias
+export const normalizeCategoryName = (categoria: string | undefined): string => {
+  if (!categoria) return 'SEM_CATEGORIA';
+  
+  // Normalizar string removendo espaços extras e convertendo para maiúscula
+  const trimmed = categoria.trim().toUpperCase();
+  
+  console.log('Normalizando categoria:', categoria, '-> trimmed:', trimmed);
+  
+  // Mapear todas as variações possíveis das categorias
+  if (trimmed === 'VARIÁVEIS' || trimmed === 'VARIAVEIS' || trimmed === 'VARIAVEL' || trimmed === 'VARIÁVEL') {
+    return 'VARIÁVEIS';
   }
-
-  // Agrupar por categoria e subcategoria
-  const categoryGroups: { [key: string]: { total: number; subcategorias: { [key: string]: number } } } = {};
-
-  despesas.forEach(despesa => {
-    const valor = despesa.valor_total || despesa.valor || 0;
-    const categoria = despesa.categoria || 'Sem categoria';
-    const subcategoria = despesa.subcategoria || 'Outros';
-
-    if (!categoryGroups[categoria]) {
-      categoryGroups[categoria] = { total: 0, subcategorias: {} };
-    }
-
-    categoryGroups[categoria].total += valor;
-    
-    if (!categoryGroups[categoria].subcategorias[subcategoria]) {
-      categoryGroups[categoria].subcategorias[subcategoria] = 0;
-    }
-    categoryGroups[categoria].subcategorias[subcategoria] += valor;
-  });
-
-  // Cores para as categorias
-  const colors: { [key: string]: string } = {
-    'INSUMOS': '#10B981',
-    'FIXAS': '#EF4444', 
-    'VARIÁVEIS': '#F59E0B',
-    'ATRASADOS': '#DC2626',
-    'RETIRADAS': '#8B5CF6',
-    'Sem categoria': '#6B7280'
-  };
-
-  const data = Object.entries(categoryGroups)
-    .filter(([_, group]) => group.total > 0)
-    .map(([categoria, group]) => ({
-      name: categoria,
-      value: group.total,
-      color: colors[categoria] || '#6B7280',
-      subcategorias: group.subcategorias
-    }))
-    .sort((a, b) => b.value - a.value);
-
-  console.log('Dados de distribuição calculados:', data);
-  return data;
+  if (trimmed === 'FIXAS' || trimmed === 'FIXA') {
+    return 'FIXAS';
+  }
+  if (trimmed === 'INSUMOS' || trimmed === 'INSUMO') {
+    return 'INSUMOS';
+  }
+  if (trimmed === 'ATRASADOS' || trimmed === 'ATRASADO') {
+    return 'ATRASADOS';
+  }
+  if (trimmed === 'RETIRADAS' || trimmed === 'RETIRADA') {
+    return 'RETIRADAS';
+  }
+  if (trimmed === 'SEM CATEGORIA' || trimmed === 'SEM_CATEGORIA' || trimmed === '' || trimmed === 'UNDEFINED') {
+    return 'SEM_CATEGORIA';
+  }
+  
+  console.log('Categoria não mapeada:', trimmed);
+  return 'SEM_CATEGORIA';
 };
 
-export const calculateMonthlyData = (despesas: Despesa[], receitas: any[]) => {
-  console.log('=== CALCULATING MONTHLY DATA ===');
-  
-  const monthlyData: { [key: string]: { despesas: number; receitas: number } } = {};
-  
-  // Processar despesas
-  despesas.forEach(despesa => {
-    if (despesa.data_vencimento) {
-      const date = new Date(despesa.data_vencimento + 'T00:00:00');
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      
-      if (!monthlyData[monthKey]) {
-        monthlyData[monthKey] = { despesas: 0, receitas: 0 };
-      }
-      
-      monthlyData[monthKey].despesas += despesa.valor_total || despesa.valor || 0;
-    }
-  });
-  
-  // Processar receitas
-  receitas.forEach(receita => {
-    if (receita.data) {
-      const date = new Date(receita.data + 'T00:00:00');
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      
-      if (!monthlyData[monthKey]) {
-        monthlyData[monthKey] = { despesas: 0, receitas: 0 };
-      }
-      
-      monthlyData[monthKey].receitas += receita.valor || 0;
-    }
-  });
-  
-  // Converter para array e ordenar
-  const data = Object.entries(monthlyData)
-    .map(([month, values]) => {
-      const [year, monthNum] = month.split('-');
-      const date = new Date(parseInt(year), parseInt(monthNum) - 1, 1);
-      const monthName = date.toLocaleDateString('pt-BR', { month: 'short' });
-      
-      return {
-        month: monthName.charAt(0).toUpperCase() + monthName.slice(1),
-        despesas: values.despesas,
-        receitas: values.receitas,
-        lucro: values.receitas - values.despesas
-      };
-    })
-    .sort((a, b) => {
-      const monthOrder = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-      return monthOrder.indexOf(a.month) - monthOrder.indexOf(b.month);
-    });
-
-  console.log('Dados mensais calculados:', data);
-  return data;
-};
-
-export const calculateTotalsByCompany = (despesas: Despesa[], empresa: string) => {
-  console.log(`=== CALCULATING TOTALS FOR ${empresa} ===`);
-  
-  const filteredDespesas = despesas.filter(d => d.empresa === empresa);
-  
-  const totalDespesas = filteredDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
-  const totalPagas = filteredDespesas
-    .filter(d => d.status === 'PAGO')
-    .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
-  const totalPendentes = filteredDespesas
-    .filter(d => d.status !== 'PAGO')
-    .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
-
-  console.log(`Totais para ${empresa}:`, { totalDespesas, totalPagas, totalPendentes });
-  
-  return {
-    totalDespesas,
-    totalPagas,
-    totalPendentes,
-    count: filteredDespesas.length
-  };
-};
-
-// Função para normalizar nomes de empresas
-export const normalizeCompanyName = (empresa: string | null | undefined): string => {
-  if (!empresa) return 'unknown';
-  
+// Função centralizada para normalizar nomes das empresas
+export const normalizeCompanyName = (empresa: string | undefined): string => {
+  if (!empresa) return '';
   const normalized = empresa.toLowerCase().trim();
   
-  if (normalized.includes('camerino')) return 'camerino';
-  if (normalized.includes('churrasco') || normalized.includes('companhia')) return 'churrasco';
-  if (normalized.includes('johnny')) return 'johnny';
+  console.log('Normalizando empresa:', empresa, '-> normalized:', normalized);
   
+  // Mapear todas as variações possíveis dos nomes das empresas
+  if (normalized.includes('churrasco') || 
+      normalized === 'companhia do churrasco' || 
+      normalized === 'cia do churrasco' ||
+      normalized === 'churrasco' ||
+      normalized === 'cia. do churrasco') {
+    return 'churrasco';
+  }
+  if (normalized.includes('johnny') || 
+      normalized === 'johnny rockets' || 
+      normalized === 'johnny rocket' ||
+      normalized === 'johnny') {
+    return 'johnny';
+  }
+  if (normalized === 'camerino' || 
+      normalized.includes('camerino')) {
+    return 'camerino';
+  }
+  
+  // Se não encontrou uma correspondência, retorna o valor original normalizado
+  console.log('Empresa não mapeada:', normalized);
   return normalized;
 };
 
-// Função para obter o valor da transação
-export const getTransactionValue = (transaction: any): number => {
-  return transaction.valor_total || transaction.valor || 0;
+// Função para obter o valor correto (prioriza valor_total, depois valor)
+export const getTransactionValue = (despesa: Despesa): number => {
+  let valor = 0;
+  
+  // Priorizar valor_total se existir e for maior que 0
+  if (despesa.valor_total && despesa.valor_total > 0) {
+    valor = despesa.valor_total;
+  } else if (despesa.valor && despesa.valor > 0) {
+    valor = despesa.valor;
+  }
+  
+  console.log('Valor da transação:', { 
+    id: despesa.id, 
+    empresa: despesa.empresa,
+    categoria: despesa.categoria,
+    valor_total: despesa.valor_total, 
+    valor: despesa.valor, 
+    valor_usado: valor 
+  });
+  return valor;
+};
+
+// Função para filtrar despesas por empresa
+export const filterExpensesByCompany = (despesas: Despesa[], companyKey: string): Despesa[] => {
+  console.log('\n=== FILTERING EXPENSES BY COMPANY ===');
+  console.log('Total despesas:', despesas.length);
+  console.log('Filtrando por empresa:', companyKey);
+  
+  // Debug: listar todas as empresas únicas
+  const uniqueCompanies = Array.from(new Set(despesas.map(d => d.empresa)));
+  console.log('Empresas únicas encontradas:', uniqueCompanies);
+  
+  const filtered = despesas.filter(d => {
+    const normalized = normalizeCompanyName(d.empresa);
+    const match = normalized === companyKey;
+    if (match) {
+      console.log('Match encontrado:', d.empresa, '->', normalized, 'valor:', getTransactionValue(d));
+    }
+    return match;
+  });
+  
+  console.log(`Despesas filtradas para ${companyKey}:`, filtered.length, 'de', despesas.length);
+  console.log('Despesas encontradas:', filtered.map(d => ({
+    id: d.id,
+    empresa: d.empresa,
+    categoria: d.categoria,
+    valor: getTransactionValue(d)
+  })));
+  
+  return filtered;
+};
+
+// Função para calcular total por categoria
+export const calculateCategoryTotal = (despesas: Despesa[], categoria: string): number => {
+  console.log('\n=== CALCULATING CATEGORY TOTAL ===');
+  console.log('Categoria solicitada:', categoria);
+  console.log('Total despesas para análise:', despesas.length);
+  
+  // Debug: listar todas as categorias únicas
+  const uniqueCategories = Array.from(new Set(despesas.map(d => d.categoria)));
+  console.log('Categorias únicas encontradas:', uniqueCategories);
+  
+  const categoryExpenses = despesas.filter(d => {
+    const normalizedDespesaCategoria = normalizeCategoryName(d.categoria);
+    const match = normalizedDespesaCategoria === categoria;
+    
+    if (match) {
+      console.log('Despesa da categoria encontrada:', {
+        id: d.id,
+        empresa: d.empresa,
+        categoria_original: d.categoria,
+        categoria_normalizada: normalizedDespesaCategoria,
+        valor_total: d.valor_total,
+        valor: d.valor,
+        valor_usado: getTransactionValue(d)
+      });
+    }
+    return match;
+  });
+  
+  const total = categoryExpenses.reduce((sum, d) => sum + getTransactionValue(d), 0);
+  
+  console.log(`Total categoria ${categoria}:`, {
+    count: categoryExpenses.length,
+    total,
+    despesas: categoryExpenses.map(d => ({
+      id: d.id,
+      empresa: d.empresa,
+      categoria: d.categoria,
+      valor_total: d.valor_total,
+      valor: d.valor,
+      valor_usado: getTransactionValue(d)
+    }))
+  });
+  
+  return total;
 };
 
 // Função para calcular totais por empresa
 export const calculateCompanyTotals = (despesas: Despesa[]) => {
-  const companies = {
-    camerino: { total: 0, expenses: [] as Despesa[], categories: { fixas: 0, insumos: 0, variaveis: 0, atrasados: 0, retiradas: 0, sem_categoria: 0 } },
-    churrasco: { total: 0, expenses: [] as Despesa[], categories: { fixas: 0, insumos: 0, variaveis: 0, atrasados: 0, retiradas: 0, sem_categoria: 0 } },
-    johnny: { total: 0, expenses: [] as Despesa[], categories: { fixas: 0, insumos: 0, variaveis: 0, atrasados: 0, retiradas: 0, sem_categoria: 0 } }
-  };
-
-  despesas.forEach(despesa => {
-    const normalizedCompany = normalizeCompanyName(despesa.empresa);
-    const valor = getTransactionValue(despesa);
-    const categoria = despesa.categoria?.toLowerCase() || 'sem_categoria';
-
-    if (companies[normalizedCompany as keyof typeof companies]) {
-      const company = companies[normalizedCompany as keyof typeof companies];
-      company.total += valor;
-      company.expenses.push(despesa);
-
-      // Categorizar despesas
-      if (categoria.includes('fixa')) {
-        company.categories.fixas += valor;
-      } else if (categoria.includes('insumo')) {
-        company.categories.insumos += valor;
-      } else if (categoria.includes('variável') || categoria.includes('variaveis')) {
-        company.categories.variaveis += valor;
-      } else if (categoria.includes('atrasado')) {
-        company.categories.atrasados += valor;
-      } else if (categoria.includes('retirada')) {
-        company.categories.retiradas += valor;
-      } else {
-        company.categories.sem_categoria += valor;
-      }
-    }
-  });
-
-  return companies;
+  console.log('\n=== CALCULATING COMPANY TOTALS ===');
+  console.log('Total de despesas recebidas:', despesas.length);
+  
+  // Debug: listar todas as despesas
+  console.log('Todas as despesas:', despesas.map(d => ({
+    id: d.id,
+    empresa: d.empresa,
+    categoria: d.categoria,
+    valor: d.valor,
+    valor_total: d.valor_total,
+    valor_usado: getTransactionValue(d)
+  })));
+  
+  const companies = ['churrasco', 'johnny', 'camerino'];
+  
+  return companies.reduce((acc, company) => {
+    console.log(`\n--- Processando empresa: ${company} ---`);
+    
+    const companyExpenses = filterExpensesByCompany(despesas, company);
+    const total = companyExpenses.reduce((sum, d) => sum + getTransactionValue(d), 0);
+    
+    console.log(`Empresa ${company} - Total de despesas:`, companyExpenses.length, 'Total valor:', total);
+    
+    // Calcular por categoria usando os nomes corretos
+    const categories = {
+      insumos: calculateCategoryTotal(companyExpenses, 'INSUMOS'),
+      variaveis: calculateCategoryTotal(companyExpenses, 'VARIÁVEIS'),
+      fixas: calculateCategoryTotal(companyExpenses, 'FIXAS'),
+      atrasados: calculateCategoryTotal(companyExpenses, 'ATRASADOS'),
+      retiradas: calculateCategoryTotal(companyExpenses, 'RETIRADAS'),
+      sem_categoria: calculateCategoryTotal(companyExpenses, 'SEM_CATEGORIA')
+    };
+    
+    console.log(`Categorias para ${company}:`, categories);
+    console.log(`Soma das categorias: ${Object.values(categories).reduce((sum, val) => sum + val, 0)}`);
+    
+    acc[company] = {
+      expenses: companyExpenses,
+      total,
+      categories
+    };
+    
+    return acc;
+  }, {} as Record<string, { expenses: Despesa[], total: number, categories: Record<string, number> }>);
 };
 
-// Função para debug das empresas
+// Função para calcular dados do gráfico de distribuição
+export const calculateDistributionData = (despesas: Despesa[]) => {
+  console.log('\n=== CALCULATING DISTRIBUTION DATA ===');
+  console.log('Calculando dados de distribuição para', despesas.length, 'despesas');
+  
+  const categories = [
+    { name: 'INSUMOS', label: 'Insumos', color: '#0ea5e9' },
+    { name: 'FIXAS', label: 'Fixas', color: '#1e293b' },
+    { name: 'VARIÁVEIS', label: 'Variáveis', color: '#f59e0b' },
+    { name: 'ATRASADOS', label: 'Atrasados', color: '#ef4444' },
+    { name: 'RETIRADAS', label: 'Retiradas', color: '#8b5cf6' },
+    { name: 'SEM_CATEGORIA', label: 'Sem Categoria', color: '#6b7280' }
+  ];
+
+  const data = categories.map(category => {
+    const value = calculateCategoryTotal(despesas, category.name);
+    
+    console.log(`Distribuição - ${category.label}:`, value);
+    
+    return {
+      name: category.label,
+      value,
+      color: category.color
+    };
+  }).filter(item => item.value > 0);
+  
+  console.log('Dados finais de distribuição:', data);
+  return data;
+};
+
+// Função para debug - listar todas as empresas únicas
 export const debugCompanies = (despesas: Despesa[]) => {
-  console.log('🔍 DEBUG: Empresas encontradas:');
-  const empresas = [...new Set(despesas.map(d => d.empresa))];
-  empresas.forEach(empresa => {
-    console.log(`- ${empresa} (normalizado: ${normalizeCompanyName(empresa)})`);
+  console.log('\n=== DEBUG COMPANIES ===');
+  const uniqueCompanies = Array.from(new Set(despesas.map(d => d.empresa)));
+  console.log('Empresas únicas encontradas:', uniqueCompanies);
+  
+  uniqueCompanies.forEach(empresa => {
+    const normalized = normalizeCompanyName(empresa);
+    const empresaDespesas = despesas.filter(d => d.empresa === empresa);
+    const count = empresaDespesas.length;
+    const total = empresaDespesas.reduce((sum, d) => sum + getTransactionValue(d), 0);
+    
+    console.log(`${empresa} -> ${normalized} (${count} despesas, total: ${total})`);
+    console.log('Despesas desta empresa:', empresaDespesas.map(d => ({
+      id: d.id,
+      categoria: d.categoria,
+      valor: getTransactionValue(d)
+    })));
   });
 };
 
-// Função para verificar integridade dos dados
+// Nova função para verificar integridade dos dados
 export const verifyDataIntegrity = (despesas: Despesa[]) => {
-  const totalRecords = despesas.length;
-  const recordsWithCompany = despesas.filter(d => d.empresa).length;
-  const recordsWithValue = despesas.filter(d => d.valor || d.valor_total).length;
-  const recordsWithDate = despesas.filter(d => d.data_vencimento).length;
-
+  console.log('\n=== VERIFICAÇÃO DE INTEGRIDADE DOS DADOS ===');
+  
+  // Verificar se há despesas sem empresa
+  const semEmpresa = despesas.filter(d => !d.empresa || d.empresa.trim() === '');
+  if (semEmpresa.length > 0) {
+    console.log('ALERTA: Despesas sem empresa:', semEmpresa);
+  }
+  
+  // Verificar se há despesas sem categoria
+  const semCategoria = despesas.filter(d => !d.categoria || d.categoria.trim() === '');
+  if (semCategoria.length > 0) {
+    console.log('ALERTA: Despesas sem categoria:', semCategoria);
+  }
+  
+  // Verificar se há despesas com valores zerados ou negativos
+  const valoresInvalidos = despesas.filter(d => getTransactionValue(d) <= 0);
+  if (valoresInvalidos.length > 0) {
+    console.log('ALERTA: Despesas com valores inválidos:', valoresInvalidos);
+  }
+  
+  // Verificar total geral
+  const totalGeral = despesas.reduce((sum, d) => sum + getTransactionValue(d), 0);
+  console.log('Total geral de todas as despesas:', totalGeral);
+  
   return {
-    totalRecords,
-    recordsWithCompany,
-    recordsWithValue,
-    recordsWithDate,
-    integrity: {
-      company: (recordsWithCompany / totalRecords) * 100,
-      value: (recordsWithValue / totalRecords) * 100,
-      date: (recordsWithDate / totalRecords) * 100
-    }
+    totalDespesas: despesas.length,
+    semEmpresa: semEmpresa.length,
+    semCategoria: semCategoria.length,
+    valoresInvalidos: valoresInvalidos.length,
+    totalGeral
   };
 };
