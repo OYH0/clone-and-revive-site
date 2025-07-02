@@ -1,5 +1,5 @@
 
-export const filterDataByPeriod = (data: any[], period: string) => {
+export const filterDataByPeriod = (data: any[], period: string, customMonth?: number, customYear?: number) => {
   if (!data || data.length === 0) return [];
   
   console.log(`\n=== FILTRO DE PERÍODO: ${period.toUpperCase()} ===`);
@@ -38,6 +38,17 @@ export const filterDataByPeriod = (data: any[], period: string) => {
       startDate = new Date(now.getFullYear(), 0, 1);
       endDate = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
       console.log('Filtro ANO - De:', startDate.toLocaleDateString('pt-BR'), 'até:', endDate.toLocaleDateString('pt-BR'));
+      break;
+    case 'custom':
+      // Período personalizado
+      if (customMonth && customYear) {
+        startDate = new Date(customYear, customMonth - 1, 1);
+        endDate = new Date(customYear, customMonth, 0, 23, 59, 59, 999);
+        console.log('Filtro PERSONALIZADO - De:', startDate.toLocaleDateString('pt-BR'), 'até:', endDate.toLocaleDateString('pt-BR'));
+      } else {
+        console.log('Período personalizado sem dados válidos, retornando todos os dados');
+        return data;
+      }
       break;
     default:
       console.log('Período não reconhecido, retornando todos os dados');
@@ -109,7 +120,7 @@ export const filterDataByPeriod = (data: any[], period: string) => {
   return filtered;
 };
 
-export const getPeriodString = (selectedPeriod: string) => {
+export const getPeriodString = (selectedPeriod: string, customMonth?: number, customYear?: number) => {
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth();
   const currentYear = currentDate.getFullYear();
@@ -125,6 +136,14 @@ export const getPeriodString = (selectedPeriod: string) => {
       return `${capitalizedMonth} ${currentYear}`;
     case 'year':
       return `Ano ${currentYear}`;
+    case 'custom':
+      if (customMonth && customYear) {
+        const customDate = new Date(customYear, customMonth - 1, 1);
+        const customMonthName = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(customDate);
+        const capitalizedCustomMonth = customMonthName.charAt(0).toUpperCase() + customMonthName.slice(1);
+        return `${capitalizedCustomMonth} ${customYear}`;
+      }
+      return 'Período Personalizado';
     default:
       return `${currentMonth} ${currentYear}`;
   }

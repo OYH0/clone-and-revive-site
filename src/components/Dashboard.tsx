@@ -6,6 +6,7 @@ import DashboardHeader from './dashboard/DashboardHeader';
 import DashboardCards from './dashboard/DashboardCards';
 import DashboardTransactions from './dashboard/DashboardTransactions';
 import DashboardCharts from './dashboard/DashboardCharts';
+import PeriodSelector from './PeriodSelector';
 import { useDespesas } from '@/hooks/useDespesas';
 import { useReceitas } from '@/hooks/useReceitas';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,7 +17,9 @@ const Dashboard = () => {
   const { data: despesas, isLoading: isLoadingDespesas, stats: despesasStats } = useDespesas();
   const { data: receitas, isLoading: isLoadingReceitas, stats: receitasStats } = useReceitas();
   const { user } = useAuth();
-  const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'year'>('month');
+  const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'year' | 'custom'>('month');
+  const [customMonth, setCustomMonth] = useState<number>(new Date().getMonth() + 1);
+  const [customYear, setCustomYear] = useState<number>(new Date().getFullYear());
 
   console.log('Dashboard - despesas count:', despesas?.length || 0);
   console.log('Dashboard - receitas count:', receitas?.length || 0);
@@ -48,12 +51,17 @@ const Dashboard = () => {
   // Memoize filtered data for better performance
   const { filteredDespesas, filteredReceitas } = useMemo(() => {
     return {
-      filteredDespesas: filterDataByPeriod(despesas || [], selectedPeriod),
-      filteredReceitas: filterDataByPeriod(receitas || [], selectedPeriod)
+      filteredDespesas: filterDataByPeriod(despesas || [], selectedPeriod, customMonth, customYear),
+      filteredReceitas: filterDataByPeriod(receitas || [], selectedPeriod, customMonth, customYear)
     };
-  }, [despesas, receitas, selectedPeriod]);
+  }, [despesas, receitas, selectedPeriod, customMonth, customYear]);
 
-  const period = getPeriodString(selectedPeriod);
+  const period = getPeriodString(selectedPeriod, customMonth, customYear);
+
+  const handleCustomDateChange = (month: number, year: number) => {
+    setCustomMonth(month);
+    setCustomYear(year);
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -77,48 +85,13 @@ const Dashboard = () => {
               </div>
 
               {/* Filtros de Período */}
-              <div className="flex gap-2">
-                <button 
-                  className={`px-4 py-2 text-sm rounded-2xl ${
-                    selectedPeriod === 'today' 
-                      ? 'bg-black text-white' 
-                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                  }`}
-                  onClick={() => setSelectedPeriod('today')}
-                >
-                  Hoje
-                </button>
-                <button 
-                  className={`px-4 py-2 text-sm rounded-2xl ${
-                    selectedPeriod === 'week' 
-                      ? 'bg-black text-white' 
-                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                  }`}
-                  onClick={() => setSelectedPeriod('week')}
-                >
-                  Semana
-                </button>
-                <button 
-                  className={`px-4 py-2 text-sm rounded-2xl ${
-                    selectedPeriod === 'month' 
-                      ? 'bg-black text-white' 
-                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                  }`}
-                  onClick={() => setSelectedPeriod('month')}
-                >
-                  Mês
-                </button>
-                <button 
-                  className={`px-4 py-2 text-sm rounded-2xl ${
-                    selectedPeriod === 'year' 
-                      ? 'bg-black text-white' 
-                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                  }`}
-                  onClick={() => setSelectedPeriod('year')}
-                >
-                  Ano
-                </button>
-              </div>
+              <PeriodSelector
+                selectedPeriod={selectedPeriod}
+                onPeriodChange={setSelectedPeriod}
+                customMonth={customMonth}
+                customYear={customYear}
+                onCustomDateChange={handleCustomDateChange}
+              />
             </div>
           </div>
 

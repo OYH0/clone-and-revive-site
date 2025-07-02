@@ -58,7 +58,9 @@ export const addDays = (dateString: string, days: number): string => {
 export const calculateProfitByPeriod = (
   allDespesas: any[], 
   allReceitas: any[], 
-  selectedPeriod: 'today' | 'week' | 'month' | 'year'
+  selectedPeriod: 'today' | 'week' | 'month' | 'year' | 'custom',
+  customMonth?: number,
+  customYear?: number
 ): number => {
   const now = new Date();
   let startDate: Date;
@@ -92,6 +94,16 @@ export const calculateProfitByPeriod = (
       // Todo o ano (incluindo meses futuros)
       startDate = new Date(now.getFullYear(), 0, 1);
       endDate = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
+      break;
+    
+    case 'custom':
+      // Período personalizado
+      if (customMonth && customYear) {
+        startDate = new Date(customYear, customMonth - 1, 1);
+        endDate = new Date(customYear, customMonth, 0, 23, 59, 59, 999);
+      } else {
+        return 0;
+      }
       break;
     
     default:

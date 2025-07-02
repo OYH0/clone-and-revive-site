@@ -1,7 +1,7 @@
-
 import React, { useState, useMemo } from 'react';
 import { Building2, TrendingUp, DollarSign, Users, BarChart3 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
+import PeriodSelector from '@/components/PeriodSelector';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts';
@@ -21,7 +21,9 @@ const CompanhiaPage = () => {
   const { data: despesas } = useDespesas();
   const { data: receitas } = useReceitas();
   const [activeModal, setActiveModal] = useState<string | null>(null);
-  const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'year'>('month');
+  const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'year' | 'custom'>('month');
+  const [customMonth, setCustomMonth] = useState<number>(new Date().getMonth() + 1);
+  const [customYear, setCustomYear] = useState<number>(new Date().getFullYear());
 
   // Filtrar dados da Companhia do Churrasco - usando várias variações possíveis do nome
   const companhiaDespesas = despesas?.filter(d => {
@@ -43,10 +45,10 @@ const CompanhiaPage = () => {
   // Aplicar filtro de período APENAS para exibição dos gráficos e distribuição
   const { filteredDespesas, filteredReceitas } = useMemo(() => {
     return {
-      filteredDespesas: filterDataByPeriod(companhiaDespesas, selectedPeriod),
-      filteredReceitas: filterDataByPeriod(companhiaReceitas, selectedPeriod)
+      filteredDespesas: filterDataByPeriod(companhiaDespesas, selectedPeriod, customMonth, customYear),
+      filteredReceitas: filterDataByPeriod(companhiaReceitas, selectedPeriod, customMonth, customYear)
     };
-  }, [companhiaDespesas, companhiaReceitas, selectedPeriod]);
+  }, [companhiaDespesas, companhiaReceitas, selectedPeriod, customMonth, customYear]);
 
   console.log('Churrasco - Despesas filtradas:', filteredDespesas.length);
   console.log('Churrasco - Despesas por categoria:', filteredDespesas.reduce((acc, d) => {
@@ -96,8 +98,14 @@ const CompanhiaPage = () => {
       case 'week': return 'Lucro Líquido Semanal';
       case 'month': return 'Lucro Líquido Acumulado';
       case 'year': return 'Lucro Líquido Anual';
+      case 'custom': return 'Lucro Líquido Personalizado';
       default: return 'Lucro Líquido';
     }
+  };
+
+  const handleCustomDateChange = (month: number, year: number) => {
+    setCustomMonth(month);
+    setCustomYear(year);
   };
 
   return (
@@ -122,48 +130,13 @@ const CompanhiaPage = () => {
               </div>
 
               {/* Filtros de Período */}
-              <div className="flex gap-2">
-                <button 
-                  className={`px-4 py-2 text-sm rounded-2xl ${
-                    selectedPeriod === 'today' 
-                      ? 'bg-black text-white' 
-                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                  }`}
-                  onClick={() => setSelectedPeriod('today')}
-                >
-                  Hoje
-                </button>
-                <button 
-                  className={`px-4 py-2 text-sm rounded-2xl ${
-                    selectedPeriod === 'week' 
-                      ? 'bg-black text-white' 
-                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                  }`}
-                  onClick={() => setSelectedPeriod('week')}
-                >
-                  Semana
-                </button>
-                <button 
-                  className={`px-4 py-2 text-sm rounded-2xl ${
-                    selectedPeriod === 'month' 
-                      ? 'bg-black text-white' 
-                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                  }`}
-                  onClick={() => setSelectedPeriod('month')}
-                >
-                  Mês
-                </button>
-                <button 
-                  className={`px-4 py-2 text-sm rounded-2xl ${
-                    selectedPeriod === 'year' 
-                      ? 'bg-black text-white' 
-                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                  }`}
-                  onClick={() => setSelectedPeriod('year')}
-                >
-                  Ano
-                </button>
-              </div>
+              <PeriodSelector
+                selectedPeriod={selectedPeriod}
+                onPeriodChange={setSelectedPeriod}
+                customMonth={customMonth}
+                customYear={customYear}
+                onCustomDateChange={handleCustomDateChange}
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
