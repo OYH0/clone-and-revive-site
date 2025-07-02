@@ -131,3 +131,88 @@ export const calculateTotalsByCompany = (despesas: Despesa[], empresa: string) =
     count: filteredDespesas.length
   };
 };
+
+// Função para normalizar nomes de empresas
+export const normalizeCompanyName = (empresa: string | null | undefined): string => {
+  if (!empresa) return 'unknown';
+  
+  const normalized = empresa.toLowerCase().trim();
+  
+  if (normalized.includes('camerino')) return 'camerino';
+  if (normalized.includes('churrasco') || normalized.includes('companhia')) return 'churrasco';
+  if (normalized.includes('johnny')) return 'johnny';
+  
+  return normalized;
+};
+
+// Função para obter o valor da transação
+export const getTransactionValue = (transaction: any): number => {
+  return transaction.valor_total || transaction.valor || 0;
+};
+
+// Função para calcular totais por empresa
+export const calculateCompanyTotals = (despesas: Despesa[]) => {
+  const companies = {
+    camerino: { total: 0, expenses: [] as Despesa[], categories: { fixas: 0, insumos: 0, variaveis: 0, atrasados: 0, retiradas: 0, sem_categoria: 0 } },
+    churrasco: { total: 0, expenses: [] as Despesa[], categories: { fixas: 0, insumos: 0, variaveis: 0, atrasados: 0, retiradas: 0, sem_categoria: 0 } },
+    johnny: { total: 0, expenses: [] as Despesa[], categories: { fixas: 0, insumos: 0, variaveis: 0, atrasados: 0, retiradas: 0, sem_categoria: 0 } }
+  };
+
+  despesas.forEach(despesa => {
+    const normalizedCompany = normalizeCompanyName(despesa.empresa);
+    const valor = getTransactionValue(despesa);
+    const categoria = despesa.categoria?.toLowerCase() || 'sem_categoria';
+
+    if (companies[normalizedCompany as keyof typeof companies]) {
+      const company = companies[normalizedCompany as keyof typeof companies];
+      company.total += valor;
+      company.expenses.push(despesa);
+
+      // Categorizar despesas
+      if (categoria.includes('fixa')) {
+        company.categories.fixas += valor;
+      } else if (categoria.includes('insumo')) {
+        company.categories.insumos += valor;
+      } else if (categoria.includes('variável') || categoria.includes('variaveis')) {
+        company.categories.variaveis += valor;
+      } else if (categoria.includes('atrasado')) {
+        company.categories.atrasados += valor;
+      } else if (categoria.includes('retirada')) {
+        company.categories.retiradas += valor;
+      } else {
+        company.categories.sem_categoria += valor;
+      }
+    }
+  });
+
+  return companies;
+};
+
+// Função para debug das empresas
+export const debugCompanies = (despesas: Despesa[]) => {
+  console.log('🔍 DEBUG: Empresas encontradas:');
+  const empresas = [...new Set(despesas.map(d => d.empresa))];
+  empresas.forEach(empresa => {
+    console.log(`- ${empresa} (normalizado: ${normalizeCompanyName(empresa)})`);
+  });
+};
+
+// Função para verificar integridade dos dados
+export const verifyDataIntegrity = (despesas: Despesa[]) => {
+  const totalRecords = despesas.length;
+  const recordsWithCompany = despesas.filter(d => d.empresa).length;
+  const recordsWithValue = despesas.filter(d => d.valor || d.valor_total).length;
+  const recordsWithDate = despesas.filter(d => d.data_vencimento).length;
+
+  return {
+    totalRecords,
+    recordsWithCompany,
+    recordsWithValue,
+    recordsWithDate,
+    integrity: {
+      company: (recordsWithCompany / totalRecords) * 100,
+      value: (recordsWithValue / totalRecords) * 100,
+      date: (recordsWithDate / totalRecords) * 100
+    }
+  };
+};
