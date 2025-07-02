@@ -11,9 +11,18 @@ import { useReceitas } from '@/hooks/useReceitas';
 interface JohnnyInsightsProps {
   despesas: Despesa[];
   receitas: Receita[];
+  selectedPeriod?: 'today' | 'week' | 'month' | 'year' | 'custom';
+  customMonth?: number;
+  customYear?: number;
 }
 
-const JohnnyInsights: React.FC<JohnnyInsightsProps> = ({ despesas, receitas }) => {
+const JohnnyInsights: React.FC<JohnnyInsightsProps> = ({ 
+  despesas, 
+  receitas,
+  selectedPeriod = 'month',
+  customMonth = new Date().getMonth() + 1,
+  customYear = new Date().getFullYear()
+}) => {
   const { data: todasDespesas } = useDespesas();
   const { data: todasReceitas } = useReceitas();
 
@@ -69,8 +78,13 @@ const JohnnyInsights: React.FC<JohnnyInsightsProps> = ({ despesas, receitas }) =
         </CardContent>
       </Card>
 
-      {/* Metas e Objetivos */}
-      <MonthlyGoals empresa="Johnny" />
+      {/* Metas e Objetivos - Now properly connected to period selection */}
+      <MonthlyGoals 
+        empresa="Johnny" 
+        selectedPeriod={selectedPeriod}
+        customMonth={customMonth}
+        customYear={customYear}
+      />
 
       {/* Próximas Ações */}
       <NextActions empresa="Johnny Rockets" />
