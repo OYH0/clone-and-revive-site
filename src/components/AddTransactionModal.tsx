@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -22,11 +24,12 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   defaultEmpresa
 }) => {
   const [formData, setFormData] = useState({
-    data: '', // This will now be empty by default (payment date)
+    data: '',
     valor: '',
     empresa: '',
     descricao: '',
     categoria: 'INSUMOS',
+    subcategoria: '',
     data_vencimento: '',
     valor_juros: ''
   });
@@ -34,7 +37,33 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const categories = ['INSUMOS', 'FIXAS', 'VARIÁVEIS', 'ATRASADOS', 'RETIRADAS'];
+  const categories = [
+    { value: 'INSUMOS', label: 'Insumos' },
+    { value: 'FIXAS', label: 'Fixas' },
+    { value: 'VARIÁVEIS', label: 'Variáveis' },
+    { value: 'ATRASADOS', label: 'Atrasados' },
+    { value: 'RETIRADAS', label: 'Retiradas' }
+  ];
+
+  const subcategories = {
+    'INSUMOS': [
+      { value: 'DESCARTAVEIS', label: 'Descartáveis' },
+      { value: 'LIMPEZA', label: 'Limpeza' },
+      { value: 'HORTIFRUTE', label: 'Hortifrute' },
+      { value: 'CARNES', label: 'Carnes' },
+      { value: 'BEBIDAS', label: 'Bebidas' },
+      { value: 'PEIXES', label: 'Peixes' },
+      { value: 'SUPERMERCADO', label: 'SuperMercado' }
+    ],
+    'FIXAS': [
+      { value: 'IMPOSTOS', label: 'Impostos' },
+      { value: 'EMPRESTIMOS', label: 'Empréstimos' }
+    ],
+    'VARIÁVEIS': [],
+    'ATRASADOS': [],
+    'RETIRADAS': []
+  };
+
   const companies = ['Churrasco', 'Johnny', 'Camerino'];
 
   // Set default empresa when modal opens
@@ -69,11 +98,12 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     
     try {
       const insertData: any = {
-        data: formData.data || null, // Leave empty if not provided - will be filled when marked as paid
+        data: formData.data || null,
         valor: parseFloat(formData.valor),
         empresa: formData.empresa,
         descricao: formData.descricao || 'Sem descrição',
         categoria: formData.categoria,
+        subcategoria: formData.subcategoria,
         data_vencimento: formData.data_vencimento,
         valor_juros: formData.valor_juros ? parseFloat(formData.valor_juros) : 0,
         user_id: user.id
@@ -105,6 +135,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         empresa: defaultEmpresa || '',
         descricao: '',
         categoria: 'INSUMOS',
+        subcategoria: '',
         data_vencimento: '',
         valor_juros: ''
       });
@@ -124,10 +155,16 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setFormData(prev => {
+      const newData = { ...prev, [field]: value };
+      
+      // Reset subcategoria when categoria changes
+      if (field === 'categoria') {
+        newData.subcategoria = '';
+      }
+      
+      return newData;
+    });
   };
 
   return (
@@ -191,33 +228,53 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 
           <div className="space-y-2">
             <Label htmlFor="empresa">Empresa *</Label>
-            <select
-              id="empresa"
-              value={formData.empresa}
-              onChange={(e) => handleInputChange('empresa', e.target.value)}
-              className="flex h-10 w-full rounded-full border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              required
-            >
-              <option value="">Selecione uma empresa</option>
-              {companies.map(company => (
-                <option key={company} value={company}>{company}</option>
-              ))}
-            </select>
+            <Select value={formData.empresa} onValueChange={(value) => handleInputChange('empresa', value)}>
+              <SelectTrigger className="rounded-full">
+                <SelectValue placeholder="Selecione uma empresa" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl">
+                {companies.map(company => (
+                  <SelectItem key={company} value={company}>
+                    {company}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="categoria">Categoria</Label>
-            <select
-              id="categoria"
-              value={formData.categoria}
-              onChange={(e) => handleInputChange('categoria', e.target.value)}
-              className="flex h-10 w-full rounded-full border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {categories.map(category => (
-                <option key={category} value={category}>{category}</option>
-              ))}
-            </select>
+            <Select value={formData.categoria} onValueChange={(value) => handleInputChange('categoria', value)}>
+              <SelectTrigger className="rounded-full">
+                <SelectValue placeholder="Selecione uma categoria" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl">
+                {categories.map(category => (
+                  <SelectItem key={category.value} value={category.value}>
+                    {category.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
+
+          {formData.categoria && subcategories[formData.categoria as keyof typeof subcategories]?.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="subcategoria">Subcategoria</Label>
+              <Select value={formData.subcategoria} onValueChange={(value) => handleInputChange('subcategoria', value)}>
+                <SelectTrigger className="rounded-full">
+                  <SelectValue placeholder="Selecione uma subcategoria" />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl">
+                  {subcategories[formData.categoria as keyof typeof subcategories].map(subcategory => (
+                    <SelectItem key={subcategory.value} value={subcategory.value}>
+                      {subcategory.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="descricao">Descrição</Label>
