@@ -18,6 +18,9 @@ interface UserTabPermissions {
     camerino: boolean;
     companhia: boolean;
     johnny: boolean;
+    admin: boolean;
+    despesas: boolean;
+    receitas: boolean;
   };
 }
 
@@ -53,7 +56,10 @@ export const useTabPermissions = () => {
             organized[perm.user_id] = {
               camerino: true,
               companhia: true,
-              johnny: true
+              johnny: true,
+              admin: true,
+              despesas: true,
+              receitas: true
             };
           }
           const tabName = perm.tab_name as keyof typeof organized[string];
@@ -139,9 +145,9 @@ export const useTabPermissions = () => {
   };
 
   const getUserTabVisibility = (userId?: string) => {
-    if (!userId) return { camerino: true, companhia: true, johnny: true };
+    if (!userId) return { camerino: true, companhia: true, johnny: true, admin: true, despesas: true, receitas: true };
     
-    return userPermissions[userId] || { camerino: true, companhia: true, johnny: true };
+    return userPermissions[userId] || { camerino: true, companhia: true, johnny: true, admin: true, despesas: true, receitas: true };
   };
 
   const getMyTabVisibility = () => {

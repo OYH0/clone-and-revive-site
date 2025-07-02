@@ -3,7 +3,7 @@
 CREATE TABLE public.user_tab_permissions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
-  tab_name TEXT NOT NULL CHECK (tab_name IN ('camerino', 'companhia', 'johnny')),
+  tab_name TEXT NOT NULL CHECK (tab_name IN ('camerino', 'companhia', 'johnny', 'admin', 'despesas', 'receitas')),
   is_visible BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),

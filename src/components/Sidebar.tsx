@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Settings, FileText, DollarSign, LogOut, Shield } from 'lucide-react';
@@ -18,8 +19,8 @@ const Sidebar: React.FC = () => {
     ...(tabVisibility.camerino ? [{ id: 'camerino', label: 'Camerino', icon: Settings, path: '/camerino' }] : []),
     ...(tabVisibility.companhia ? [{ id: 'companhia', label: 'Companhia do Churrasco', icon: Settings, path: '/companhia' }] : []),
     ...(tabVisibility.johnny ? [{ id: 'johnny', label: 'Johnny Rockets', icon: Settings, path: '/johnny' }] : []),
-    { id: 'despesas', label: 'Despesas', icon: DollarSign, path: '/despesas' },
-    { id: 'receitas', label: 'Receitas', icon: DollarSign, path: '/receitas' },
+    ...(tabVisibility.despesas ? [{ id: 'despesas', label: 'Despesas', icon: DollarSign, path: '/despesas' }] : []),
+    ...(tabVisibility.receitas ? [{ id: 'receitas', label: 'Receitas', icon: DollarSign, path: '/receitas' }] : []),
     { id: 'relatorios', label: 'Relatórios', icon: FileText, path: '/relatorios' },
     { id: 'configuracoes', label: 'Configurações', icon: Settings, path: '/configuracoes' },
   ];
@@ -62,17 +63,19 @@ const Sidebar: React.FC = () => {
           );
         })}
         
-        <button
-          onClick={() => navigate('/admin')}
-          className={`w-full flex items-center gap-3 p-3 rounded-xl mb-2 text-left transition-all duration-200 ${
-            location.pathname === '/admin'
-              ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm' 
-              : 'hover:bg-white/10 text-blue-100 hover:text-white'
-          }`}
-        >
-          <Shield size={18} />
-          <span className="text-sm">Admin</span>
-        </button>
+        {tabVisibility.admin && (
+          <button
+            onClick={() => navigate('/admin')}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl mb-2 text-left transition-all duration-200 ${
+              location.pathname === '/admin'
+                ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm' 
+                : 'hover:bg-white/10 text-blue-100 hover:text-white'
+            }`}
+          >
+            <Shield size={18} />
+            <span className="text-sm">Admin</span>
+          </button>
+        )}
       </nav>
       
       <div className="p-4 border-t border-blue-500/30">

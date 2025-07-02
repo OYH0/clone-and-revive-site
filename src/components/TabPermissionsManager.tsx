@@ -25,7 +25,10 @@ const TabPermissionsManager: React.FC<TabPermissionsManagerProps> = ({ profiles 
   const tabLabels = {
     camerino: 'Camerino',
     companhia: 'Companhia do Churrasco',
-    johnny: 'Johnny Rockets'
+    johnny: 'Johnny Rockets',
+    admin: 'Admin',
+    despesas: 'Despesas',
+    receitas: 'Receitas'
   };
 
   const handlePermissionChange = async (userId: string, tabName: string, isVisible: boolean) => {
@@ -51,7 +54,7 @@ const TabPermissionsManager: React.FC<TabPermissionsManagerProps> = ({ profiles 
           <div>
             <CardTitle className="text-gray-800">Permissões de Abas</CardTitle>
             <CardDescription className="text-gray-600">
-              Configure quais abas das empresas cada usuário pode visualizar
+              Configure quais abas cada usuário pode visualizar
             </CardDescription>
           </div>
         </div>
@@ -82,7 +85,7 @@ const TabPermissionsManager: React.FC<TabPermissionsManagerProps> = ({ profiles 
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {Object.entries(tabLabels).map(([tabKey, tabLabel]) => {
                     const isVisible = visibility[tabKey as keyof typeof visibility];
                     
