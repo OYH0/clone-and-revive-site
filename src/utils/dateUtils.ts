@@ -104,11 +104,11 @@ export const calculateProfitByPeriod = (
       break;
     
     case 'custom':
-      // Período personalizado - ACUMULADO desde janeiro até o mês selecionado
+      // Período personalizado - APENAS o mês selecionado (não acumulado)
       if (customMonth && customYear) {
-        startDate = new Date(customYear, 0, 1); // 1º de janeiro do ano selecionado
+        startDate = new Date(customYear, customMonth - 1, 1); // Primeiro dia do mês selecionado
         endDate = new Date(customYear, customMonth, 0, 23, 59, 59, 999); // Último dia do mês selecionado
-        console.log('Período personalizado definido - De:', startDate, 'até:', endDate);
+        console.log('Período personalizado definido - APENAS o mês selecionado - De:', startDate, 'até:', endDate);
       } else {
         console.log('Dados insuficientes para período personalizado');
         return 0;

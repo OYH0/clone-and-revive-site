@@ -40,11 +40,11 @@ export const filterDataByPeriod = (data: any[], period: string, customMonth?: nu
       console.log('Filtro ANO - De:', startDate.toLocaleDateString('pt-BR'), 'até:', endDate.toLocaleDateString('pt-BR'));
       break;
     case 'custom':
-      // Período personalizado - ACUMULADO desde janeiro até o mês selecionado
+      // Período personalizado - APENAS o mês selecionado (não acumulado)
       if (customMonth && customYear) {
-        startDate = new Date(customYear, 0, 1); // 1º de janeiro do ano selecionado
+        startDate = new Date(customYear, customMonth - 1, 1); // Primeiro dia do mês selecionado
         endDate = new Date(customYear, customMonth, 0, 23, 59, 59, 999); // Último dia do mês selecionado
-        console.log('Filtro PERSONALIZADO ACUMULADO - De:', startDate.toLocaleDateString('pt-BR'), 'até:', endDate.toLocaleDateString('pt-BR'));
+        console.log('Filtro PERSONALIZADO - APENAS o mês selecionado - De:', startDate.toLocaleDateString('pt-BR'), 'até:', endDate.toLocaleDateString('pt-BR'));
       } else {
         console.log('Período personalizado sem dados válidos, retornando todos os dados');
         return data;
@@ -141,7 +141,7 @@ export const getPeriodString = (selectedPeriod: string, customMonth?: number, cu
         const customDate = new Date(customYear, customMonth - 1, 1);
         const customMonthName = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(customDate);
         const capitalizedCustomMonth = customMonthName.charAt(0).toUpperCase() + customMonthName.slice(1);
-        return `Acumulado até ${capitalizedCustomMonth} ${customYear}`;
+        return `${capitalizedCustomMonth} ${customYear}`;
       }
       return 'Período Personalizado';
     default:
