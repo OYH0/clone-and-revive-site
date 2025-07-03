@@ -54,6 +54,10 @@ const ImplementacaoPage = () => {
     setIsModalOpen(false);
   };
 
+  const handleTransactionUpdated = () => {
+    refetchDespesas();
+  };
+
   const isLoading = despesasLoading || receitasLoading;
 
   if (isLoading) {
@@ -137,7 +141,10 @@ const ImplementacaoPage = () => {
               </div>
             </CardHeader>
             <CardContent className="p-6">
-              <TransactionTable transactions={despesasToTransactions(filteredDespesas)} />
+              <TransactionTable 
+                transactions={despesasToTransactions(filteredDespesas)} 
+                onTransactionUpdated={handleTransactionUpdated}
+              />
             </CardContent>
           </Card>
         </div>
