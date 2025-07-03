@@ -14,13 +14,23 @@ import { useReceitas } from '@/hooks/useReceitas';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { filterDataByPeriod, getPeriodString } from '@/components/dashboard/utils';
 
+interface FilterOptions {
+  empresa?: string;
+  categoria?: string;
+  status?: string;
+  valorMin?: number;
+  valorMax?: number;
+  dataInicio?: Date;
+  dataFim?: Date;
+}
+
 const NovaEmpresaPage = () => {
   const { data: allDespesas, isLoading: isLoadingDespesas, refetch: refetchDespesas } = useDespesas();
   const { data: allReceitas, isLoading: isLoadingReceitas } = useReceitas();
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'year' | 'custom'>('month');
   const [customMonth, setCustomMonth] = useState<number>(new Date().getMonth() + 1);
   const [customYear, setCustomYear] = useState<number>(new Date().getFullYear());
-  const [additionalFilters, setAdditionalFilters] = useState({});
+  const [additionalFilters, setAdditionalFilters] = useState<FilterOptions>({});
 
   // Filtrar dados para Nova Empresa
   const despesasNovaEmpresa = useMemo(() => {
@@ -88,7 +98,7 @@ const NovaEmpresaPage = () => {
     refetchDespesas();
   };
 
-  const handleFilterChange = (filters) => {
+  const handleFilterChange = (filters: FilterOptions) => {
     setAdditionalFilters(filters);
   };
 
