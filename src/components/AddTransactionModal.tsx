@@ -78,6 +78,8 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   // Function to create corresponding receita for Implementação category
   const createImplementacaoReceita = async (despesaData: any) => {
     try {
+      console.log('Creating Implementação receita with data:', despesaData);
+      
       const receitaData = {
         data: despesaData.data_vencimento,
         valor: despesaData.valor,
@@ -88,9 +90,13 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         user_id: user.id
       };
 
-      const { error: receitaError } = await supabase
+      console.log('Inserting receita data:', receitaData);
+
+      const { data: insertedReceita, error: receitaError } = await supabase
         .from('receitas')
-        .insert([receitaData]);
+        .insert([receitaData])
+        .select()
+        .single();
 
       if (receitaError) {
         console.error('Error creating receita for Implementação:', receitaError);
@@ -100,10 +106,19 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
           variant: "destructive"
         });
       } else {
-        console.log('Receita de Implementação criada com sucesso');
+        console.log('Receita de Implementação criada com sucesso:', insertedReceita);
+        toast({
+          title: "Sucesso!",
+          description: "Receita de Implementação criada automaticamente.",
+        });
       }
     } catch (error) {
       console.error('Error in createImplementacaoReceita:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao criar receita de Implementação.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -144,9 +159,13 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         user_id: user.id
       };
 
-      const { error } = await supabase
+      console.log('Inserting despesa with data:', insertData);
+
+      const { data: insertedDespesa, error } = await supabase
         .from('despesas')
-        .insert([insertData]);
+        .insert([insertData])
+        .select()
+        .single();
 
       if (error) {
         console.error('Error inserting despesa:', error);
@@ -157,6 +176,8 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         });
         return;
       }
+
+      console.log('Despesa inserted successfully:', insertedDespesa);
 
       // If categoria is IMPLEMENTACAO, create corresponding receita
       if (formData.categoria === 'IMPLEMENTACAO') {

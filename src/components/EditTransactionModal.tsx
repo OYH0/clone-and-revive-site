@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -87,6 +88,8 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
   // Function to create corresponding receita for Implementação category
   const createImplementacaoReceita = async (despesaData: any) => {
     try {
+      console.log('Creating Implementação receita from edit with data:', despesaData);
+      
       const receitaData = {
         data: despesaData.data_vencimento,
         valor: despesaData.valor,
@@ -97,9 +100,13 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
         user_id: user.id
       };
 
-      const { error: receitaError } = await supabase
+      console.log('Inserting receita data from edit:', receitaData);
+
+      const { data: insertedReceita, error: receitaError } = await supabase
         .from('receitas')
-        .insert([receitaData]);
+        .insert([receitaData])
+        .select()
+        .single();
 
       if (receitaError) {
         console.error('Error creating receita for Implementação:', receitaError);
@@ -109,10 +116,19 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
           variant: "destructive"
         });
       } else {
-        console.log('Receita de Implementação criada com sucesso');
+        console.log('Receita de Implementação criada com sucesso no edit:', insertedReceita);
+        toast({
+          title: "Sucesso!",
+          description: "Receita de Implementação criada automaticamente.",
+        });
       }
     } catch (error) {
       console.error('Error in createImplementacaoReceita:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao criar receita de Implementação.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -152,10 +168,14 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
         status: formData.categoria === 'IMPLEMENTACAO' ? 'PAGO' : transaction.status
       };
 
-      const { error } = await supabase
+      console.log('Updating despesa with data:', updateData);
+
+      const { data: updatedDespesa, error } = await supabase
         .from('despesas')
         .update(updateData)
-        .eq('id', transaction.id);
+        .eq('id', transaction.id)
+        .select()
+        .single();
 
       if (error) {
         console.error('Error updating despesa:', error);
@@ -166,6 +186,8 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
         });
         return;
       }
+
+      console.log('Despesa updated successfully:', updatedDespesa);
 
       // If categoria changed to IMPLEMENTACAO and it wasn't before, create corresponding receita
       if (formData.categoria === 'IMPLEMENTACAO' && transaction.category !== 'IMPLEMENTACAO') {
