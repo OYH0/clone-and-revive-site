@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend, CartesianGrid, ReferenceLine } from 'recharts';
@@ -75,9 +74,8 @@ const JohnnyCharts: React.FC<JohnnyChartsProps> = ({ despesas, receitas }) => {
                 <Legend />
                 <ReferenceLine 
                   y={0} 
-                  stroke="#374151" 
-                  strokeWidth={3}
-                  strokeDasharray="none"
+                  stroke="#D1D5DB" 
+                  strokeWidth={1}
                 />
                 <Bar dataKey="receitas" fill="#10b981" name="Receitas" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="despesas" fill="#3b82f6" name="Despesas" radius={[4, 4, 0, 0]} />

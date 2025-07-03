@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Legend, Tooltip, ReferenceLine } from 'recharts';
 import { normalizeCompanyName, getTransactionValue } from '@/utils/dashboardCalculations';
@@ -204,9 +203,8 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
           />
           <ReferenceLine 
             y={0} 
-            stroke="#374151" 
-            strokeWidth={3}
-            strokeDasharray="none"
+            stroke="#D1D5DB" 
+            strokeWidth={1}
           />
           <Bar 
             name="churrasco"
