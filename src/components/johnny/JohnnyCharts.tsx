@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend, CartesianGrid } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend, CartesianGrid, ReferenceLine } from 'recharts';
 import ExpenseDistribution from '@/components/ExpenseDistribution';
 import { useDespesas } from '@/hooks/useDespesas';
 import { useReceitas } from '@/hooks/useReceitas';
@@ -73,6 +73,12 @@ const JohnnyCharts: React.FC<JohnnyChartsProps> = ({ despesas, receitas }) => {
                 <YAxis />
                 <Tooltip formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
                 <Legend />
+                <ReferenceLine 
+                  y={0} 
+                  stroke="#374151" 
+                  strokeWidth={3}
+                  strokeDasharray="none"
+                />
                 <Bar dataKey="receitas" fill="#10b981" name="Receitas" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="despesas" fill="#3b82f6" name="Despesas" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="lucro" fill="#8b5cf6" name="Lucro" radius={[4, 4, 0, 0]} />
