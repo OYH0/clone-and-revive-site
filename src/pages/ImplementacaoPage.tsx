@@ -1,27 +1,17 @@
 
-import React, { useState, useMemo } from 'react';
-import { Building2, Plus, Shield } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { Building2, Shield } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import TransactionTable from '@/components/TransactionTable';
-import AddTransactionModal from '@/components/AddTransactionModal';
 import NextActions from '@/components/NextActions';
-import PeriodSelector from '@/components/PeriodSelector';
 import { useDespesas } from '@/hooks/useDespesas';
 import { useReceitas } from '@/hooks/useReceitas';
 import { useAdminAccess } from '@/hooks/useAdminAccess';
 import ImplementacaoCharts from '@/components/implementacao/ImplementacaoCharts';
 import ImplementacaoStats from '@/components/implementacao/ImplementacaoStats';
-import { despesasToTransactions } from '@/utils/transactionUtils';
 
 const ImplementacaoPage = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'year' | 'custom'>('month');
-  const [customMonth, setCustomMonth] = useState(new Date().getMonth() + 1);
-  const [customYear, setCustomYear] = useState(new Date().getFullYear());
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  
-  const { data: allDespesas, isLoading: despesasLoading, refetch: refetchDespesas } = useDespesas();
+  const { data: allDespesas, isLoading: despesasLoading } = useDespesas();
   const { data: allReceitas, isLoading: receitasLoading } = useReceitas();
   const { isAdmin } = useAdminAccess();
 
@@ -38,58 +28,6 @@ const ImplementacaoPage = () => {
       return empresa === 'implementação' || empresa === 'implementacao';
     }) || [];
   }, [allReceitas]);
-
-  const filteredDespesas = useMemo(() => {
-    const now = new Date();
-    let startDate: Date;
-    let endDate: Date;
-
-    switch (selectedPeriod) {
-      case 'today':
-        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-        break;
-      case 'week':
-        const weekStart = new Date(now);
-        weekStart.setDate(now.getDate() - now.getDay());
-        startDate = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate());
-        endDate = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 7);
-        break;
-      case 'month':
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-        break;
-      case 'year':
-        startDate = new Date(now.getFullYear(), 0, 1);
-        endDate = new Date(now.getFullYear() + 1, 0, 1);
-        break;
-      case 'custom':
-        startDate = new Date(customYear, customMonth - 1, 1);
-        endDate = new Date(customYear, customMonth, 1);
-        break;
-      default:
-        return implementacaoDespesas;
-    }
-
-    return implementacaoDespesas.filter(despesa => {
-      const despesaDate = new Date(despesa.data || despesa.data_vencimento || '');
-      return despesaDate >= startDate && despesaDate < endDate;
-    });
-  }, [implementacaoDespesas, selectedPeriod, customMonth, customYear]);
-
-  const handleTransactionAdded = () => {
-    refetchDespesas();
-    setIsModalOpen(false);
-  };
-
-  const handleTransactionUpdated = () => {
-    refetchDespesas();
-  };
-
-  const handleCustomDateChange = (month: number, year: number) => {
-    setCustomMonth(month);
-    setCustomYear(year);
-  };
 
   const isLoading = despesasLoading || receitasLoading;
 
@@ -124,15 +62,7 @@ const ImplementacaoPage = () => {
               </div>
             </div>
             
-            {isAdmin ? (
-              <Button 
-                onClick={() => setIsModalOpen(true)}
-                className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200 rounded-2xl"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Nova Despesa
-              </Button>
-            ) : (
+            {!isAdmin && (
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                 <div className="flex items-center gap-3">
                   <Shield className="h-5 w-5 text-blue-600" />
@@ -151,57 +81,12 @@ const ImplementacaoPage = () => {
           {/* Charts */}
           <ImplementacaoCharts despesas={implementacaoDespesas} receitas={implementacaoReceitas} />
 
-          {/* Period Selector */}
-          <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl mb-6">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-xl text-gray-800">Filtros por Período</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <PeriodSelector
-                selectedPeriod={selectedPeriod}
-                onPeriodChange={setSelectedPeriod}
-                customMonth={customMonth}
-                customYear={customYear}
-                onCustomDateChange={handleCustomDateChange}
-              />
-            </CardContent>
-          </Card>
-
           {/* Next Actions */}
           <div className="mb-6">
             <NextActions empresa="Implementação" />
           </div>
-
-          {/* Main Content Card */}
-          <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-            <CardHeader className="border-b border-gray-100">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-xl text-gray-800">Despesas da Implementação</CardTitle>
-                  <CardDescription className="text-gray-600">
-                    {filteredDespesas.length} despesa(s) encontrada(s)
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="p-6">
-              <TransactionTable 
-                transactions={despesasToTransactions(filteredDespesas)} 
-                onTransactionUpdated={handleTransactionUpdated}
-              />
-            </CardContent>
-          </Card>
         </div>
       </div>
-
-      {isAdmin && (
-        <AddTransactionModal 
-          isOpen={isModalOpen} 
-          onClose={() => setIsModalOpen(false)}
-          onTransactionAdded={handleTransactionAdded}
-          defaultEmpresa="Implementação"
-        />
-      )}
     </div>
   );
 };
