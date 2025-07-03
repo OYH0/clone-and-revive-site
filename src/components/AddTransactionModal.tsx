@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -64,7 +63,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     'RETIRADAS': []
   };
 
-  const companies = ['Churrasco', 'Johnny', 'Camerino'];
+  const companies = ['Churrasco', 'Johnny', 'Camerino', 'Implementação'];
 
   // Set default empresa when modal opens
   useEffect(() => {

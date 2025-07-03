@@ -118,6 +118,7 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
                   <SelectItem value="Churrasco">Companhia do Churrasco</SelectItem>
                   <SelectItem value="Johnny">Johnny Rockets</SelectItem>
                   <SelectItem value="Camerino">Camerino</SelectItem>
+                  <SelectItem value="Implementação">Implementação</SelectItem>
                   <SelectItem value="Outros">Outros</SelectItem>
                 </SelectContent>
               </Select>
@@ -132,6 +133,7 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
                   <SelectItem value="VENDAS">Vendas</SelectItem>
                   <SelectItem value="VENDAS_DIARIAS">Vendas Diárias</SelectItem>
                   <SelectItem value="SERVICOS">Serviços</SelectItem>
+                  <SelectItem value="IMPLEMENTACAO">Implementação</SelectItem>
                   <SelectItem value="OUTROS">Outros</SelectItem>
                 </SelectContent>
               </Select>
