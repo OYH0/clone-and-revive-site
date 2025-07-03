@@ -9,8 +9,8 @@ import { Button } from '@/components/ui/button';
 interface DespesasFilterSimpleProps {
   searchTerm: string;
   setSearchTerm: (value: string) => void;
-  filterEmpresa: string;
-  setFilterEmpresa: (value: string) => void;
+  filterEmpresa?: string;
+  setFilterEmpresa?: (value: string) => void;
   filterCategoria: string;
   setFilterCategoria: (value: string) => void;
   filterStatus: string;
@@ -36,7 +36,7 @@ const DespesasFilterSimple: React.FC<DespesasFilterSimpleProps> = ({
   setDateTo
 }) => {
   const hasActiveFilters = searchTerm !== '' || 
-    filterEmpresa !== 'all' || 
+    (filterEmpresa && filterEmpresa !== 'all') || 
     filterCategoria !== 'all' || 
     filterStatus !== 'all' ||
     (dateFrom && dateFrom !== '') ||
@@ -44,7 +44,7 @@ const DespesasFilterSimple: React.FC<DespesasFilterSimpleProps> = ({
 
   const clearFilters = () => {
     setSearchTerm('');
-    setFilterEmpresa('all');
+    if (setFilterEmpresa) setFilterEmpresa('all');
     setFilterCategoria('all');
     setFilterStatus('all');
     if (setDateFrom) setDateFrom('');
@@ -82,19 +82,22 @@ const DespesasFilterSimple: React.FC<DespesasFilterSimpleProps> = ({
               className="rounded-xl h-9"
             />
           </div>
-          <div className="min-w-[140px]">
-            <Select value={filterEmpresa} onValueChange={setFilterEmpresa}>
-              <SelectTrigger className="rounded-xl h-9 text-sm">
-                <SelectValue placeholder="Empresa" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas as empresas</SelectItem>
-                <SelectItem value="Churrasco">Churrasco</SelectItem>
-                <SelectItem value="Johnny">Johnny</SelectItem>
-                <SelectItem value="Camerino">Camerino</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {filterEmpresa && setFilterEmpresa && (
+            <div className="min-w-[140px]">
+              <Select value={filterEmpresa} onValueChange={setFilterEmpresa}>
+                <SelectTrigger className="rounded-xl h-9 text-sm">
+                  <SelectValue placeholder="Empresa" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as empresas</SelectItem>
+                  <SelectItem value="Churrasco">Churrasco</SelectItem>
+                  <SelectItem value="Johnny">Johnny</SelectItem>
+                  <SelectItem value="Camerino">Camerino</SelectItem>
+                  <SelectItem value="Implementação">Implementação</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="min-w-[130px]">
             <Select value={filterCategoria} onValueChange={setFilterCategoria}>
               <SelectTrigger className="rounded-xl h-9 text-sm">
@@ -124,7 +127,6 @@ const DespesasFilterSimple: React.FC<DespesasFilterSimpleProps> = ({
             </Select>
           </div>
           
-          {/* Filtros de Data */}
           {setDateFrom && setDateTo && (
             <>
               <div className="min-w-[130px]">

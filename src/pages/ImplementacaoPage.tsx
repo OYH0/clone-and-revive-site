@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { Building2, TrendingUp, DollarSign, AlertCircle, Plus, Shield } from 'lucide-react';
+import { Building2, Plus, Shield } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +12,7 @@ import { useReceitas } from '@/hooks/useReceitas';
 import { useAdminAccess } from '@/hooks/useAdminAccess';
 import ImplementacaoCharts from '@/components/implementacao/ImplementacaoCharts';
 import ImplementacaoStats from '@/components/implementacao/ImplementacaoStats';
+import { despesasToTransactions } from '@/utils/transactionUtils';
 
 const ImplementacaoPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -19,7 +20,7 @@ const ImplementacaoPage = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   
-  const { data: allDespesas, isLoading: despesasLoading } = useDespesas();
+  const { data: allDespesas, isLoading: despesasLoading, refetch: refetchDespesas } = useDespesas();
   const { data: allReceitas, isLoading: receitasLoading } = useReceitas();
   const { isAdmin } = useAdminAccess();
 
@@ -47,6 +48,11 @@ const ImplementacaoPage = () => {
       return matchesSearch && matchesCategoria && matchesStatus;
     });
   }, [implementacaoDespesas, searchTerm, filterCategoria, filterStatus]);
+
+  const handleTransactionAdded = () => {
+    refetchDespesas();
+    setIsModalOpen(false);
+  };
 
   const isLoading = despesasLoading || receitasLoading;
 
@@ -131,7 +137,7 @@ const ImplementacaoPage = () => {
               </div>
             </CardHeader>
             <CardContent className="p-6">
-              <TransactionTable transactions={filteredDespesas} />
+              <TransactionTable transactions={despesasToTransactions(filteredDespesas)} />
             </CardContent>
           </Card>
         </div>
@@ -141,6 +147,7 @@ const ImplementacaoPage = () => {
         <AddTransactionModal 
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)}
+          onTransactionAdded={handleTransactionAdded}
           defaultEmpresa="Implementação"
         />
       )}
