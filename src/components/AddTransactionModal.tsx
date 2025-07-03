@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -42,7 +41,8 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     { value: 'FIXAS', label: 'Fixas' },
     { value: 'VARIÁVEIS', label: 'Variáveis' },
     { value: 'ATRASADOS', label: 'Atrasados' },
-    { value: 'RETIRADAS', label: 'Retiradas' }
+    { value: 'RETIRADAS', label: 'Retiradas' },
+    { value: 'IMPLEMENTAÇÃO', label: 'Implementação' }
   ];
 
   const subcategories = {
@@ -64,7 +64,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     'RETIRADAS': []
   };
 
-  const companies = ['Churrasco', 'Johnny', 'Camerino'];
+  const companies = ['Churrasco', 'Johnny', 'Camerino', 'Implementação'];
 
   // Set default empresa when modal opens
   useEffect(() => {
@@ -123,9 +123,36 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         return;
       }
 
+      // Se a categoria for IMPLEMENTAÇÃO, criar uma receita correspondente
+      if (formData.categoria === 'IMPLEMENTAÇÃO') {
+        const receitaData = {
+          data: formData.data_vencimento, // usar data de vencimento como data da receita
+          valor: parseFloat(formData.valor) + (formData.valor_juros ? parseFloat(formData.valor_juros) : 0),
+          empresa: 'Implementação',
+          descricao: formData.descricao || 'Receita de implementação',
+          categoria: 'IMPLEMENTAÇÃO',
+          user_id: user.id
+        };
+
+        const { error: receitaError } = await supabase
+          .from('receitas')
+          .insert([receitaData]);
+
+        if (receitaError) {
+          console.error('Error inserting receita:', receitaError);
+          toast({
+            title: "Aviso",
+            description: "Despesa criada, mas houve erro ao criar receita de implementação.",
+            variant: "destructive"
+          });
+        }
+      }
+
       toast({
         title: "Sucesso!",
-        description: "Transação adicionada com sucesso.",
+        description: formData.categoria === 'IMPLEMENTAÇÃO' 
+          ? "Transação adicionada e receita de implementação criada com sucesso."
+          : "Transação adicionada com sucesso.",
       });
 
       // Reset form

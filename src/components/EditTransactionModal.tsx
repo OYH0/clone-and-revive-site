@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -43,7 +42,8 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     { value: 'FIXAS', label: 'Fixas' },
     { value: 'VARIÁVEIS', label: 'Variáveis' },
     { value: 'ATRASADOS', label: 'Atrasados' },
-    { value: 'RETIRADAS', label: 'Retiradas' }
+    { value: 'RETIRADAS', label: 'Retiradas' },
+    { value: 'IMPLEMENTAÇÃO', label: 'Implementação' }
   ];
 
   const subcategories = {
@@ -65,7 +65,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     'RETIRADAS': []
   };
 
-  const companies = ['Churrasco', 'Johnny', 'Camerino'];
+  const companies = ['Churrasco', 'Johnny', 'Camerino', 'Implementação'];
 
   // Update form data when transaction changes
   useEffect(() => {
@@ -131,6 +131,31 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
           variant: "destructive"
         });
         return;
+      }
+
+      // Se a categoria mudou para IMPLEMENTAÇÃO, criar uma receita correspondente
+      if (formData.categoria === 'IMPLEMENTAÇÃO' && transaction.category !== 'IMPLEMENTAÇÃO') {
+        const receitaData = {
+          data: formData.data_vencimento,
+          valor: parseFloat(formData.valor) + (formData.valor_juros ? parseFloat(formData.valor_juros) : 0),
+          empresa: 'Implementação',
+          descricao: formData.descricao || 'Receita de implementação',
+          categoria: 'IMPLEMENTAÇÃO',
+          user_id: user.id
+        };
+
+        const { error: receitaError } = await supabase
+          .from('receitas')
+          .insert([receitaData]);
+
+        if (receitaError) {
+          console.error('Error inserting receita:', receitaError);
+          toast({
+            title: "Aviso",
+            description: "Transação atualizada, mas houve erro ao criar receita de implementação.",
+            variant: "destructive"
+          });
+        }
       }
 
       toast({
