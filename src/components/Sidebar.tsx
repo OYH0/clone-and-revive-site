@@ -19,6 +19,7 @@ const Sidebar: React.FC = () => {
     ...(tabVisibility.camerino ? [{ id: 'camerino', label: 'Camerino', icon: Settings, path: '/camerino' }] : []),
     ...(tabVisibility.companhia ? [{ id: 'companhia', label: 'Companhia do Churrasco', icon: Settings, path: '/companhia' }] : []),
     ...(tabVisibility.johnny ? [{ id: 'johnny', label: 'Johnny Rockets', icon: Settings, path: '/johnny' }] : []),
+    { id: 'nova-empresa', label: 'Nova Empresa', icon: Settings, path: '/nova-empresa' },
     ...(tabVisibility.despesas ? [{ id: 'despesas', label: 'Despesas', icon: DollarSign, path: '/despesas' }] : []),
     ...(tabVisibility.receitas ? [{ id: 'receitas', label: 'Receitas', icon: DollarSign, path: '/receitas' }] : []),
     { id: 'relatorios', label: 'Relatórios', icon: FileText, path: '/relatorios' },

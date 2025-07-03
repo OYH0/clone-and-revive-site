@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,6 +17,7 @@ interface UserTabPermissions {
     camerino: boolean;
     companhia: boolean;
     johnny: boolean;
+    novaempresa: boolean;
     admin: boolean;
     despesas: boolean;
     receitas: boolean;
@@ -57,6 +57,7 @@ export const useTabPermissions = () => {
               camerino: true,
               companhia: true,
               johnny: true,
+              novaempresa: true,
               admin: true,
               despesas: true,
               receitas: true
@@ -145,9 +146,9 @@ export const useTabPermissions = () => {
   };
 
   const getUserTabVisibility = (userId?: string) => {
-    if (!userId) return { camerino: true, companhia: true, johnny: true, admin: true, despesas: true, receitas: true };
+    if (!userId) return { camerino: true, companhia: true, johnny: true, novaempresa: true, admin: true, despesas: true, receitas: true };
     
-    return userPermissions[userId] || { camerino: true, companhia: true, johnny: true, admin: true, despesas: true, receitas: true };
+    return userPermissions[userId] || { camerino: true, companhia: true, johnny: true, novaempresa: true, admin: true, despesas: true, receitas: true };
   };
 
   const getMyTabVisibility = () => {
