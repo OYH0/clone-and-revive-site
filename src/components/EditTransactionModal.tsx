@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -42,7 +43,8 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     { value: 'FIXAS', label: 'Fixas' },
     { value: 'VARIÁVEIS', label: 'Variáveis' },
     { value: 'ATRASADOS', label: 'Atrasados' },
-    { value: 'RETIRADAS', label: 'Retiradas' }
+    { value: 'RETIRADAS', label: 'Retiradas' },
+    { value: 'IMPLEMENTACAO', label: 'Implementação' }
   ];
 
   const subcategories = {
@@ -61,7 +63,8 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     ],
     'VARIÁVEIS': [],
     'ATRASADOS': [],
-    'RETIRADAS': []
+    'RETIRADAS': [],
+    'IMPLEMENTACAO': []
   };
 
   const companies = ['Churrasco', 'Johnny', 'Camerino', 'Implementação'];
@@ -81,6 +84,38 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
       });
     }
   }, [transaction, isOpen]);
+
+  // Function to create corresponding receita for Implementação category
+  const createImplementacaoReceita = async (despesaData: any) => {
+    try {
+      const receitaData = {
+        data: despesaData.data_vencimento || new Date().toISOString().split('T')[0],
+        valor: despesaData.valor,
+        data_recebimento: despesaData.data || null,
+        descricao: `Receita da Implementação: ${despesaData.descricao}`,
+        empresa: 'Implementação',
+        categoria: 'IMPLEMENTACAO',
+        user_id: user.id
+      };
+
+      const { error: receitaError } = await supabase
+        .from('receitas')
+        .insert([receitaData]);
+
+      if (receitaError) {
+        console.error('Error creating receita for Implementação:', receitaError);
+        toast({
+          title: "Aviso",
+          description: "Despesa atualizada, mas houve erro ao criar a receita correspondente na Implementação.",
+          variant: "destructive"
+        });
+      } else {
+        console.log('Receita de Implementação criada com sucesso');
+      }
+    } catch (error) {
+      console.error('Error in createImplementacaoReceita:', error);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,9 +167,16 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
         return;
       }
 
+      // If categoria changed to IMPLEMENTACAO and it wasn't before, create corresponding receita
+      if (formData.categoria === 'IMPLEMENTACAO' && transaction.category !== 'IMPLEMENTACAO') {
+        await createImplementacaoReceita(updateData);
+      }
+
       toast({
         title: "Sucesso!",
-        description: "Transação atualizada com sucesso.",
+        description: formData.categoria === 'IMPLEMENTACAO' && transaction.category !== 'IMPLEMENTACAO'
+          ? "Transação atualizada e receita de Implementação criada com sucesso."
+          : "Transação atualizada com sucesso.",
       });
 
       onTransactionUpdated();
@@ -253,6 +295,14 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
               </SelectContent>
             </Select>
           </div>
+
+          {formData.categoria === 'IMPLEMENTACAO' && transaction?.category !== 'IMPLEMENTACAO' && (
+            <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+              <p className="text-sm text-blue-700">
+                <strong>Nota:</strong> Ao alterar para categoria Implementação, será criada uma receita correspondente para a empresa Implementação.
+              </p>
+            </div>
+          )}
 
           {formData.categoria && subcategories[formData.categoria as keyof typeof subcategories]?.length > 0 && (
             <div className="space-y-2">

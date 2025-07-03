@@ -54,7 +54,8 @@ export const getCategoryColor = (category: string): string => {
     'INSUMOS': 'bg-purple-100 text-purple-800',
     'ATRASADOS': 'bg-red-100 text-red-800',
     'IMPLEMENTAÇÃO': 'bg-orange-100 text-orange-800',
-    'IMPLEMENTACAO': 'bg-orange-100 text-orange-800'
+    'IMPLEMENTACAO': 'bg-orange-100 text-orange-800',
+    'RETIRADAS': 'bg-yellow-100 text-yellow-800'
   };
   
   return colors[category?.toUpperCase()] || 'bg-gray-100 text-gray-800';
