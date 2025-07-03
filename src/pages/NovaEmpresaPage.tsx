@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { filterDataByPeriod, getPeriodString } from '@/components/dashboard/utils';
 
 const NovaEmpresaPage = () => {
-  const { data: allDespesas, isLoading: isLoadingDespesas } = useDespesas();
+  const { data: allDespesas, isLoading: isLoadingDespesas, refetch: refetchDespesas } = useDespesas();
   const { data: allReceitas, isLoading: isLoadingReceitas } = useReceitas();
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'year' | 'custom'>('month');
   const [customMonth, setCustomMonth] = useState<number>(new Date().getMonth() + 1);
@@ -69,6 +69,10 @@ const NovaEmpresaPage = () => {
   const handleCustomDateChange = (month: number, year: number) => {
     setCustomMonth(month);
     setCustomYear(year);
+  };
+
+  const handleTransactionUpdated = () => {
+    refetchDespesas();
   };
 
   return (
@@ -125,7 +129,7 @@ const NovaEmpresaPage = () => {
               />
 
               {/* Next Actions */}
-              <NextActions />
+              <NextActions empresa="Nova Empresa" />
 
               {/* Data Tables */}
               <Tabs defaultValue="despesas" className="w-full mt-8">
@@ -142,7 +146,7 @@ const NovaEmpresaPage = () => {
                   />
                   <TransactionTable 
                     transactions={finalFilteredDespesas}
-                    showCompanyFilter={false}
+                    onTransactionUpdated={handleTransactionUpdated}
                   />
                 </TabsContent>
                 
