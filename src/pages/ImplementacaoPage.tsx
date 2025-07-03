@@ -4,9 +4,10 @@ import { Building2, Plus, Shield } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import DespesasFilterSimple from '@/components/DespesasFilterSimple';
 import TransactionTable from '@/components/TransactionTable';
 import AddTransactionModal from '@/components/AddTransactionModal';
+import NextActions from '@/components/NextActions';
+import PeriodSelector from '@/components/PeriodSelector';
 import { useDespesas } from '@/hooks/useDespesas';
 import { useReceitas } from '@/hooks/useReceitas';
 import { useAdminAccess } from '@/hooks/useAdminAccess';
@@ -15,9 +16,9 @@ import ImplementacaoStats from '@/components/implementacao/ImplementacaoStats';
 import { despesasToTransactions } from '@/utils/transactionUtils';
 
 const ImplementacaoPage = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterCategoria, setFilterCategoria] = useState('all');
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'year' | 'custom'>('month');
+  const [customMonth, setCustomMonth] = useState(new Date().getMonth() + 1);
+  const [customYear, setCustomYear] = useState(new Date().getFullYear());
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   const { data: allDespesas, isLoading: despesasLoading, refetch: refetchDespesas } = useDespesas();
@@ -39,15 +40,42 @@ const ImplementacaoPage = () => {
   }, [allReceitas]);
 
   const filteredDespesas = useMemo(() => {
+    const now = new Date();
+    let startDate: Date;
+    let endDate: Date;
+
+    switch (selectedPeriod) {
+      case 'today':
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+        break;
+      case 'week':
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - now.getDay());
+        startDate = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate());
+        endDate = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 7);
+        break;
+      case 'month':
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        break;
+      case 'year':
+        startDate = new Date(now.getFullYear(), 0, 1);
+        endDate = new Date(now.getFullYear() + 1, 0, 1);
+        break;
+      case 'custom':
+        startDate = new Date(customYear, customMonth - 1, 1);
+        endDate = new Date(customYear, customMonth, 1);
+        break;
+      default:
+        return implementacaoDespesas;
+    }
+
     return implementacaoDespesas.filter(despesa => {
-      const matchesSearch = despesa.descricao?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                           despesa.empresa?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategoria = filterCategoria === 'all' || despesa.categoria === filterCategoria;
-      const matchesStatus = filterStatus === 'all' || despesa.status === filterStatus;
-      
-      return matchesSearch && matchesCategoria && matchesStatus;
+      const despesaDate = new Date(despesa.data || despesa.data_vencimento || '');
+      return despesaDate >= startDate && despesaDate < endDate;
     });
-  }, [implementacaoDespesas, searchTerm, filterCategoria, filterStatus]);
+  }, [implementacaoDespesas, selectedPeriod, customMonth, customYear]);
 
   const handleTransactionAdded = () => {
     refetchDespesas();
@@ -56,6 +84,11 @@ const ImplementacaoPage = () => {
 
   const handleTransactionUpdated = () => {
     refetchDespesas();
+  };
+
+  const handleCustomDateChange = (month: number, year: number) => {
+    setCustomMonth(month);
+    setCustomYear(year);
   };
 
   const isLoading = despesasLoading || receitasLoading;
@@ -118,15 +151,26 @@ const ImplementacaoPage = () => {
           {/* Charts */}
           <ImplementacaoCharts despesas={implementacaoDespesas} receitas={implementacaoReceitas} />
 
-          {/* Filters */}
-          <DespesasFilterSimple
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            filterCategoria={filterCategoria}
-            setFilterCategoria={setFilterCategoria}
-            filterStatus={filterStatus}
-            setFilterStatus={setFilterStatus}
-          />
+          {/* Period Selector */}
+          <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl mb-6">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl text-gray-800">Filtros por Período</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <PeriodSelector
+                selectedPeriod={selectedPeriod}
+                onPeriodChange={setSelectedPeriod}
+                customMonth={customMonth}
+                customYear={customYear}
+                onCustomDateChange={handleCustomDateChange}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Next Actions */}
+          <div className="mb-6">
+            <NextActions empresa="Implementação" />
+          </div>
 
           {/* Main Content Card */}
           <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
