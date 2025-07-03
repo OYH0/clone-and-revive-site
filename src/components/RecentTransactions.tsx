@@ -12,19 +12,34 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ despesas }) => 
   
   // Memoize processed transactions for better performance
   const transactions = useMemo(() => {
-    return despesas?.slice(0, 5).map(despesa => ({
-      id: despesa.id,
-      date: despesa.data,
-      company: despesa.empresa,
-      description: despesa.descricao,
-      category: despesa.categoria,
-      value: despesa.valor,
-      status: getTransactionStatus({
+    return despesas?.slice(0, 5).map(despesa => {
+      // Create a complete transaction object for status calculation
+      const transaction = {
+        id: despesa.id,
         date: despesa.data,
+        valor: despesa.valor,
+        company: despesa.empresa,
+        description: despesa.descricao,
         category: despesa.categoria,
-        data_vencimento: despesa.data_vencimento
-      })
-    })) || [];
+        subcategoria: despesa.subcategoria,
+        data_vencimento: despesa.data_vencimento,
+        comprovante: despesa.comprovante,
+        status: despesa.status,
+        user_id: despesa.user_id,
+        valor_juros: despesa.valor_juros,
+        valor_total: despesa.valor_total,
+      };
+
+      return {
+        id: despesa.id,
+        date: despesa.data,
+        company: despesa.empresa,
+        description: despesa.descricao,
+        category: despesa.categoria,
+        value: despesa.valor,
+        status: getTransactionStatus(transaction)
+      };
+    }) || [];
   }, [despesas]);
 
   const getCompanyColor = (company: string) => {
