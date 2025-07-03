@@ -79,9 +79,9 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   const createImplementacaoReceita = async (despesaData: any) => {
     try {
       const receitaData = {
-        data: despesaData.data_vencimento || new Date().toISOString().split('T')[0],
+        data: despesaData.data_vencimento,
         valor: despesaData.valor,
-        data_recebimento: despesaData.data || null,
+        data_recebimento: despesaData.data_vencimento, // Same as due date
         descricao: `Receita da Implementação: ${despesaData.descricao}`,
         empresa: 'Implementação',
         categoria: 'IMPLEMENTACAO',
@@ -132,7 +132,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     
     try {
       const insertData: any = {
-        data: formData.data || null,
+        data: formData.categoria === 'IMPLEMENTACAO' ? formData.data_vencimento : (formData.data || null),
         valor: parseFloat(formData.valor),
         empresa: formData.empresa,
         descricao: formData.descricao || 'Sem descrição',
@@ -140,6 +140,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         subcategoria: formData.subcategoria || null,
         data_vencimento: formData.data_vencimento,
         valor_juros: formData.valor_juros ? parseFloat(formData.valor_juros) : 0,
+        status: formData.categoria === 'IMPLEMENTACAO' ? 'PAGO' : null,
         user_id: user.id
       };
 
@@ -165,7 +166,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       toast({
         title: "Sucesso!",
         description: formData.categoria === 'IMPLEMENTACAO' 
-          ? "Despesa adicionada e receita de Implementação criada com sucesso."
+          ? "Despesa adicionada como paga e receita de Implementação criada com sucesso."
           : "Transação adicionada com sucesso.",
       });
 
@@ -202,6 +203,15 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       // Reset subcategoria when categoria changes
       if (field === 'categoria') {
         newData.subcategoria = '';
+        // If categoria is IMPLEMENTACAO, automatically set data to data_vencimento
+        if (value === 'IMPLEMENTACAO' && prev.data_vencimento) {
+          newData.data = prev.data_vencimento;
+        }
+      }
+      
+      // If data_vencimento changes and categoria is IMPLEMENTACAO, update data too
+      if (field === 'data_vencimento' && prev.categoria === 'IMPLEMENTACAO') {
+        newData.data = value;
       }
       
       return newData;
@@ -223,9 +233,14 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               type="date"
               value={formData.data}
               onChange={(e) => handleInputChange('data', e.target.value)}
+              disabled={formData.categoria === 'IMPLEMENTACAO'}
               className="rounded-full"
             />
-            <p className="text-xs text-gray-500">Deixe vazio se ainda não foi paga. Será preenchida automaticamente ao marcar como paga.</p>
+            {formData.categoria === 'IMPLEMENTACAO' ? (
+              <p className="text-xs text-blue-600">Preenchida automaticamente com a data de vencimento para categoria Implementação.</p>
+            ) : (
+              <p className="text-xs text-gray-500">Deixe vazio se ainda não foi paga. Será preenchida automaticamente ao marcar como paga.</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -302,7 +317,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
           {formData.categoria === 'IMPLEMENTACAO' && (
             <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
               <p className="text-sm text-blue-700">
-                <strong>Nota:</strong> Esta despesa será automaticamente convertida em uma receita para a empresa Implementação.
+                <strong>Nota:</strong> Esta despesa será automaticamente marcada como paga e convertida em uma receita para a empresa Implementação com data de recebimento igual à data de vencimento.
               </p>
             </div>
           )}
