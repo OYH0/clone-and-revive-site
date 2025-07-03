@@ -94,7 +94,7 @@ const NovaEmpresaCharts: React.FC<NovaEmpresaChartsProps> = ({ despesas, receita
           <CardDescription>Categorias de gastos no período selecionado</CardDescription>
         </CardHeader>
         <CardContent>
-          <ExpenseDistribution despesas={despesas} empresa="Nova Empresa" />
+          <ExpenseDistribution despesas={despesas} empresa="Implementação" />
         </CardContent>
       </Card>
     </div>

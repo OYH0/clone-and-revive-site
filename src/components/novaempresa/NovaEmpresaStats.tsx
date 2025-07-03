@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
+import { DollarSign } from 'lucide-react';
 
 interface NovaEmpresaStatsProps {
   despesas: any[];
@@ -28,7 +28,7 @@ const NovaEmpresaStats: React.FC<NovaEmpresaStatsProps> = ({ despesas, receitas,
       <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-gray-600">Total de Receitas</CardTitle>
-          <TrendingUp className="h-4 w-4 text-green-600" />
+          <DollarSign className="h-4 w-4 text-green-600" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-green-600">
@@ -44,10 +44,10 @@ const NovaEmpresaStats: React.FC<NovaEmpresaStatsProps> = ({ despesas, receitas,
       <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-gray-600">Total de Despesas</CardTitle>
-          <TrendingDown className="h-4 w-4 text-blue-600" />
+          <DollarSign className="h-4 w-4 text-red-600" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-blue-600">
+          <div className="text-2xl font-bold text-red-600">
             {formatCurrency(totalDespesas)}
           </div>
           <CardDescription className="text-xs text-gray-500 mt-1">

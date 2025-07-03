@@ -121,7 +121,7 @@ const NovaEmpresaPage = () => {
                 </div>
                 <div>
                   <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 bg-clip-text text-transparent">
-                    Nova Empresa
+                    Implementação
                   </h1>
                   <p className="text-gray-600 text-lg">Gestão financeira - {period}</p>
                 </div>
@@ -160,7 +160,7 @@ const NovaEmpresaPage = () => {
               />
 
               {/* Next Actions */}
-              <NextActions empresa="Nova Empresa" />
+              <NextActions empresa="Implementação" />
 
               {/* Data Tables */}
               <Tabs defaultValue="despesas" className="w-full mt-8">
