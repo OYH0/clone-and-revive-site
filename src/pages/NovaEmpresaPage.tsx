@@ -20,13 +20,7 @@ const NovaEmpresaPage = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'year' | 'custom'>('month');
   const [customMonth, setCustomMonth] = useState<number>(new Date().getMonth() + 1);
   const [customYear, setCustomYear] = useState<number>(new Date().getFullYear());
-  const [filters, setFilters] = useState({
-    status: 'todos' as 'todos' | 'pendente' | 'pago' | 'vencido',
-    categoria: 'todas' as string,
-    empresa: 'todas' as string,
-    valorMin: '',
-    valorMax: '',
-  });
+  const [additionalFilters, setAdditionalFilters] = useState({});
 
   // Filtrar dados para Nova Empresa
   const despesasNovaEmpresa = useMemo(() => {
@@ -54,14 +48,33 @@ const NovaEmpresaPage = () => {
 
   // Aplicar filtros adicionais nas despesas
   const finalFilteredDespesas = useMemo(() => {
-    return filteredDespesas.filter(despesa => {
-      if (filters.status !== 'todos' && despesa.status !== filters.status) return false;
-      if (filters.categoria !== 'todas' && despesa.categoria !== filters.categoria) return false;
-      if (filters.valorMin && (despesa.valor_total || despesa.valor || 0) < parseFloat(filters.valorMin)) return false;
-      if (filters.valorMax && (despesa.valor_total || despesa.valor || 0) > parseFloat(filters.valorMax)) return false;
-      return true;
-    });
-  }, [filteredDespesas, filters]);
+    let filtered = filteredDespesas;
+    
+    // Apply additional filters from DespesasFilter
+    if (additionalFilters.empresa && additionalFilters.empresa !== 'all') {
+      filtered = filtered.filter(d => d.empresa === additionalFilters.empresa);
+    }
+    if (additionalFilters.categoria && additionalFilters.categoria !== 'all') {
+      filtered = filtered.filter(d => d.categoria === additionalFilters.categoria);
+    }
+    if (additionalFilters.status && additionalFilters.status !== 'all') {
+      filtered = filtered.filter(d => d.status === additionalFilters.status);
+    }
+    if (additionalFilters.valorMin) {
+      filtered = filtered.filter(d => (d.valor_total || d.valor || 0) >= additionalFilters.valorMin);
+    }
+    if (additionalFilters.valorMax) {
+      filtered = filtered.filter(d => (d.valor_total || d.valor || 0) <= additionalFilters.valorMax);
+    }
+    if (additionalFilters.dataInicio) {
+      filtered = filtered.filter(d => new Date(d.data || d.data_vencimento) >= new Date(additionalFilters.dataInicio));
+    }
+    if (additionalFilters.dataFim) {
+      filtered = filtered.filter(d => new Date(d.data || d.data_vencimento) <= new Date(additionalFilters.dataFim));
+    }
+    
+    return filtered;
+  }, [filteredDespesas, additionalFilters]);
 
   const period = getPeriodString(selectedPeriod, customMonth, customYear);
   const isLoading = isLoadingDespesas || isLoadingReceitas;
@@ -73,6 +86,14 @@ const NovaEmpresaPage = () => {
 
   const handleTransactionUpdated = () => {
     refetchDespesas();
+  };
+
+  const handleFilterChange = (filters) => {
+    setAdditionalFilters(filters);
+  };
+
+  const handleClearFilters = () => {
+    setAdditionalFilters({});
   };
 
   return (
@@ -140,9 +161,8 @@ const NovaEmpresaPage = () => {
                 
                 <TabsContent value="despesas" className="space-y-6">
                   <DespesasFilter 
-                    filters={filters}
-                    onFiltersChange={setFilters}
-                    despesas={filteredDespesas}
+                    onFilterChange={handleFilterChange}
+                    onClearFilters={handleClearFilters}
                   />
                   <TransactionTable 
                     transactions={finalFilteredDespesas}
