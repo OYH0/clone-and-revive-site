@@ -32,14 +32,14 @@ const ImplementacaoPage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex-1 p-8 flex items-center justify-center bg-gradient-to-br from-gray-50 via-orange-50 to-amber-100">
+      <div className="p-8 flex items-center justify-center bg-gradient-to-br from-gray-50 via-orange-50 to-amber-100">
         <p className="text-lg text-gray-600">Carregando dados da Implementação...</p>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 p-8 bg-gradient-to-br from-gray-50 via-orange-50 to-amber-100">
+    <div className="p-8 bg-gradient-to-br from-gray-50 via-orange-50 to-amber-100">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="mb-8">
