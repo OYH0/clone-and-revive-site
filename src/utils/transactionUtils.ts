@@ -65,3 +65,17 @@ export const formatDate = (dateString: string | null): string => {
   const date = new Date(dateString + 'T00:00:00');
   return date.toLocaleDateString('pt-BR');
 };
+
+export const truncateDescription = (description: string, maxLength: number = 80): { text: string; isTruncated: boolean } => {
+  if (!description || description.length <= maxLength) {
+    return {
+      text: description || '',
+      isTruncated: false
+    };
+  }
+  
+  return {
+    text: description.substring(0, maxLength) + '...',
+    isTruncated: true
+  };
+};
