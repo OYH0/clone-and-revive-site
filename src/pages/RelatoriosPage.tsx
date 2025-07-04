@@ -1,5 +1,7 @@
+
 import React, { useState } from 'react';
-import { FileText, Download, TrendingUp, DollarSign, PieChart as PieChartIcon } from 'lucide-react';
+import { FileText, Download, TrendingUp, DollarSign, Calendar, PieChart as PieChartIcon } from 'lucide-react';
+import Sidebar from '@/components/Sidebar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -217,224 +219,228 @@ const RelatoriosPage = () => {
   };
 
   return (
-    <div className="p-8 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
-      <div className="max-w-7xl mx-auto">
-        {/* Header Section */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl shadow-lg">
-              <FileText className="h-8 w-8 text-white" />
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
+      <Sidebar />
+      
+      <div className="flex-1 p-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Header Section */}
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl shadow-lg">
+                <FileText className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent">
+                  Relatórios
+                </h1>
+                <p className="text-gray-600 text-lg">Análises e relatórios financeiros</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent">
-                Relatórios
-              </h1>
-              <p className="text-gray-600 text-lg">Análises e relatórios financeiros</p>
-            </div>
-          </div>
-          
-          <div className="flex gap-4">
-            <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-              <SelectTrigger className="w-48 rounded-2xl">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="mes">Este Mês</SelectItem>
-                <SelectItem value="trimestre">Trimestre</SelectItem>
-                <SelectItem value="semestre">Semestre</SelectItem>
-                <SelectItem value="ano">Ano</SelectItem>
-              </SelectContent>
-            </Select>
             
-            <Select value={selectedType} onValueChange={setSelectedType}>
-              <SelectTrigger className="w-48 rounded-2xl">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="geral">Relatório Geral</SelectItem>
-                <SelectItem value="despesas">Apenas Despesas</SelectItem>
-                <SelectItem value="receitas">Apenas Receitas</SelectItem>
-                <SelectItem value="comparativo">Comparativo</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex gap-4">
+              <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+                <SelectTrigger className="w-48 rounded-2xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="mes">Este Mês</SelectItem>
+                  <SelectItem value="trimestre">Trimestre</SelectItem>
+                  <SelectItem value="semestre">Semestre</SelectItem>
+                  <SelectItem value="ano">Ano</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={selectedType} onValueChange={setSelectedType}>
+                <SelectTrigger className="w-48 rounded-2xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="geral">Relatório Geral</SelectItem>
+                  <SelectItem value="despesas">Apenas Despesas</SelectItem>
+                  <SelectItem value="receitas">Apenas Receitas</SelectItem>
+                  <SelectItem value="comparativo">Comparativo</SelectItem>
+                </SelectContent>
+              </Select>
 
-            <Button 
-              onClick={generatePDF}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg rounded-2xl"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Exportar PDF
-            </Button>
+              <Button 
+                onClick={generatePDF}
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg rounded-2xl"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Exportar PDF
+              </Button>
+            </div>
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600">Total Receitas</CardTitle>
-              <div className="p-2 bg-gradient-to-r from-green-100 to-green-200 rounded-xl">
-                <TrendingUp className="h-4 w-4 text-green-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-              </div>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Total Receitas</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-green-100 to-green-200 rounded-xl">
+                  <TrendingUp className="h-4 w-4 text-green-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">
+                  R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600">Total Despesas</CardTitle>
-              <div className="p-2 bg-gradient-to-r from-red-100 to-red-200 rounded-xl">
-                <DollarSign className="h-4 w-4 text-red-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-              </div>
-            </CardContent>
-          </Card>
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Total Despesas</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-red-100 to-red-200 rounded-xl">
+                  <DollarSign className="h-4 w-4 text-red-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-600">
+                  R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600">Lucro Líquido</CardTitle>
-              <div className="p-2 bg-gradient-to-r from-blue-100 to-blue-200 rounded-xl">
-                <TrendingUp className="h-4 w-4 text-blue-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className={`text-2xl font-bold ${lucroTotal >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                R$ {lucroTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-              </div>
-            </CardContent>
-          </Card>
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Lucro Líquido</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-blue-100 to-blue-200 rounded-xl">
+                  <TrendingUp className="h-4 w-4 text-blue-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className={`text-2xl font-bold ${lucroTotal >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  R$ {lucroTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600">Margem de Lucro</CardTitle>
-              <div className="p-2 bg-gradient-to-r from-purple-100 to-purple-200 rounded-xl">
-                <PieChartIcon className="h-4 w-4 text-purple-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className={`text-2xl font-bold ${margemLucro >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {margemLucro.toFixed(1)}%
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600">Margem de Lucro</CardTitle>
+                <div className="p-2 bg-gradient-to-r from-purple-100 to-purple-200 rounded-xl">
+                  <PieChartIcon className="h-4 w-4 text-purple-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className={`text-2xl font-bold ${margemLucro >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {margemLucro.toFixed(1)}%
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-            <CardHeader>
-              <CardTitle className="text-xl text-gray-800">Evolução Mensal</CardTitle>
-              <CardDescription>Receitas vs Despesas por mês</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={monthlyData}>
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
-                    <Legend />
-                    <Line type="monotone" dataKey="receitas" stroke="#10b981" strokeWidth={3} name="Receitas" />
-                    <Line type="monotone" dataKey="despesas" stroke="#ef4444" strokeWidth={3} name="Despesas" />
-                    <Line type="monotone" dataKey="lucro" stroke="#3b82f6" strokeWidth={3} name="Lucro" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader>
+                <CardTitle className="text-xl text-gray-800">Evolução Mensal</CardTitle>
+                <CardDescription>Receitas vs Despesas por mês</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={monthlyData}>
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
+                      <Legend />
+                      <Line type="monotone" dataKey="receitas" stroke="#10b981" strokeWidth={3} name="Receitas" />
+                      <Line type="monotone" dataKey="despesas" stroke="#ef4444" strokeWidth={3} name="Despesas" />
+                      <Line type="monotone" dataKey="lucro" stroke="#3b82f6" strokeWidth={3} name="Lucro" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-            <CardHeader>
-              <CardTitle className="text-xl text-gray-800">Distribuição de Despesas</CardTitle>
-              <CardDescription>Por categoria</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={categoryData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={120}
-                      dataKey="value"
-                    >
-                      {categoryData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader>
+                <CardTitle className="text-xl text-gray-800">Distribuição de Despesas</CardTitle>
+                <CardDescription>Por categoria</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={categoryData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={120}
+                        dataKey="value"
+                      >
+                        {categoryData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-            <CardHeader>
-              <CardTitle className="text-xl text-gray-800">Receitas por Empresa</CardTitle>
-              <CardDescription>Distribuição das receitas</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={receitasEmpresaData}>
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
-                    <Bar dataKey="value" fill="#10b981" radius={[8, 8, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader>
+                <CardTitle className="text-xl text-gray-800">Receitas por Empresa</CardTitle>
+                <CardDescription>Distribuição das receitas</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={receitasEmpresaData}>
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
+                      <Bar dataKey="value" fill="#10b981" radius={[8, 8, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-            <CardHeader>
-              <CardTitle className="text-xl text-gray-800">Resumo do Período</CardTitle>
-              <CardDescription>Principais indicadores</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between items-center p-4 bg-green-50 rounded-xl">
-                <span className="text-green-700 font-medium">Maior Receita</span>
-                <span className="text-green-800 font-bold">
-                  R$ {Math.max(...(receitas?.map(r => r.valor || 0) || [0])).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </span>
-              </div>
-              
-              <div className="flex justify-between items-center p-4 bg-red-50 rounded-xl">
-                <span className="text-red-700 font-medium">Maior Despesa</span>
-                <span className="text-red-800 font-bold">
-                  R$ {Math.max(...(despesas?.map(d => d.valor_total || d.valor || 0) || [0])).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </span>
-              </div>
-              
-              <div className="flex justify-between items-center p-4 bg-blue-50 rounded-xl">
-                <span className="text-blue-700 font-medium">Média Mensal</span>
-                <span className="text-blue-800 font-bold">
-                  R$ {(totalReceitas / 12).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </span>
-              </div>
-              
-              <div className="flex justify-between items-center p-4 bg-purple-50 rounded-xl">
-                <span className="text-purple-700 font-medium">Total de Transações</span>
-                <span className="text-purple-800 font-bold">
-                  {(despesas?.length || 0) + (receitas?.length || 0)}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
+            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+              <CardHeader>
+                <CardTitle className="text-xl text-gray-800">Resumo do Período</CardTitle>
+                <CardDescription>Principais indicadores</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center p-4 bg-green-50 rounded-xl">
+                  <span className="text-green-700 font-medium">Maior Receita</span>
+                  <span className="text-green-800 font-bold">
+                    R$ {Math.max(...(receitas?.map(r => r.valor || 0) || [0])).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between items-center p-4 bg-red-50 rounded-xl">
+                  <span className="text-red-700 font-medium">Maior Despesa</span>
+                  <span className="text-red-800 font-bold">
+                    R$ {Math.max(...(despesas?.map(d => d.valor_total || d.valor || 0) || [0])).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between items-center p-4 bg-blue-50 rounded-xl">
+                  <span className="text-blue-700 font-medium">Média Mensal</span>
+                  <span className="text-blue-800 font-bold">
+                    R$ {(totalReceitas / 12).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between items-center p-4 bg-purple-50 rounded-xl">
+                  <span className="text-purple-700 font-medium">Total de Transações</span>
+                  <span className="text-purple-800 font-bold">
+                    {(despesas?.length || 0) + (receitas?.length || 0)}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>

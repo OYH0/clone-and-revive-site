@@ -38,7 +38,7 @@ const Sidebar: React.FC = () => {
   };
 
   return (
-    <div className="w-64 bg-gradient-to-b from-blue-600 via-blue-700 to-blue-800 text-white h-screen flex flex-col shadow-xl border-r border-blue-500/30">
+    <div className="fixed left-0 top-0 w-64 bg-gradient-to-b from-blue-600 via-blue-700 to-blue-800 text-white h-screen flex flex-col z-50 shadow-xl">
       <div className="p-6 border-b border-blue-500/30">
         <h1 className="text-xl font-bold">Gestão Financeira</h1>
       </div>
