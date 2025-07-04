@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -86,7 +85,7 @@ const DespesasFilter: React.FC<DespesasFilterProps> = ({ onFilterChange, onClear
               <SelectItem value="INSUMOS">Insumos</SelectItem>
               <SelectItem value="FIXAS">Fixas</SelectItem>
               <SelectItem value="VARIÁVEIS">Variáveis</SelectItem>
-              <SelectItem value="ATRASADOS">Atrasados</SelectItem>
+              <SelectItem value="OBRAS">Obras</SelectItem>
               <SelectItem value="RETIRADAS">Retiradas</SelectItem>
             </SelectContent>
           </Select>

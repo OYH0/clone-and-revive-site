@@ -51,7 +51,7 @@ const ImplementacaoCharts: React.FC<ImplementacaoChartsProps> = ({ despesas, rec
         month,
         despesas: monthDespesas,
         receitas: monthReceitas,
-        lucro: monthReceitas - monthDespesas
+        valorRestante: monthReceitas - monthDespesas
       };
     });
   }, [despesasImplementacao, receitasImplementacao]);
@@ -80,7 +80,7 @@ const ImplementacaoCharts: React.FC<ImplementacaoChartsProps> = ({ despesas, rec
                 />
                 <Bar dataKey="receitas" fill="#10b981" name="Receitas" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="despesas" fill="#3b82f6" name="Despesas" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="lucro" fill="#8b5cf6" name="Lucro" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="valorRestante" fill="#8b5cf6" name="Valor Restante" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

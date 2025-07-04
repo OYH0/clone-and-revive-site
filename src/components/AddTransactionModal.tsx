@@ -41,7 +41,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     { value: 'INSUMOS', label: 'Insumos' },
     { value: 'FIXAS', label: 'Fixas' },
     { value: 'VARIÁVEIS', label: 'Variáveis' },
-    { value: 'ATRASADOS', label: 'Atrasados' },
+    { value: 'OBRAS', label: 'Obras' },
     { value: 'RETIRADAS', label: 'Retiradas' },
     { value: 'IMPLEMENTACAO', label: 'Implementação' }
   ];
@@ -61,7 +61,18 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       { value: 'EMPRESTIMOS', label: 'Empréstimos' }
     ],
     'VARIÁVEIS': [],
-    'ATRASADOS': [],
+    'OBRAS': [
+      { value: 'MATERIAIS', label: 'Materiais' },
+      { value: 'MAO_DE_OBRA', label: 'Mão de Obra' },
+      { value: 'EQUIPAMENTOS', label: 'Equipamentos' },
+      { value: 'PROJETOS', label: 'Projetos' },
+      { value: 'LICENCAS', label: 'Licenças' },
+      { value: 'SERVICOS_TERCEIRIZADOS', label: 'Serviços Terceirizados' },
+      { value: 'IMPOSTOS_OBRAS', label: 'Impostos' },
+      { value: 'ADMINISTRACAO_OBRA', label: 'Administração da Obra' },
+      { value: 'SEGUROS', label: 'Seguros' },
+      { value: 'DESPESAS_GERAIS', label: 'Despesas Gerais' }
+    ],
     'RETIRADAS': [],
     'IMPLEMENTACAO': []
   };
