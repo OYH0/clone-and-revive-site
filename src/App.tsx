@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Sidebar from "./components/Sidebar";
 import Index from "./pages/Index";
 import AuthPage from "./pages/AuthPage";
 import DespesasPage from "./pages/DespesasPage";
@@ -37,72 +38,102 @@ const App = () => {
               <Routes>
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/" element={
-                  <div className="main-content">
+                  <div className="flex min-h-screen">
                     <ProtectedRoute>
-                      <Index />
+                      <Sidebar />
+                      <div className="flex-1">
+                        <Index />
+                      </div>
                     </ProtectedRoute>
                   </div>
                 } />
                 <Route path="/despesas" element={
-                  <div className="main-content">
+                  <div className="flex min-h-screen">
                     <ProtectedRoute>
-                      <DespesasPage />
+                      <Sidebar />
+                      <div className="flex-1">
+                        <DespesasPage />
+                      </div>
                     </ProtectedRoute>
                   </div>
                 } />
                 <Route path="/receitas" element={
-                  <div className="main-content">
+                  <div className="flex min-h-screen">
                     <ProtectedRoute>
-                      <ReceitasPage />
+                      <Sidebar />
+                      <div className="flex-1">
+                        <ReceitasPage />
+                      </div>
                     </ProtectedRoute>
                   </div>
                 } />
                 <Route path="/relatorios" element={
-                  <div className="main-content">
+                  <div className="flex min-h-screen">
                     <ProtectedRoute>
-                      <RelatoriosPage />
+                      <Sidebar />
+                      <div className="flex-1">
+                        <RelatoriosPage />
+                      </div>
                     </ProtectedRoute>
                   </div>
                 } />
                 <Route path="/configuracoes" element={
-                  <div className="main-content">
+                  <div className="flex min-h-screen">
                     <ProtectedRoute>
-                      <ConfiguracoesPage />
+                      <Sidebar />
+                      <div className="flex-1">
+                        <ConfiguracoesPage />
+                      </div>
                     </ProtectedRoute>
                   </div>
                 } />
                 <Route path="/camerino" element={
-                  <div className="main-content">
+                  <div className="flex min-h-screen">
                     <ProtectedRoute>
-                      <CamerinoPage />
+                      <Sidebar />
+                      <div className="flex-1">
+                        <CamerinoPage />
+                      </div>
                     </ProtectedRoute>
                   </div>
                 } />
                 <Route path="/companhia" element={
-                  <div className="main-content">
+                  <div className="flex min-h-screen">
                     <ProtectedRoute>
-                      <CompanhiaPage />
+                      <Sidebar />
+                      <div className="flex-1">
+                        <CompanhiaPage />
+                      </div>
                     </ProtectedRoute>
                   </div>
                 } />
                 <Route path="/johnny" element={
-                  <div className="main-content">
+                  <div className="flex min-h-screen">
                     <ProtectedRoute>
-                      <JohnnyPage />
+                      <Sidebar />
+                      <div className="flex-1">
+                        <JohnnyPage />
+                      </div>
                     </ProtectedRoute>
                   </div>
                 } />
                 <Route path="/implementacao" element={
-                  <div className="main-content">
+                  <div className="flex min-h-screen">
                     <ProtectedRoute>
-                      <ImplementacaoPage />
+                      <Sidebar />
+                      <div className="flex-1">
+                        <ImplementacaoPage />
+                      </div>
                     </ProtectedRoute>
                   </div>
                 } />
                 <Route path="/admin" element={
-                  <div className="main-content">
+                  <div className="flex min-h-screen">
                     <ProtectedRoute>
-                      <AdminPage />
+                      <Sidebar />
+                      <div className="flex-1">
+                        <AdminPage />
+                      </div>
                     </ProtectedRoute>
                   </div>
                 } />
