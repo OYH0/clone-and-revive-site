@@ -9,10 +9,16 @@ export const calculateDistributionData = (despesas: Despesa[]) => {
     return [];
   }
 
+  // Filtrar despesas para excluir Camerino
+  const despesasSemCamerino = despesas.filter(despesa => {
+    const empresa = despesa.empresa?.toLowerCase().trim() || '';
+    return !empresa.includes('camerino');
+  });
+
   // Agrupar por categoria e subcategoria
   const categoryGroups: { [key: string]: { total: number; subcategorias: { [key: string]: number } } } = {};
 
-  despesas.forEach(despesa => {
+  despesasSemCamerino.forEach(despesa => {
     const valor = despesa.valor_total || despesa.valor || 0;
     const categoria = despesa.categoria || 'Sem categoria';
     const subcategoria = despesa.subcategoria || 'Outros';
@@ -49,7 +55,7 @@ export const calculateDistributionData = (despesas: Despesa[]) => {
     }))
     .sort((a, b) => b.value - a.value);
 
-  console.log('Dados de distribuição calculados:', data);
+  console.log('Dados de distribuição calculados (sem Camerino):', data);
   return data;
 };
 
@@ -58,8 +64,20 @@ export const calculateMonthlyData = (despesas: Despesa[], receitas: any[]) => {
   
   const monthlyData: { [key: string]: { despesas: number; receitas: number } } = {};
   
-  // Processar despesas
-  despesas.forEach(despesa => {
+  // Filtrar despesas para excluir Camerino
+  const despesasSemCamerino = despesas.filter(despesa => {
+    const empresa = despesa.empresa?.toLowerCase().trim() || '';
+    return !empresa.includes('camerino');
+  });
+
+  // Filtrar receitas para excluir Camerino
+  const receitasSemCamerino = receitas.filter(receita => {
+    const empresa = receita.empresa?.toLowerCase().trim() || '';
+    return !empresa.includes('camerino');
+  });
+  
+  // Processar despesas (sem Camerino)
+  despesasSemCamerino.forEach(despesa => {
     if (despesa.data_vencimento) {
       const date = new Date(despesa.data_vencimento + 'T00:00:00');
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
@@ -72,8 +90,8 @@ export const calculateMonthlyData = (despesas: Despesa[], receitas: any[]) => {
     }
   });
   
-  // Processar receitas
-  receitas.forEach(receita => {
+  // Processar receitas (sem Camerino)
+  receitasSemCamerino.forEach(receita => {
     if (receita.data) {
       const date = new Date(receita.data + 'T00:00:00');
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
@@ -105,7 +123,7 @@ export const calculateMonthlyData = (despesas: Despesa[], receitas: any[]) => {
       return monthOrder.indexOf(a.month) - monthOrder.indexOf(b.month);
     });
 
-  console.log('Dados mensais calculados:', data);
+  console.log('Dados mensais calculados (sem Camerino):', data);
   return data;
 };
 
@@ -150,10 +168,9 @@ export const getTransactionValue = (transaction: any): number => {
   return transaction.valor_total || transaction.valor || 0;
 };
 
-// Função para calcular totais por empresa
+// Função para calcular totais por empresa (excluindo Camerino)
 export const calculateCompanyTotals = (despesas: Despesa[]) => {
   const companies = {
-    camerino: { total: 0, expenses: [] as Despesa[], categories: { fixas: 0, insumos: 0, variaveis: 0, atrasados: 0, retiradas: 0, sem_categoria: 0 } },
     churrasco: { total: 0, expenses: [] as Despesa[], categories: { fixas: 0, insumos: 0, variaveis: 0, atrasados: 0, retiradas: 0, sem_categoria: 0 } },
     johnny: { total: 0, expenses: [] as Despesa[], categories: { fixas: 0, insumos: 0, variaveis: 0, atrasados: 0, retiradas: 0, sem_categoria: 0 } }
   };
@@ -162,6 +179,11 @@ export const calculateCompanyTotals = (despesas: Despesa[]) => {
     const normalizedCompany = normalizeCompanyName(despesa.empresa);
     const valor = getTransactionValue(despesa);
     const categoria = despesa.categoria?.toUpperCase() || 'SEM_CATEGORIA';
+
+    // Pular despesas da Camerino
+    if (normalizedCompany === 'camerino') {
+      return;
+    }
 
     if (companies[normalizedCompany as keyof typeof companies]) {
       const company = companies[normalizedCompany as keyof typeof companies];

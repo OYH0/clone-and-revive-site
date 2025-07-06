@@ -39,22 +39,25 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ despesas, period, stats
   console.log('Stats:', stats);
   console.log('🎯 FILTRO: Usando DATA DE VENCIMENTO para filtrar despesas');
 
+  // Filtrar despesas para excluir Camerino
+  const despesasSemCamerino = despesas.filter(despesa => {
+    const empresa = despesa.empresa?.toLowerCase().trim() || '';
+    return !empresa.includes('camerino');
+  });
+
+  console.log('Total de despesas após filtrar Camerino:', despesasSemCamerino.length);
+
   // Verificar integridade dos dados
-  const integrity = verifyDataIntegrity(despesas);
+  const integrity = verifyDataIntegrity(despesasSemCamerino);
   console.log('Integridade dos dados:', integrity);
 
   // Debug das empresas
-  debugCompanies(despesas);
+  debugCompanies(despesasSemCamerino);
 
-  // Usar função centralizada para calcular dados
-  const companyTotals = calculateCompanyTotals(despesas);
+  // Usar função centralizada para calcular dados (sem Camerino)
+  const companyTotals = calculateCompanyTotals(despesasSemCamerino);
 
-  console.log('\n🎯 === TOTAIS FINAIS CALCULADOS (POR DATA DE VENCIMENTO) ===');
-  console.log('Camerino:', {
-    total: companyTotals.camerino?.total || 0,
-    despesas: companyTotals.camerino?.expenses?.length || 0,
-    categorias: companyTotals.camerino?.categories
-  });
+  console.log('\n🎯 === TOTAIS FINAIS CALCULADOS (SEM CAMERINO) ===');
   console.log('Churrasco:', {
     total: companyTotals.churrasco?.total || 0,
     despesas: companyTotals.churrasco?.expenses?.length || 0,
@@ -67,28 +70,12 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ despesas, period, stats
   });
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-      <CompanyCard
-        name="Camerino"
-        totalDespesas={companyTotals.camerino?.total || 0}
-        status={despesas && despesas.length > 0 ? "Atualizado" : "Sem dados"}
-        statusColor={despesas && despesas.length > 0 ? "green" : "yellow"}
-        periodo={period}
-        fixas={companyTotals.camerino?.categories.fixas > 0 ? companyTotals.camerino.categories.fixas : undefined}
-        insumos={companyTotals.camerino?.categories.insumos > 0 ? companyTotals.camerino.categories.insumos : undefined}
-        variaveis={companyTotals.camerino?.categories.variaveis > 0 ? companyTotals.camerino.categories.variaveis : undefined}
-        atrasados={companyTotals.camerino?.categories.atrasados > 0 ? companyTotals.camerino.categories.atrasados : undefined}
-        retiradas={companyTotals.camerino?.categories.retiradas > 0 ? companyTotals.camerino.categories.retiradas : undefined}
-        sem_categoria={companyTotals.camerino?.categories.sem_categoria > 0 ? companyTotals.camerino.categories.sem_categoria : undefined}
-        chartData={generateChartData(companyTotals.camerino?.categories || {})}
-        chartColor="#10b981"
-      />
-      
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
       <CompanyCard
         name="Companhia do Churrasco"
         totalDespesas={companyTotals.churrasco?.total || 0}
-        status={despesas && despesas.length > 0 ? "Atualizado" : "Sem dados"}
-        statusColor={despesas && despesas.length > 0 ? "green" : "yellow"}
+        status={despesasSemCamerino && despesasSemCamerino.length > 0 ? "Atualizado" : "Sem dados"}
+        statusColor={despesasSemCamerino && despesasSemCamerino.length > 0 ? "green" : "yellow"}
         periodo={period}
         insumos={companyTotals.churrasco?.categories.insumos > 0 ? companyTotals.churrasco.categories.insumos : undefined}
         variaveis={companyTotals.churrasco?.categories.variaveis > 0 ? companyTotals.churrasco.categories.variaveis : undefined}
@@ -103,8 +90,8 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ despesas, period, stats
       <CompanyCard
         name="Johnny Rockets"
         totalDespesas={companyTotals.johnny?.total || 0}
-        status={despesas && despesas.length > 0 ? "Atualizado" : "Sem dados"}
-        statusColor={despesas && despesas.length > 0 ? "green" : "yellow"}
+        status={despesasSemCamerino && despesasSemCamerino.length > 0 ? "Atualizado" : "Sem dados"}
+        statusColor={despesasSemCamerino && despesasSemCamerino.length > 0 ? "green" : "yellow"}
         periodo={period}
         fixas={companyTotals.johnny?.categories.fixas > 0 ? companyTotals.johnny.categories.fixas : undefined}
         insumos={companyTotals.johnny?.categories.insumos > 0 ? companyTotals.johnny.categories.insumos : undefined}

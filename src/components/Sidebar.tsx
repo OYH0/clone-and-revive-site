@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Settings, FileText, DollarSign, LogOut, Shield, Building2 } from 'lucide-react';
+import { LayoutDashboard, Settings, DollarSign, LogOut, Shield, Building2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { useTabPermissions } from '@/hooks/useTabPermissions';
@@ -16,13 +16,11 @@ const Sidebar: React.FC = () => {
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/' },
-    ...(tabVisibility.camerino ? [{ id: 'camerino', label: 'Camerino', icon: Settings, path: '/camerino' }] : []),
     ...(tabVisibility.companhia ? [{ id: 'companhia', label: 'Companhia do Churrasco', icon: Settings, path: '/companhia' }] : []),
     ...(tabVisibility.johnny ? [{ id: 'johnny', label: 'Johnny Rockets', icon: Settings, path: '/johnny' }] : []),
     { id: 'implementacao', label: 'Implementação', icon: Building2, path: '/implementacao' },
     ...(tabVisibility.despesas ? [{ id: 'despesas', label: 'Despesas', icon: DollarSign, path: '/despesas' }] : []),
     ...(tabVisibility.receitas ? [{ id: 'receitas', label: 'Receitas', icon: DollarSign, path: '/receitas' }] : []),
-    { id: 'relatorios', label: 'Relatórios', icon: FileText, path: '/relatorios' },
     { id: 'configuracoes', label: 'Configurações', icon: Settings, path: '/configuracoes' },
   ];
 
