@@ -1,4 +1,3 @@
-
 import { Transaction } from '@/types/transaction';
 import { Receita } from '@/hooks/useReceitas';
 
@@ -62,24 +61,8 @@ export const filterDespesasCurrentMonth = (transactions: Transaction[], dateFrom
 
     let includeTransaction = false;
 
-    // Verificar data de vencimento (deve ser do mês atual)
-    if (vencimento) {
-      let vencimentoDate: Date;
-      if (vencimento.includes('/')) {
-        const [dia, mes, ano] = vencimento.split('/');
-        vencimentoDate = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
-      } else {
-        vencimentoDate = new Date(vencimento + 'T00:00:00');
-      }
-
-      if (vencimentoDate >= currentMonthStart && vencimentoDate <= currentMonthEnd) {
-        includeTransaction = true;
-        console.log('Incluído por vencimento no mês atual:', vencimento, transaction.description);
-      }
-    }
-
-    // Se não foi incluído por vencimento, verificar data de pagamento
-    if (!includeTransaction && pagamento) {
+    // Se foi paga (tem data de pagamento), usar a data de pagamento como critério principal
+    if (pagamento) {
       let pagamentoDate: Date;
       if (pagamento.includes('/')) {
         const [dia, mes, ano] = pagamento.split('/');
@@ -91,6 +74,21 @@ export const filterDespesasCurrentMonth = (transactions: Transaction[], dateFrom
       if (pagamentoDate >= currentMonthStart && pagamentoDate <= currentMonthEnd) {
         includeTransaction = true;
         console.log('Incluído por pagamento no mês atual:', pagamento, transaction.description);
+      }
+    }
+    // Se não foi paga ainda, usar data de vencimento
+    else if (vencimento) {
+      let vencimentoDate: Date;
+      if (vencimento.includes('/')) {
+        const [dia, mes, ano] = vencimento.split('/');
+        vencimentoDate = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
+      } else {
+        vencimentoDate = new Date(vencimento + 'T00:00:00');
+      }
+
+      if (vencimentoDate >= currentMonthStart && vencimentoDate <= currentMonthEnd) {
+        includeTransaction = true;
+        console.log('Incluído por vencimento no mês atual:', vencimento, transaction.description);
       }
     }
 

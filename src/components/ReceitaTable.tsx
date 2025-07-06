@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Receita, useDeleteReceita } from '@/hooks/useReceitas';
 import { useAdminAccess } from '@/hooks/useAdminAccess';
 import { useAuth } from '@/contexts/AuthContext';
+import EditReceitaModal from '@/components/EditReceitaModal';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +25,7 @@ interface ReceitaTableProps {
 
 const ReceitaTable: React.FC<ReceitaTableProps> = ({ receitas }) => {
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [editingReceita, setEditingReceita] = useState<Receita | null>(null);
   const deleteReceita = useDeleteReceita();
   const { isAdmin } = useAdminAccess();
   const { user } = useAuth();
@@ -127,7 +129,11 @@ const ReceitaTable: React.FC<ReceitaTableProps> = ({ receitas }) => {
                   <TableCell>
                     <div className="flex gap-2">
                       {canEdit ? (
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => setEditingReceita(receita)}
+                        >
                           <Edit size={16} />
                         </Button>
                       ) : (
@@ -159,6 +165,14 @@ const ReceitaTable: React.FC<ReceitaTableProps> = ({ receitas }) => {
         </Table>
       </div>
 
+      {/* Edit Modal */}
+      <EditReceitaModal
+        isOpen={!!editingReceita}
+        onClose={() => setEditingReceita(null)}
+        receita={editingReceita}
+      />
+
+      {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>

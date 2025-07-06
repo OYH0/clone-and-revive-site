@@ -2,13 +2,9 @@
 import React, { useState, useMemo } from 'react';
 import { Building2, TrendingUp, DollarSign, BarChart3 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDespesas } from '@/hooks/useDespesas';
 import { useReceitas } from '@/hooks/useReceitas';
-import AnalyseCostsModal from '@/components/AnalyseCostsModal';
-import ProjectionsModal from '@/components/ProjectionsModal';
-import ComparativeModal from '@/components/ComparativeModal';
 import NextActions from '@/components/NextActions';
 import { filterDataByPeriod } from '@/components/dashboard/utils';
 import { calculateProfitByPeriod } from '@/utils/dateUtils';
@@ -18,7 +14,6 @@ import CamerinoCharts from '@/components/camerino/CamerinoCharts';
 const CamerinoPage = () => {
   const { data: despesas } = useDespesas();
   const { data: receitas } = useReceitas();
-  const [activeModal, setActiveModal] = useState<string | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'year' | 'custom'>('month');
   const [customMonth, setCustomMonth] = useState<number>(new Date().getMonth() + 1);
   const [customYear, setCustomYear] = useState<number>(new Date().getFullYear());
@@ -56,10 +51,6 @@ const CamerinoPage = () => {
   // NOVO: Calcular lucro baseado no período selecionado
   const lucroCalculado = calculateProfitByPeriod(camerinoDespesas, camerinoReceitas, selectedPeriod);
   const margemLucro = totalReceitasPeriodo > 0 ? (lucroCalculado / totalReceitasPeriodo) * 100 : 0;
-
-  // Para os indicadores (ROI e Break Even), usar dados acumulados totais
-  const totalDespesasAcumulado = camerinoDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
-  const totalReceitasAcumulado = camerinoReceitas.reduce((sum, r) => sum + r.valor, 0);
 
   // Determinar o label do lucro baseado no período
   const getLucroLabel = () => {
@@ -108,36 +99,9 @@ const CamerinoPage = () => {
                 onCustomDateChange={handleCustomDateChange}
               />
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Button className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-2xl h-12">
-                Relatório Mensal
-              </Button>
-              <Button 
-                variant="outline" 
-                className="rounded-2xl h-12"
-                onClick={() => setActiveModal('costs')}
-              >
-                Análise de Custos
-              </Button>
-              <Button 
-                variant="outline" 
-                className="rounded-2xl h-12"
-                onClick={() => setActiveModal('projections')}
-              >
-                Projeções
-              </Button>
-              <Button 
-                variant="outline" 
-                className="rounded-2xl h-12"
-                onClick={() => setActiveModal('comparative')}
-              >
-                Comparativo
-              </Button>
-            </div>
           </div>
 
-          {/* Stats Cards - Removido o card de Ticket Médio */}
+          {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
@@ -190,63 +154,12 @@ const CamerinoPage = () => {
           {/* Charts Component */}
           <CamerinoCharts despesas={filteredDespesas} receitas={filteredReceitas} />
 
-          {/* Informações Adicionais */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Indicadores de Performance */}
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader>
-                <CardTitle className="text-xl text-gray-800">Indicadores</CardTitle>
-                <CardDescription>KPIs principais</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center p-3 bg-purple-50 rounded-xl">
-                  <span className="text-purple-700 font-medium">ROI</span>
-                  <span className="text-purple-800 font-bold">
-                    {totalDespesasAcumulado > 0 ? (((totalReceitasAcumulado - totalDespesasAcumulado) / totalDespesasAcumulado) * 100).toFixed(1) : '0'}%
-                  </span>
-                </div>
-                
-                <div className="flex justify-between items-center p-3 bg-indigo-50 rounded-xl">
-                  <span className="text-indigo-700 font-medium">Break Even</span>
-                  <span className="text-indigo-800 font-bold">
-                    R$ {totalDespesasAcumulado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
-                
-                <div className="flex justify-between items-center p-3 bg-blue-50 rounded-xl">
-                  <span className="text-blue-700 font-medium">Crescimento</span>
-                  <span className="text-blue-800 font-bold">+8.3%</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Próximas Ações */}
+          {/* Próximas Ações */}
+          <div className="grid grid-cols-1 gap-6">
             <NextActions empresa="Camerino" />
           </div>
         </div>
       </div>
-
-      {/* Modals */}
-      <AnalyseCostsModal
-        isOpen={activeModal === 'costs'}
-        onClose={() => setActiveModal(null)}
-        despesas={filteredDespesas}
-        empresa="Camerino"
-      />
-
-      <ProjectionsModal
-        isOpen={activeModal === 'projections'}
-        onClose={() => setActiveModal(null)}
-        despesas={filteredDespesas}
-        receitas={filteredReceitas}
-        empresa="Camerino"
-      />
-
-      <ComparativeModal
-        isOpen={activeModal === 'comparative'}
-        onClose={() => setActiveModal(null)}
-        empresa="Camerino"
-      />
     </div>
   );
 };
