@@ -9,19 +9,14 @@ interface DashboardTransactionsProps {
 }
 
 const DashboardTransactions: React.FC<DashboardTransactionsProps> = ({ despesas }) => {
-  // Filtrar despesas para excluir Camerino
-  const despesasSemCamerino = despesas.filter(despesa => {
-    const empresa = despesa.empresa?.toLowerCase().trim() || '';
-    return !empresa.includes('camerino');
-  });
-
+  // Não filtrar despesas - mostrar todas incluindo Camerino
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-8 shadow-sm">
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-gray-800">Últimas Transações</h3>
       </div>
-      {despesasSemCamerino && despesasSemCamerino.length > 0 ? (
-        <RecentTransactions despesas={despesasSemCamerino} />
+      {despesas && despesas.length > 0 ? (
+        <RecentTransactions despesas={despesas} />
       ) : (
         <Card className="p-6 text-center text-gray-600">
           <p>Não há transações recentes para mostrar.</p>

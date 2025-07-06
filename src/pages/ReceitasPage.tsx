@@ -22,10 +22,15 @@ const ReceitasPage = () => {
   const { data: receitas, isLoading } = useReceitas();
   const { isAdmin } = useAdminAccess();
 
-  // Aplicar filtro do mês atual primeiro
+  // Aplicar filtro do mês atual - excluir Camerino apenas quando não há filtro de empresa específico
+  const shouldExcludeCamerino = filterEmpresa === 'all';
   const currentMonthReceitas = useMemo(() => {
-    return filterReceitasCurrentMonth(receitas || [], dateFrom, dateTo);
-  }, [receitas, dateFrom, dateTo]);
+    console.log('=== DEBUG FILTRO RECEITAS ===');
+    console.log('Filtro empresa:', filterEmpresa);
+    console.log('Deve excluir Camerino?', shouldExcludeCamerino);
+    
+    return filterReceitasCurrentMonth(receitas || [], dateFrom, dateTo, shouldExcludeCamerino);
+  }, [receitas, dateFrom, dateTo, shouldExcludeCamerino]);
 
   // Filtrar receitas com base nos outros filtros
   const filteredReceitas = useMemo(() => {

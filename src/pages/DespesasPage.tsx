@@ -44,20 +44,23 @@ const DespesasPage = () => {
     valor_total: despesa.valor_total || despesa.valor
   }));
 
-  // Aplicar filtro do mês atual primeiro
+  // Aplicar filtro do mês atual - excluir Camerino apenas quando não há filtro de empresa específico
+  const shouldExcludeCamerino = filterEmpresa === 'all';
   const currentMonthTransactions = useMemo(() => {
     console.log('=== DEBUG FILTRO MÊS ATUAL ===');
     console.log('Total de despesas antes do filtro:', allTransactions.length);
     console.log('Filtros de data - De:', dateFrom, 'Até:', dateTo);
+    console.log('Filtro empresa:', filterEmpresa);
+    console.log('Deve excluir Camerino?', shouldExcludeCamerino);
     console.log('Usando filtros manuais?', !!(dateFrom || dateTo));
     
-    const filtered = filterDespesasCurrentMonth(allTransactions, dateFrom, dateTo);
+    const filtered = filterDespesasCurrentMonth(allTransactions, dateFrom, dateTo, shouldExcludeCamerino);
     
     console.log('Despesas após filtro do mês atual:', filtered.length);
     console.log('Total dos valores filtrados:', filtered.reduce((sum, t) => sum + (t.valor_total || t.valor), 0));
     
     return filtered;
-  }, [allTransactions, dateFrom, dateTo]);
+  }, [allTransactions, dateFrom, dateTo, shouldExcludeCamerino]);
 
   // Filtrar despesas com base nos outros filtros
   const filteredTransactions = useMemo(() => {

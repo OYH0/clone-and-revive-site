@@ -18,6 +18,7 @@ const Sidebar: React.FC = () => {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/' },
     ...(tabVisibility.companhia ? [{ id: 'companhia', label: 'Companhia do Churrasco', icon: Settings, path: '/companhia' }] : []),
     ...(tabVisibility.johnny ? [{ id: 'johnny', label: 'Johnny Rockets', icon: Settings, path: '/johnny' }] : []),
+    { id: 'camerino', label: 'Camerino', icon: Building2, path: '/camerino' },
     { id: 'implementacao', label: 'Implementação', icon: Building2, path: '/implementacao' },
     ...(tabVisibility.despesas ? [{ id: 'despesas', label: 'Despesas', icon: DollarSign, path: '/despesas' }] : []),
     ...(tabVisibility.receitas ? [{ id: 'receitas', label: 'Receitas', icon: DollarSign, path: '/receitas' }] : []),

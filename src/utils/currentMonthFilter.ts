@@ -2,25 +2,28 @@
 import { Transaction } from '@/types/transaction';
 import { Receita } from '@/hooks/useReceitas';
 
-export const filterDespesasCurrentMonth = (transactions: Transaction[], dateFrom?: string, dateTo?: string) => {
+export const filterDespesasCurrentMonth = (transactions: Transaction[], dateFrom?: string, dateTo?: string, excludeCamerino: boolean = true) => {
   if (!transactions || transactions.length === 0) return [];
 
-  // Filtrar primeiro para excluir Camerino
-  const transactionsSemCamerino = transactions.filter(transaction => {
-    const empresa = transaction.company?.toLowerCase().trim() || '';
-    return !empresa.includes('camerino');
-  });
+  // Filtrar Camerino apenas se excludeCamerino for true
+  const filteredTransactions = excludeCamerino 
+    ? transactions.filter(transaction => {
+        const empresa = transaction.company?.toLowerCase().trim() || '';
+        return !empresa.includes('camerino');
+      })
+    : transactions;
 
   console.log('=== FILTRO MÊS ATUAL ===');
   console.log('Total de transações:', transactions.length);
-  console.log('Transações sem Camerino:', transactionsSemCamerino.length);
+  console.log('Transações após filtro Camerino:', filteredTransactions.length);
+  console.log('Excluir Camerino?', excludeCamerino);
   console.log('Filtros de data - De:', dateFrom, 'Até:', dateTo);
 
   // Se foram fornecidas datas específicas, usar elas
   if (dateFrom || dateTo) {
     console.log('Usando filtros de data manuais');
     
-    return transactionsSemCamerino.filter(transaction => {
+    return filteredTransactions.filter(transaction => {
       const transactionDate = transaction.data_vencimento || transaction.date;
       if (!transactionDate) return false;
 
@@ -51,7 +54,7 @@ export const filterDespesasCurrentMonth = (transactions: Transaction[], dateFrom
   console.log('Filtro automático - Início do mês atual:', currentMonthStart.toLocaleDateString('pt-BR'));
   console.log('Filtro automático - 30 dias atrás:', thirtyDaysAgo.toLocaleDateString('pt-BR'));
 
-  const filtered = transactionsSemCamerino.filter(transaction => {
+  const filtered = filteredTransactions.filter(transaction => {
     const vencimento = transaction.data_vencimento;
     const pagamento = transaction.date;
 
@@ -92,29 +95,32 @@ export const filterDespesasCurrentMonth = (transactions: Transaction[], dateFrom
     return includeTransaction;
   });
 
-  console.log('Total filtrado (sem Camerino):', filtered.length);
+  console.log('Total filtrado:', filtered.length);
   return filtered;
 };
 
-export const filterReceitasCurrentMonth = (receitas: Receita[], dateFrom?: string, dateTo?: string) => {
+export const filterReceitasCurrentMonth = (receitas: Receita[], dateFrom?: string, dateTo?: string, excludeCamerino: boolean = true) => {
   if (!receitas || receitas.length === 0) return [];
 
-  // Filtrar primeiro para excluir Camerino
-  const receitasSemCamerino = receitas.filter(receita => {
-    const empresa = receita.empresa?.toLowerCase().trim() || '';
-    return !empresa.includes('camerino');
-  });
+  // Filtrar Camerino apenas se excludeCamerino for true
+  const filteredReceitas = excludeCamerino 
+    ? receitas.filter(receita => {
+        const empresa = receita.empresa?.toLowerCase().trim() || '';
+        return !empresa.includes('camerino');
+      })
+    : receitas;
 
   console.log('=== FILTRO MÊS ATUAL - RECEITAS ===');
   console.log('Total de receitas:', receitas.length);
-  console.log('Receitas sem Camerino:', receitasSemCamerino.length);
+  console.log('Receitas após filtro Camerino:', filteredReceitas.length);
+  console.log('Excluir Camerino?', excludeCamerino);
   console.log('Filtros de data - De:', dateFrom, 'Até:', dateTo);
 
   // Se foram fornecidas datas específicas, usar elas
   if (dateFrom || dateTo) {
     console.log('Usando filtros de data manuais');
     
-    return receitasSemCamerino.filter(receita => {
+    return filteredReceitas.filter(receita => {
       const receitaDate = receita.data_recebimento || receita.data;
       if (!receitaDate) return false;
 
@@ -145,7 +151,7 @@ export const filterReceitasCurrentMonth = (receitas: Receita[], dateFrom?: strin
   console.log('Filtro automático - Início do mês atual:', currentMonthStart.toLocaleDateString('pt-BR'));
   console.log('Filtro automático - 30 dias atrás:', thirtyDaysAgo.toLocaleDateString('pt-BR'));
 
-  const filtered = receitasSemCamerino.filter(receita => {
+  const filtered = filteredReceitas.filter(receita => {
     const dataReceita = receita.data;
     const dataRecebimento = receita.data_recebimento;
 
@@ -186,6 +192,6 @@ export const filterReceitasCurrentMonth = (receitas: Receita[], dateFrom?: strin
     return includeReceita;
   });
 
-  console.log('Total filtrado (sem Camerino):', filtered.length);
+  console.log('Total filtrado:', filtered.length);
   return filtered;
 };
