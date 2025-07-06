@@ -1,13 +1,12 @@
 
 import React, { useState, useMemo } from 'react';
-import { Building2, TrendingUp, DollarSign, BarChart3 } from 'lucide-react';
+import { Building2, TrendingUp, DollarSign } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDespesas } from '@/hooks/useDespesas';
 import { useReceitas } from '@/hooks/useReceitas';
 import NextActions from '@/components/NextActions';
 import { filterDataByPeriod } from '@/components/dashboard/utils';
-import { calculateProfitByPeriod } from '@/utils/dateUtils';
 import PeriodSelector from '@/components/PeriodSelector';
 import CamerinoCharts from '@/components/camerino/CamerinoCharts';
 
@@ -44,25 +43,9 @@ const CamerinoPage = () => {
     return acc;
   }, {} as Record<string, number>));
 
-  // Calcular estatísticas - usar nova lógica de lucro por período
+  // Calcular estatísticas
   const totalDespesasPeriodo = filteredDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
   const totalReceitasPeriodo = filteredReceitas.reduce((sum, r) => sum + r.valor, 0);
-  
-  // NOVO: Calcular lucro baseado no período selecionado
-  const lucroCalculado = calculateProfitByPeriod(camerinoDespesas, camerinoReceitas, selectedPeriod);
-  const margemLucro = totalReceitasPeriodo > 0 ? (lucroCalculado / totalReceitasPeriodo) * 100 : 0;
-
-  // Determinar o label do lucro baseado no período
-  const getLucroLabel = () => {
-    switch (selectedPeriod) {
-      case 'today': return 'Lucro Líquido Hoje';
-      case 'week': return 'Lucro Líquido Semanal';
-      case 'month': return 'Lucro Líquido Acumulado';
-      case 'year': return 'Lucro Líquido Anual';
-      case 'custom': return 'Lucro Líquido Personalizado';
-      default: return 'Lucro Líquido';
-    }
-  };
 
   const handleCustomDateChange = (month: number, year: number) => {
     setCustomMonth(month);
@@ -101,8 +84,8 @@ const CamerinoPage = () => {
             </div>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          {/* Stats Cards - Only Revenue and Expenses */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                 <CardTitle className="text-sm font-medium text-gray-600">Receita Total</CardTitle>
@@ -130,23 +113,6 @@ const CamerinoPage = () => {
                   R$ {totalDespesasPeriodo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">{filteredDespesas.length} transações</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">{getLucroLabel()}</CardTitle>
-                <div className="p-2 bg-gradient-to-r from-blue-100 to-blue-200 rounded-xl">
-                  <BarChart3 className="h-4 w-4 text-blue-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className={`text-2xl font-bold ${lucroCalculado >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  R$ {lucroCalculado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  {lucroCalculado >= 0 ? '+' : ''}{margemLucro.toFixed(1)}% margem
-                </p>
               </CardContent>
             </Card>
           </div>

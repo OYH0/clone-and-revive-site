@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -37,44 +36,22 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const categories = [
-    { value: 'INSUMOS', label: 'Insumos' },
-    { value: 'FIXAS', label: 'Fixas' },
-    { value: 'VARIÁVEIS', label: 'Variáveis' },
-    { value: 'OBRAS', label: 'Obras' },
-    { value: 'RETIRADAS', label: 'Retiradas' },
-    { value: 'IMPLEMENTACAO', label: 'Implementação' }
+  const categorias = [
+    'INSUMOS',
+    'FIXAS', 
+    'VARIÁVEIS',
+    'ATRASADOS',
+    'RETIRADAS',
+    'PESSOAIS'
   ];
 
-  const subcategories = {
-    'INSUMOS': [
-      { value: 'DESCARTAVEIS', label: 'Descartáveis' },
-      { value: 'LIMPEZA', label: 'Limpeza' },
-      { value: 'HORTIFRUTE', label: 'Hortifrute' },
-      { value: 'CARNES', label: 'Carnes' },
-      { value: 'BEBIDAS', label: 'Bebidas' },
-      { value: 'PEIXES', label: 'Peixes' },
-      { value: 'SUPERMERCADO', label: 'SuperMercado' }
-    ],
-    'FIXAS': [
-      { value: 'IMPOSTOS', label: 'Impostos' },
-      { value: 'EMPRESTIMOS', label: 'Empréstimos' }
-    ],
-    'VARIÁVEIS': [],
-    'OBRAS': [
-      { value: 'MATERIAIS', label: 'Materiais' },
-      { value: 'MAO_DE_OBRA', label: 'Mão de Obra' },
-      { value: 'EQUIPAMENTOS', label: 'Equipamentos' },
-      { value: 'PROJETOS', label: 'Projetos' },
-      { value: 'LICENCAS', label: 'Licenças' },
-      { value: 'SERVICOS_TERCEIRIZADOS', label: 'Serviços Terceirizados' },
-      { value: 'IMPOSTOS_OBRAS', label: 'Impostos' },
-      { value: 'ADMINISTRACAO_OBRA', label: 'Administração da Obra' },
-      { value: 'SEGUROS', label: 'Seguros' },
-      { value: 'DESPESAS_GERAIS', label: 'Despesas Gerais' }
-    ],
-    'RETIRADAS': [],
-    'IMPLEMENTACAO': []
+  const subcategoriasPorCategoria: { [key: string]: string[] } = {
+    INSUMOS: ['Carnes', 'Bebidas', 'Carvão', 'Temperos', 'Descartáveis', 'Outros'],
+    FIXAS: ['Aluguel', 'Energia', 'Água', 'Internet', 'Telefone', 'Seguro', 'Outros'],
+    VARIÁVEIS: ['Marketing', 'Manutenção', 'Combustível', 'Transporte', 'Outros'],
+    ATRASADOS: ['Juros', 'Multas', 'Outros'],
+    RETIRADAS: ['Pró-labore', 'Distribuição de Lucros', 'Outros'],
+    PESSOAIS: ['Alimentação', 'Transporte', 'Saúde', 'Lazer', 'Educação', 'Vestuário', 'Cuidados Pessoais', 'Família', 'Imprevistos', 'Moradia', 'Manutenção']
   };
 
   const companies = ['Churrasco', 'Johnny', 'Camerino', 'Implementação'];
@@ -337,9 +314,9 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                 <SelectValue placeholder="Selecione uma categoria" />
               </SelectTrigger>
               <SelectContent className="rounded-2xl">
-                {categories.map(category => (
-                  <SelectItem key={category.value} value={category.value}>
-                    {category.label}
+                {categorias.map(category => (
+                  <SelectItem key={category} value={category}>
+                    {category}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -354,7 +331,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             </div>
           )}
 
-          {formData.categoria && subcategories[formData.categoria as keyof typeof subcategories]?.length > 0 && (
+          {formData.categoria && subcategoriasPorCategoria[formData.categoria]?.length > 0 && (
             <div className="space-y-2">
               <Label htmlFor="subcategoria">Subcategoria</Label>
               <Select value={formData.subcategoria} onValueChange={(value) => handleInputChange('subcategoria', value)}>
@@ -362,9 +339,9 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                   <SelectValue placeholder="Selecione uma subcategoria" />
                 </SelectTrigger>
                 <SelectContent className="rounded-2xl">
-                  {subcategories[formData.categoria as keyof typeof subcategories].map(subcategory => (
-                    <SelectItem key={subcategory.value} value={subcategory.value}>
-                      {subcategory.label}
+                  {subcategoriasPorCategoria[formData.categoria].map(subcategory => (
+                    <SelectItem key={subcategory} value={subcategory}>
+                      {subcategory}
                     </SelectItem>
                   ))}
                 </SelectContent>

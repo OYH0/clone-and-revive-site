@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend, CartesianGrid, ReferenceLine } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend, CartesianGrid } from 'recharts';
 import ExpenseDistribution from '@/components/ExpenseDistribution';
 import { useDespesas } from '@/hooks/useDespesas';
 import { useReceitas } from '@/hooks/useReceitas';
@@ -49,15 +50,14 @@ const CamerinoCharts: React.FC<CamerinoChartsProps> = ({ despesas, receitas }) =
       return {
         month,
         despesas: monthDespesas,
-        receitas: monthReceitas,
-        lucro: monthReceitas - monthDespesas
+        receitas: monthReceitas
       };
     });
   }, [despesasCamerino, receitasCamerino]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-      {/* Evolução Mensal */}
+      {/* Evolução Mensal - sem lucro */}
       <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
         <CardHeader>
           <CardTitle className="text-xl text-gray-800">Evolução Mensal</CardTitle>
@@ -72,14 +72,8 @@ const CamerinoCharts: React.FC<CamerinoChartsProps> = ({ despesas, receitas }) =
                 <YAxis />
                 <Tooltip formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
                 <Legend />
-                <ReferenceLine 
-                  y={0} 
-                  stroke="#D1D5DB" 
-                  strokeWidth={1}
-                />
                 <Bar dataKey="receitas" fill="#10b981" name="Receitas" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="despesas" fill="#3b82f6" name="Despesas" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="lucro" fill="#8b5cf6" name="Lucro" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

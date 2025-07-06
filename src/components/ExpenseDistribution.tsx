@@ -2,7 +2,6 @@
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { Despesa } from '@/hooks/useDespesas';
-import { calculateDistributionData } from '@/utils/dashboardCalculations';
 
 interface ExpenseDistributionProps {
   despesas: Despesa[];
@@ -14,10 +13,56 @@ const ExpenseDistribution: React.FC<ExpenseDistributionProps> = ({ despesas, emp
   console.log('Empresa:', empresa);
   console.log('Despesas recebidas (já filtradas):', despesas?.length || 0);
 
-  // Usar os dados filtrados que foram passados como props
-  const data = calculateDistributionData(despesas || []);
+  // Calcular dados de distribuição diretamente das despesas passadas
+  const data = React.useMemo(() => {
+    if (!despesas || despesas.length === 0) {
+      return [];
+    }
 
-  console.log('Dados do gráfico de distribuição:', data);
+    // Agrupar por categoria e subcategoria
+    const categoryGroups: { [key: string]: { total: number; subcategorias: { [key: string]: number } } } = {};
+
+    despesas.forEach(despesa => {
+      const valor = despesa.valor_total || despesa.valor || 0;
+      const categoria = despesa.categoria || 'Sem categoria';
+      const subcategoria = despesa.subcategoria || 'Outros';
+
+      if (!categoryGroups[categoria]) {
+        categoryGroups[categoria] = { total: 0, subcategorias: {} };
+      }
+
+      categoryGroups[categoria].total += valor;
+      
+      if (!categoryGroups[categoria].subcategorias[subcategoria]) {
+        categoryGroups[categoria].subcategorias[subcategoria] = 0;
+      }
+      categoryGroups[categoria].subcategorias[subcategoria] += valor;
+    });
+
+    // Cores para as categorias
+    const colors: { [key: string]: string } = {
+      'INSUMOS': '#10B981',
+      'FIXAS': '#EF4444', 
+      'VARIÁVEIS': '#F59E0B',
+      'ATRASADOS': '#DC2626',
+      'RETIRADAS': '#8B5CF6',
+      'PESSOAIS': '#06B6D4',
+      'Sem categoria': '#6B7280'
+    };
+
+    const result = Object.entries(categoryGroups)
+      .filter(([_, group]) => group.total > 0)
+      .map(([categoria, group]) => ({
+        name: categoria,
+        value: group.total,
+        color: colors[categoria] || '#6B7280',
+        subcategorias: group.subcategorias
+      }))
+      .sort((a, b) => b.value - a.value);
+
+    console.log('Dados de distribuição calculados:', result);
+    return result;
+  }, [despesas]);
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
