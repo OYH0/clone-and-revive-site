@@ -1,5 +1,6 @@
 
 import { Transaction } from '@/types/transaction';
+import { Receita } from '@/hooks/useReceitas';
 
 export const filterDespesasCurrentMonth = (transactions: Transaction[], dateFrom?: string, dateTo?: string) => {
   if (!transactions || transactions.length === 0) return [];
@@ -89,6 +90,100 @@ export const filterDespesasCurrentMonth = (transactions: Transaction[], dateFrom
     }
 
     return includeTransaction;
+  });
+
+  console.log('Total filtrado (sem Camerino):', filtered.length);
+  return filtered;
+};
+
+export const filterReceitasCurrentMonth = (receitas: Receita[], dateFrom?: string, dateTo?: string) => {
+  if (!receitas || receitas.length === 0) return [];
+
+  // Filtrar primeiro para excluir Camerino
+  const receitasSemCamerino = receitas.filter(receita => {
+    const empresa = receita.empresa?.toLowerCase().trim() || '';
+    return !empresa.includes('camerino');
+  });
+
+  console.log('=== FILTRO MÊS ATUAL - RECEITAS ===');
+  console.log('Total de receitas:', receitas.length);
+  console.log('Receitas sem Camerino:', receitasSemCamerino.length);
+  console.log('Filtros de data - De:', dateFrom, 'Até:', dateTo);
+
+  // Se foram fornecidas datas específicas, usar elas
+  if (dateFrom || dateTo) {
+    console.log('Usando filtros de data manuais');
+    
+    return receitasSemCamerino.filter(receita => {
+      const receitaDate = receita.data_recebimento || receita.data;
+      if (!receitaDate) return false;
+
+      let itemDate: Date;
+      if (receitaDate.includes('/')) {
+        const [dia, mes, ano] = receitaDate.split('/');
+        itemDate = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
+      } else {
+        itemDate = new Date(receitaDate + 'T00:00:00');
+      }
+
+      const fromDate = dateFrom ? new Date(dateFrom + 'T00:00:00') : null;
+      const toDate = dateTo ? new Date(dateTo + 'T23:59:59') : null;
+
+      if (fromDate && itemDate < fromDate) return false;
+      if (toDate && itemDate > toDate) return false;
+
+      return true;
+    });
+  }
+
+  // Caso contrário, filtrar pelo mês atual + últimos 30 dias de recebimentos
+  const now = new Date();
+  const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(now.getDate() - 30);
+
+  console.log('Filtro automático - Início do mês atual:', currentMonthStart.toLocaleDateString('pt-BR'));
+  console.log('Filtro automático - 30 dias atrás:', thirtyDaysAgo.toLocaleDateString('pt-BR'));
+
+  const filtered = receitasSemCamerino.filter(receita => {
+    const dataReceita = receita.data;
+    const dataRecebimento = receita.data_recebimento;
+
+    let includeReceita = false;
+
+    // Verificar data da receita (deve ser do mês atual)
+    if (dataReceita) {
+      let receitaDate: Date;
+      if (dataReceita.includes('/')) {
+        const [dia, mes, ano] = dataReceita.split('/');
+        receitaDate = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
+      } else {
+        receitaDate = new Date(dataReceita + 'T00:00:00');
+      }
+
+      if (receitaDate >= currentMonthStart) {
+        includeReceita = true;
+        console.log('Incluído por data da receita:', dataReceita, receita.descricao);
+      }
+    }
+
+    // Verificar data de recebimento (deve ser dos últimos 30 dias)
+    if (!includeReceita && dataRecebimento) {
+      let recebimentoDate: Date;
+      if (dataRecebimento.includes('/')) {
+        const [dia, mes, ano] = dataRecebimento.split('/');
+        recebimentoDate = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
+      } else {
+        recebimentoDate = new Date(dataRecebimento + 'T00:00:00');
+      }
+
+      if (recebimentoDate >= thirtyDaysAgo) {
+        includeReceita = true;
+        console.log('Incluído por recebimento recente:', dataRecebimento, receita.descricao);
+      }
+    }
+
+    return includeReceita;
   });
 
   console.log('Total filtrado (sem Camerino):', filtered.length);
