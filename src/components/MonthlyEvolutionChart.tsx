@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Legend, Tooltip, ReferenceLine } from 'recharts';
 import { normalizeCompanyName, getTransactionValue } from '@/utils/dashboardCalculations';
@@ -18,11 +19,17 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
 
     console.log('Gerando dados do gráfico para período:', selectedPeriod);
 
+    // Filtrar despesas para excluir Camerino
+    const despesasSemCamerino = despesas.filter(d => {
+      const empresa = normalizeCompanyName(d.empresa);
+      return empresa !== 'camerino';
+    });
+
     if (selectedPeriod === 'today') {
       // Show hourly data for today
       const hours = Array.from({ length: 24 }, (_, i) => i);
       return hours.map(hour => {
-        const hourData = despesas.filter(d => {
+        const hourData = despesasSemCamerino.filter(d => {
           const date = new Date(d.data);
           return date.getHours() === hour;
         });
@@ -35,24 +42,19 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
           .filter(d => normalizeCompanyName(d.empresa) === 'johnny')
           .reduce((sum, d) => sum + getTransactionValue(d), 0);
         
-        const camerino = hourData
-          .filter(d => normalizeCompanyName(d.empresa) === 'camerino')
-          .reduce((sum, d) => sum + getTransactionValue(d), 0);
-        
         return {
           period: `${hour}h`,
           churrasco,
-          johnny,
-          camerino
+          johnny
         };
-      }).filter(item => item.churrasco > 0 || item.johnny > 0 || item.camerino > 0);
+      }).filter(item => item.churrasco > 0 || item.johnny > 0);
     }
 
     if (selectedPeriod === 'week') {
       // Show daily data for the week
       const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
       return days.map((day, index) => {
-        const dayData = despesas.filter(d => {
+        const dayData = despesasSemCamerino.filter(d => {
           const date = new Date(d.data);
           return date.getDay() === index;
         });
@@ -65,15 +67,10 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
           .filter(d => normalizeCompanyName(d.empresa) === 'johnny')
           .reduce((sum, d) => sum + getTransactionValue(d), 0);
         
-        const camerino = dayData
-          .filter(d => normalizeCompanyName(d.empresa) === 'camerino')
-          .reduce((sum, d) => sum + getTransactionValue(d), 0);
-        
         return {
           period: day,
           churrasco,
-          johnny,
-          camerino
+          johnny
         };
       });
     }
@@ -86,7 +83,7 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
       ];
       
       return months.map((month, index) => {
-        const monthData = despesas.filter(d => {
+        const monthData = despesasSemCamerino.filter(d => {
           const date = new Date(d.data);
           return date.getMonth() === index;
         });
@@ -99,15 +96,10 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
           .filter(d => normalizeCompanyName(d.empresa) === 'johnny')
           .reduce((sum, d) => sum + getTransactionValue(d), 0);
         
-        const camerino = monthData
-          .filter(d => normalizeCompanyName(d.empresa) === 'camerino')
-          .reduce((sum, d) => sum + getTransactionValue(d), 0);
-        
         return {
           period: month,
           churrasco,
-          johnny,
-          camerino
+          johnny
         };
       });
     }
@@ -122,11 +114,10 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
       period: month,
       index,
       churrasco: 0,
-      johnny: 0,
-      camerino: 0
+      johnny: 0
     }));
     
-    despesas.forEach(despesa => {
+    despesasSemCamerino.forEach(despesa => {
       const date = new Date(despesa.data);
       const monthIndex = date.getMonth();
       const valor = getTransactionValue(despesa);
@@ -136,8 +127,6 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
         data[monthIndex].churrasco += valor;
       } else if (empresa === 'johnny') {
         data[monthIndex].johnny += valor;
-      } else if (empresa === 'camerino') {
-        data[monthIndex].camerino += valor;
       }
     });
     
@@ -146,7 +135,7 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
       .filter((_, i) => i <= currentMonth && i >= currentMonth - 5)
       .sort((a, b) => a.index - b.index);
       
-    console.log('Dados finais do gráfico mensal:', result);
+    console.log('Dados finais do gráfico mensal (sem Camerino):', result);
     return result;
   }, [despesas, selectedPeriod]);
   
@@ -159,8 +148,7 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
           {payload.map((entry: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
               {entry.name === 'churrasco' ? 'Companhia do Churrasco' : 
-               entry.name === 'johnny' ? 'Johnny Rockets' : 
-               entry.name === 'camerino' ? 'Camerino' : entry.name}: R$ {entry.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+               entry.name === 'johnny' ? 'Johnny Rockets' : entry.name}: R$ {entry.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </p>
           ))}
         </div>
@@ -197,8 +185,7 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
           <Legend 
             formatter={(value) => 
               value === 'churrasco' ? 'Companhia do Churrasco' : 
-              value === 'johnny' ? 'Johnny Rockets' : 
-              value === 'camerino' ? 'Camerino' : value
+              value === 'johnny' ? 'Johnny Rockets' : value
             }
           />
           <ReferenceLine 
@@ -216,12 +203,6 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
             name="johnny"
             dataKey="johnny" 
             fill="#3b82f6" 
-            radius={[4, 4, 0, 0]}
-          />
-          <Bar 
-            name="camerino"
-            dataKey="camerino" 
-            fill="#10b981" 
             radius={[4, 4, 0, 0]}
           />
         </BarChart>

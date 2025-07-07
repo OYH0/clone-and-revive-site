@@ -9,6 +9,7 @@ import NextActions from '@/components/NextActions';
 import { filterDataByPeriod } from '@/components/dashboard/utils';
 import PeriodSelector from '@/components/PeriodSelector';
 import CamerinoCharts from '@/components/camerino/CamerinoCharts';
+import CamerinoPasswordProtection from '@/components/CamerinoPasswordProtection';
 
 const CamerinoPage = () => {
   const { data: despesas } = useDespesas();
@@ -16,6 +17,12 @@ const CamerinoPage = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'year' | 'custom'>('month');
   const [customMonth, setCustomMonth] = useState<number>(new Date().getMonth() + 1);
   const [customYear, setCustomYear] = useState<number>(new Date().getFullYear());
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Se não estiver autenticado, mostrar tela de senha
+  if (!isAuthenticated) {
+    return <CamerinoPasswordProtection onPasswordCorrect={() => setIsAuthenticated(true)} />;
+  }
 
   // Filtrar dados do Camerino - usando várias variações possíveis do nome
   const camerinoDespesas = despesas?.filter(d => {
