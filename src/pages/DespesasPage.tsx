@@ -5,11 +5,13 @@ import Sidebar from '@/components/Sidebar';
 import TransactionTable from '@/components/TransactionTable';
 import AddTransactionModal from '@/components/AddTransactionModal';
 import DespesasFilterSimple from '@/components/DespesasFilterSimple';
+import CamerinoPasswordProtection from '@/components/CamerinoPasswordProtection';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDespesas } from '@/hooks/useDespesas';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminAccess } from '@/hooks/useAdminAccess';
+import { useCamerinoAuth } from '@/hooks/useCamerinoAuth';
 import { Transaction } from '@/types/transaction';
 import { getTransactionStatus } from '@/utils/transactionUtils';
 import { filterDespesasCurrentMonth } from '@/utils/currentMonthFilter';
@@ -26,6 +28,15 @@ const DespesasPage = () => {
   const { data: despesas = [], isLoading, refetch } = useDespesas();
   const { user } = useAuth();
   const { isAdmin } = useAdminAccess();
+  const { isAuthenticated: isCamerinoAuthenticated, checkCamerinoAccess, authenticate: authenticateCamerino } = useCamerinoAuth();
+
+  // Verificar se precisa autenticar para Camerino
+  const needsCamerinoAuth = filterEmpresa === 'Camerino' && !isCamerinoAuthenticated;
+
+  // Se precisar autenticar para Camerino, mostrar tela de senha
+  if (needsCamerinoAuth) {
+    return <CamerinoPasswordProtection onPasswordCorrect={authenticateCamerino} />;
+  }
 
   // Converter Despesa para Transaction
   const allTransactions: Transaction[] = despesas.map(despesa => ({
@@ -105,6 +116,16 @@ const DespesasPage = () => {
     refetch();
   };
 
+  // Handle filter empresa change with Camerino auth check
+  const handleFilterEmpresaChange = (value: string) => {
+    if (value === 'Camerino' && !isCamerinoAuthenticated) {
+      // Will trigger auth screen on next render
+      setFilterEmpresa(value);
+    } else {
+      setFilterEmpresa(value);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-red-50 to-red-100">
@@ -162,7 +183,7 @@ const DespesasPage = () => {
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
             filterEmpresa={filterEmpresa}
-            setFilterEmpresa={setFilterEmpresa}
+            setFilterEmpresa={handleFilterEmpresaChange}
             filterCategoria={filterCategoria}
             setFilterCategoria={setFilterCategoria}
             filterStatus={filterStatus}

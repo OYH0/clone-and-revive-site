@@ -7,8 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import AddReceitaModal from '@/components/AddReceitaModal';
 import ReceitaTable from '@/components/ReceitaTable';
 import ReceitasFilter from '@/components/ReceitasFilter';
+import CamerinoPasswordProtection from '@/components/CamerinoPasswordProtection';
 import { useReceitas } from '@/hooks/useReceitas';
 import { useAdminAccess } from '@/hooks/useAdminAccess';
+import { useCamerinoAuth } from '@/hooks/useCamerinoAuth';
 import { filterReceitasCurrentMonth } from '@/utils/currentMonthFilter';
 
 const ReceitasPage = () => {
@@ -21,6 +23,15 @@ const ReceitasPage = () => {
   
   const { data: receitas, isLoading } = useReceitas();
   const { isAdmin } = useAdminAccess();
+  const { isAuthenticated: isCamerinoAuthenticated, checkCamerinoAccess, authenticate: authenticateCamerino } = useCamerinoAuth();
+
+  // Verificar se precisa autenticar para Camerino
+  const needsCamerinoAuth = filterEmpresa === 'Camerino' && !isCamerinoAuthenticated;
+
+  // Se precisar autenticar para Camerino, mostrar tela de senha
+  if (needsCamerinoAuth) {
+    return <CamerinoPasswordProtection onPasswordCorrect={authenticateCamerino} />;
+  }
 
   // Aplicar filtro do mês atual - excluir Camerino apenas quando não há filtro de empresa específico
   const shouldExcludeCamerino = filterEmpresa === 'all';
@@ -49,6 +60,16 @@ const ReceitasPage = () => {
   const receitasRecebidas = filteredReceitas.filter(r => r.data_recebimento).length;
   const receitasPendentes = filteredReceitas.filter(r => !r.data_recebimento).length;
   const valorRecebido = filteredReceitas.filter(r => r.data_recebimento).reduce((sum, receita) => sum + receita.valor, 0);
+
+  // Handle filter empresa change with Camerino auth check
+  const handleFilterEmpresaChange = (value: string) => {
+    if (value === 'Camerino' && !isCamerinoAuthenticated) {
+      // Will trigger auth screen on next render
+      setFilterEmpresa(value);
+    } else {
+      setFilterEmpresa(value);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -107,7 +128,7 @@ const ReceitasPage = () => {
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
             filterEmpresa={filterEmpresa}
-            setFilterEmpresa={setFilterEmpresa}
+            setFilterEmpresa={handleFilterEmpresaChange}
             filterCategoria={filterCategoria}
             setFilterCategoria={setFilterCategoria}
             dateFrom={dateFrom}
