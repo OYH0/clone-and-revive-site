@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Plus, TrendingDown, DollarSign, CheckCircle, Clock, AlertTriangle, Shield } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -28,14 +27,14 @@ const DespesasPage = () => {
   const { data: despesas = [], isLoading, refetch } = useDespesas();
   const { user } = useAuth();
   const { isAdmin } = useAdminAccess();
-  const { isAuthenticated: isCamerinoAuthenticated, checkCamerinoAccess, authenticate: authenticateCamerino } = useCamerinoAuth();
+  const { isAuthenticated, authenticate } = useCamerinoAuth();
 
   // Verificar se precisa autenticar para Camerino
-  const needsCamerinoAuth = filterEmpresa === 'Camerino' && !isCamerinoAuthenticated;
+  const needsCamerinoAuth = filterEmpresa === 'Camerino' && !isAuthenticated;
 
   // Se precisar autenticar para Camerino, mostrar tela de senha
   if (needsCamerinoAuth) {
-    return <CamerinoPasswordProtection onPasswordCorrect={authenticateCamerino} />;
+    return <CamerinoPasswordProtection onPasswordCorrect={authenticate} />;
   }
 
   // Converter Despesa para Transaction
@@ -118,7 +117,7 @@ const DespesasPage = () => {
 
   // Handle filter empresa change with Camerino auth check
   const handleFilterEmpresaChange = (value: string) => {
-    if (value === 'Camerino' && !isCamerinoAuthenticated) {
+    if (value === 'Camerino' && !isAuthenticated) {
       // Will trigger auth screen on next render
       setFilterEmpresa(value);
     } else {
