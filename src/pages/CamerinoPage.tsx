@@ -19,21 +19,20 @@ const CamerinoPage = () => {
   const [customYear, setCustomYear] = useState<number>(new Date().getFullYear());
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Se não estiver autenticado, mostrar tela de senha
-  if (!isAuthenticated) {
-    return <CamerinoPasswordProtection onPasswordCorrect={() => setIsAuthenticated(true)} />;
-  }
-
   // Filtrar dados do Camerino - usando várias variações possíveis do nome
-  const camerinoDespesas = despesas?.filter(d => {
-    const empresa = d.empresa?.toLowerCase().trim() || '';
-    return empresa === 'camerino' || empresa.includes('camerino');
-  }) || [];
+  const camerinoDespesas = useMemo(() => {
+    return despesas?.filter(d => {
+      const empresa = d.empresa?.toLowerCase().trim() || '';
+      return empresa === 'camerino' || empresa.includes('camerino');
+    }) || [];
+  }, [despesas]);
   
-  const camerinoReceitas = receitas?.filter(r => {
-    const empresa = r.empresa?.toLowerCase().trim() || '';
-    return empresa === 'camerino' || empresa.includes('camerino');
-  }) || [];
+  const camerinoReceitas = useMemo(() => {
+    return receitas?.filter(r => {
+      const empresa = r.empresa?.toLowerCase().trim() || '';
+      return empresa === 'camerino' || empresa.includes('camerino');
+    }) || [];
+  }, [receitas]);
 
   // Aplicar filtro de período APENAS para exibição dos cards de estatísticas
   const { filteredDespesas, filteredReceitas } = useMemo(() => {
@@ -43,21 +42,33 @@ const CamerinoPage = () => {
     };
   }, [camerinoDespesas, camerinoReceitas, selectedPeriod, customMonth, customYear]);
 
+  // Calcular estatísticas
+  const totalDespesasPeriodo = useMemo(() => 
+    filteredDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0), 
+    [filteredDespesas]
+  );
+  
+  const totalReceitasPeriodo = useMemo(() => 
+    filteredReceitas.reduce((sum, r) => sum + r.valor, 0), 
+    [filteredReceitas]
+  );
+
+  const handleCustomDateChange = (month: number, year: number) => {
+    setCustomMonth(month);
+    setCustomYear(year);
+  };
+
+  // Se não estiver autenticado, mostrar tela de senha
+  if (!isAuthenticated) {
+    return <CamerinoPasswordProtection onPasswordCorrect={() => setIsAuthenticated(true)} />;
+  }
+
   console.log('Camerino - Despesas filtradas:', filteredDespesas.length);
   console.log('Camerino - Despesas por categoria:', filteredDespesas.reduce((acc, d) => {
     const cat = d.categoria || 'SEM_CATEGORIA';
     acc[cat] = (acc[cat] || 0) + 1;
     return acc;
   }, {} as Record<string, number>));
-
-  // Calcular estatísticas
-  const totalDespesasPeriodo = filteredDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
-  const totalReceitasPeriodo = filteredReceitas.reduce((sum, r) => sum + r.valor, 0);
-
-  const handleCustomDateChange = (month: number, year: number) => {
-    setCustomMonth(month);
-    setCustomYear(year);
-  };
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50">
