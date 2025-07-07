@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Plus, TrendingDown, DollarSign, CheckCircle, Clock, AlertTriangle, Shield } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -29,11 +30,16 @@ const DespesasPage = () => {
   const { isAdmin } = useAdminAccess();
   const { isAuthenticated, authenticate } = useCamerinoAuth();
 
+  console.log('DespesasPage - filterEmpresa:', filterEmpresa);
+  console.log('DespesasPage - isAuthenticated:', isAuthenticated);
+
   // Verificar se precisa autenticar para Camerino
   const needsCamerinoAuth = filterEmpresa === 'Camerino' && !isAuthenticated;
+  console.log('DespesasPage - needsCamerinoAuth:', needsCamerinoAuth);
 
   // Se precisar autenticar para Camerino, mostrar tela de senha
   if (needsCamerinoAuth) {
+    console.log('DespesasPage - Showing Camerino auth screen');
     return <CamerinoPasswordProtection onPasswordCorrect={authenticate} />;
   }
 
@@ -117,10 +123,13 @@ const DespesasPage = () => {
 
   // Handle filter empresa change with Camerino auth check
   const handleFilterEmpresaChange = (value: string) => {
+    console.log('DespesasPage - handleFilterEmpresaChange:', value);
     if (value === 'Camerino' && !isAuthenticated) {
+      console.log('DespesasPage - Setting Camerino filter without auth');
       // Will trigger auth screen on next render
       setFilterEmpresa(value);
     } else {
+      console.log('DespesasPage - Setting filter normally:', value);
       setFilterEmpresa(value);
     }
   };
