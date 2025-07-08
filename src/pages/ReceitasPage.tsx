@@ -25,16 +25,11 @@ const ReceitasPage = () => {
   const { isAdmin } = useAdminAccess();
   const { isAuthenticated, authenticate } = useCamerinoAuth();
 
-  console.log('ReceitasPage - filterEmpresa:', filterEmpresa);
-  console.log('ReceitasPage - isAuthenticated:', isAuthenticated);
-
   // Verificar se precisa autenticar para Camerino
   const needsCamerinoAuth = filterEmpresa === 'Camerino' && !isAuthenticated;
-  console.log('ReceitasPage - needsCamerinoAuth:', needsCamerinoAuth);
 
   // Se precisar autenticar para Camerino, mostrar tela de senha
   if (needsCamerinoAuth) {
-    console.log('ReceitasPage - Showing Camerino auth screen');
     return (
       <CamerinoPasswordProtection onPasswordCorrect={authenticate} />
     );
@@ -70,15 +65,7 @@ const ReceitasPage = () => {
 
   // Handle filter empresa change with Camerino auth check
   const handleFilterEmpresaChange = (value: string) => {
-    console.log('ReceitasPage - handleFilterEmpresaChange:', value);
-    if (value === 'Camerino' && !isAuthenticated) {
-      console.log('ReceitasPage - Setting Camerino filter without auth');
-      // Will trigger auth screen on next render
-      setFilterEmpresa(value);
-    } else {
-      console.log('ReceitasPage - Setting filter normally:', value);
-      setFilterEmpresa(value);
-    }
+    setFilterEmpresa(value);
   };
 
   if (isLoading) {
