@@ -28,13 +28,6 @@ const ReceitasPage = () => {
   // Verificar se precisa autenticar para Camerino
   const needsCamerinoAuth = filterEmpresa === 'Camerino' && !isAuthenticated;
 
-  // Se precisar autenticar para Camerino, mostrar tela de senha
-  if (needsCamerinoAuth) {
-    return (
-      <CamerinoPasswordProtection onPasswordCorrect={authenticate} />
-    );
-  }
-
   // Aplicar filtro do mês atual - excluir Camerino apenas quando não há filtro de empresa específico
   const shouldExcludeCamerino = filterEmpresa === 'all';
   const currentMonthReceitas = useMemo(() => {
@@ -76,6 +69,13 @@ const ReceitasPage = () => {
           <p className="text-lg text-gray-600">Carregando receitas...</p>
         </div>
       </div>
+    );
+  }
+
+  // Se precisar autenticar para Camerino, mostrar tela de senha
+  if (needsCamerinoAuth) {
+    return (
+      <CamerinoPasswordProtection onPasswordCorrect={authenticate} />
     );
   }
 
