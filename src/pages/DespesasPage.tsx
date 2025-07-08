@@ -40,7 +40,9 @@ const DespesasPage = () => {
   // Se precisar autenticar para Camerino, mostrar tela de senha
   if (needsCamerinoAuth) {
     console.log('DespesasPage - Showing Camerino auth screen');
-    return <CamerinoPasswordProtection onPasswordCorrect={authenticate} />;
+    return (
+      <CamerinoPasswordProtection onPasswordCorrect={authenticate} />
+    );
   }
 
   // Converter Despesa para Transaction

@@ -35,7 +35,9 @@ const ReceitasPage = () => {
   // Se precisar autenticar para Camerino, mostrar tela de senha
   if (needsCamerinoAuth) {
     console.log('ReceitasPage - Showing Camerino auth screen');
-    return <CamerinoPasswordProtection onPasswordCorrect={authenticate} />;
+    return (
+      <CamerinoPasswordProtection onPasswordCorrect={authenticate} />
+    );
   }
 
   // Aplicar filtro do mês atual - excluir Camerino apenas quando não há filtro de empresa específico
