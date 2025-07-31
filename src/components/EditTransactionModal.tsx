@@ -38,33 +38,64 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const categories = [
-    { value: 'INSUMOS', label: 'Insumos' },
-    { value: 'FIXAS', label: 'Fixas' },
-    { value: 'VARIÁVEIS', label: 'Variáveis' },
-    { value: 'ATRASADOS', label: 'Atrasados' },
-    { value: 'RETIRADAS', label: 'Retiradas' },
-    { value: 'IMPLEMENTACAO', label: 'Implementação' }
-  ];
+  // Get categories based on selected company
+  const getCategoriesForCompany = (empresa: string) => {
+    switch (empresa) {
+      case 'Camerino':
+        return [
+          { value: 'FIXAS', label: 'Fixas' },
+          { value: 'VARIÁVEIS', label: 'Variáveis' },
+          { value: 'SAZONAIS', label: 'Sazonais' }
+        ];
+      case 'Implementação':
+        return [
+          { value: 'OBRA', label: 'Obra' },
+          { value: 'EQUIPAMENTO', label: 'Equipamento' },
+          { value: 'SERVIÇO', label: 'Serviço' },
+          { value: 'CUSTO EXTRA', label: 'Custo Extra' }
+        ];
+      default:
+        return [
+          { value: 'INSUMOS', label: 'Insumos' },
+          { value: 'FIXAS', label: 'Fixas' },
+          { value: 'VARIÁVEIS', label: 'Variáveis' },
+          { value: 'RETIRADAS', label: 'Retiradas' }
+        ];
+    }
+  };
 
-  const subcategories = {
-    'INSUMOS': [
-      { value: 'DESCARTAVEIS', label: 'Descartáveis' },
-      { value: 'LIMPEZA', label: 'Limpeza' },
-      { value: 'HORTIFRUTE', label: 'Hortifrute' },
-      { value: 'CARNES', label: 'Carnes' },
-      { value: 'BEBIDAS', label: 'Bebidas' },
-      { value: 'PEIXES', label: 'Peixes' },
-      { value: 'SUPERMERCADO', label: 'SuperMercado' }
-    ],
-    'FIXAS': [
-      { value: 'IMPOSTOS', label: 'Impostos' },
-      { value: 'EMPRESTIMOS', label: 'Empréstimos' }
-    ],
-    'VARIÁVEIS': [],
-    'ATRASADOS': [],
-    'RETIRADAS': [],
-    'IMPLEMENTACAO': []
+  // Get subcategories based on selected company and category
+  const getSubcategoriesForCompanyAndCategory = (empresa: string, categoria: string) => {
+    // Camerino and Implementação don't have subcategories
+    if (empresa === 'Camerino' || empresa === 'Implementação') {
+      return [];
+    }
+
+    const subcategories: { [key: string]: { value: string; label: string }[] } = {
+      'INSUMOS': [
+        { value: 'PROTEINAS', label: 'Proteínas' },
+        { value: 'HORTIFRUTI', label: 'Hortifrúti' },
+        { value: 'BEBIDAS', label: 'Bebidas' },
+        { value: 'MERCADO_COMUM', label: 'Mercado Comum' },
+        { value: 'DESCARTAVEIS_LIMPEZA', label: 'Descartáveis e Limpeza' },
+        { value: 'COMBUSTIVEL_TRANSPORTE', label: 'Combustível e Transporte' }
+      ],
+      'FIXAS': [
+        { value: 'TAXA_OCUPACAO', label: 'Taxa de Ocupação' },
+        { value: 'FOLHA_SALARIAL', label: 'Folha Salarial' },
+        { value: 'EMPRESTIMOS_PRESTACOES', label: 'Empréstimos e Prestações' }
+      ],
+      'VARIÁVEIS': [
+        { value: 'MANUTENCAO', label: 'Manutenção' },
+        { value: 'SAZONAIS', label: 'Sazonais' }
+      ],
+      'RETIRADAS': [
+        { value: 'PROLABORE', label: 'Prolabore' },
+        { value: 'IMPLEMENTACAO', label: 'Implementação' }
+      ]
+    };
+
+    return subcategories[categoria] || [];
   };
 
   const companies = ['Churrasco', 'Johnny', 'Camerino', 'Implementação'];
@@ -85,7 +116,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     }
   }, [transaction, isOpen]);
 
-  // Function to create corresponding receita for Implementação category
+  // Function to create corresponding receita for Retiradas subcategory Implementação
   const createImplementacaoReceita = async (despesaData: any) => {
     try {
       console.log('Creating Implementação receita from edit with data:', despesaData);
@@ -157,7 +188,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     
     try {
       const updateData: any = {
-        data: formData.categoria === 'IMPLEMENTACAO' ? formData.data_vencimento : (formData.data || null),
+        data: formData.data || null,
         valor: parseFloat(formData.valor),
         empresa: formData.empresa,
         descricao: formData.descricao,
@@ -165,7 +196,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
         subcategoria: formData.subcategoria || null,
         data_vencimento: formData.data_vencimento,
         valor_juros: formData.valor_juros ? parseFloat(formData.valor_juros) : 0,
-        status: formData.categoria === 'IMPLEMENTACAO' ? 'PAGO' : transaction.status
+        status: transaction.status
       };
 
       console.log('Updating despesa with data:', updateData);
@@ -189,15 +220,18 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
 
       console.log('Despesa updated successfully:', updatedDespesa);
 
-      // If categoria changed to IMPLEMENTACAO and it wasn't before, create corresponding receita
-      if (formData.categoria === 'IMPLEMENTACAO' && transaction.category !== 'IMPLEMENTACAO') {
+      // If categoria changed to RETIRADAS with subcategoria Implementação and it wasn't before
+      const wasImplementacao = transaction.category === 'RETIRADAS' && transaction.subcategoria === 'IMPLEMENTACAO';
+      const isImplementacao = formData.categoria === 'RETIRADAS' && formData.subcategoria === 'Implementação';
+      
+      if (isImplementacao && !wasImplementacao) {
         await createImplementacaoReceita(updateData);
       }
 
       toast({
         title: "Sucesso!",
-        description: formData.categoria === 'IMPLEMENTACAO' && transaction.category !== 'IMPLEMENTACAO'
-          ? "Transação atualizada como paga e receita de Implementação criada com sucesso."
+        description: isImplementacao && !wasImplementacao
+          ? "Transação atualizada e receita de Implementação criada com sucesso."
           : "Transação atualizada com sucesso.",
       });
 
@@ -222,15 +256,13 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
       // Reset subcategoria when categoria changes
       if (field === 'categoria') {
         newData.subcategoria = '';
-        // If categoria is IMPLEMENTACAO, automatically set data to data_vencimento
-        if (value === 'IMPLEMENTACAO' && prev.data_vencimento) {
-          newData.data = prev.data_vencimento;
-        }
       }
       
-      // If data_vencimento changes and categoria is IMPLEMENTACAO, update data too
-      if (field === 'data_vencimento' && prev.categoria === 'IMPLEMENTACAO') {
-        newData.data = value;
+      // Reset categoria and subcategoria when empresa changes
+      if (field === 'empresa') {
+        const availableCategories = getCategoriesForCompany(value);
+        newData.categoria = availableCategories[0]?.value || '';
+        newData.subcategoria = '';
       }
       
       return newData;
@@ -252,14 +284,9 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
               type="date"
               value={formData.data}
               onChange={(e) => handleInputChange('data', e.target.value)}
-              disabled={formData.categoria === 'IMPLEMENTACAO'}
               className="rounded-full"
             />
-            {formData.categoria === 'IMPLEMENTACAO' ? (
-              <p className="text-xs text-blue-600">Preenchida automaticamente com a data de vencimento para categoria Implementação.</p>
-            ) : (
-              <p className="text-xs text-gray-500">Deixe vazio se ainda não foi paga.</p>
-            )}
+            <p className="text-xs text-gray-500">Deixe vazio se ainda não foi paga.</p>
           </div>
 
           <div className="space-y-2">
@@ -324,7 +351,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                 <SelectValue placeholder="Selecione uma categoria" />
               </SelectTrigger>
               <SelectContent className="rounded-2xl">
-                {categories.map(category => (
+                {getCategoriesForCompany(formData.empresa).map(category => (
                   <SelectItem key={category.value} value={category.value}>
                     {category.label}
                   </SelectItem>
@@ -333,15 +360,16 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
             </Select>
           </div>
 
-          {formData.categoria === 'IMPLEMENTACAO' && transaction?.category !== 'IMPLEMENTACAO' && (
+          {formData.categoria === 'RETIRADAS' && formData.subcategoria === 'Implementação' && 
+           !(transaction?.category === 'RETIRADAS' && transaction?.subcategoria === 'IMPLEMENTACAO') && (
             <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
               <p className="text-sm text-blue-700">
-                <strong>Nota:</strong> Ao alterar para categoria Implementação, a despesa será marcada como paga e será criada uma receita correspondente para a empresa Implementação com data de recebimento igual à data de vencimento.
+                <strong>Nota:</strong> Ao alterar para subcategoria Implementação em Retiradas, será criada uma receita correspondente para a empresa Implementação.
               </p>
             </div>
           )}
 
-          {formData.categoria && subcategories[formData.categoria as keyof typeof subcategories]?.length > 0 && (
+          {formData.categoria && getSubcategoriesForCompanyAndCategory(formData.empresa, formData.categoria).length > 0 && (
             <div className="space-y-2">
               <Label htmlFor="subcategoria">Subcategoria</Label>
               <Select value={formData.subcategoria} onValueChange={(value) => handleInputChange('subcategoria', value)}>
@@ -349,7 +377,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                   <SelectValue placeholder="Selecione uma subcategoria" />
                 </SelectTrigger>
                 <SelectContent className="rounded-2xl">
-                  {subcategories[formData.categoria as keyof typeof subcategories].map(subcategory => (
+                  {getSubcategoriesForCompanyAndCategory(formData.empresa, formData.categoria).map(subcategory => (
                     <SelectItem key={subcategory.value} value={subcategory.value}>
                       {subcategory.label}
                     </SelectItem>
