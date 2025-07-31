@@ -85,6 +85,7 @@ const DespesasFilter: React.FC<DespesasFilterProps> = ({ onFilterChange, onClear
               <SelectItem value="INSUMOS">Insumos</SelectItem>
               <SelectItem value="FIXAS">Fixas</SelectItem>
               <SelectItem value="VARIÁVEIS">Variáveis</SelectItem>
+              <SelectItem value="OBRAS">Obras</SelectItem>
               <SelectItem value="RETIRADAS">Retiradas</SelectItem>
             </SelectContent>
           </Select>

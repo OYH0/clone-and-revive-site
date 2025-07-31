@@ -100,7 +100,9 @@ const DespesasFilterSimple: React.FC<DespesasFilterSimpleProps> = ({
             <SelectItem value="INSUMOS">Insumos</SelectItem>
             <SelectItem value="FIXAS">Fixas</SelectItem>
             <SelectItem value="VARIÁVEIS">Variáveis</SelectItem>
+            <SelectItem value="OBRAS">Obras</SelectItem>
             <SelectItem value="RETIRADAS">Retiradas</SelectItem>
+            <SelectItem value="IMPLEMENTACAO">Implementação</SelectItem>
           </SelectContent>
         </Select>
 
