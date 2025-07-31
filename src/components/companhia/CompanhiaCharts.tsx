@@ -34,14 +34,15 @@ const CompanhiaCharts: React.FC<CompanhiaChartsProps> = ({ despesas, receitas })
     const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
     const currentYear = new Date().getFullYear();
     
+    // Usar despesas e receitas filtradas por período ao invés dos dados completos
     return months.map((month, index) => {
-      const monthDespesas = despesasCompanhia.filter(d => {
+      const monthDespesas = despesas.filter(d => {
         const date = d.data_vencimento ? new Date(d.data_vencimento + 'T00:00:00') : 
                       d.data ? new Date(d.data + 'T00:00:00') : null;
         return date && date.getMonth() === index && date.getFullYear() === currentYear;
       }).reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
       
-      const monthReceitas = receitasCompanhia.filter(r => {
+      const monthReceitas = receitas.filter(r => {
         const date = r.data ? new Date(r.data + 'T00:00:00') : null;
         return date && date.getMonth() === index && date.getFullYear() === currentYear;
       }).reduce((sum, r) => sum + (r.valor || 0), 0);
@@ -53,7 +54,7 @@ const CompanhiaCharts: React.FC<CompanhiaChartsProps> = ({ despesas, receitas })
         lucro: monthReceitas - monthDespesas
       };
     });
-  }, [despesasCompanhia, receitasCompanhia]);
+  }, [despesas, receitas]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
