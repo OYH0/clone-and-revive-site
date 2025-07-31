@@ -42,8 +42,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     'VARIÁVEIS',
     'ATRASADOS',
     'RETIRADAS',
-    'PESSOAIS',
-    'IMPLEMENTACAO'
+    'PESSOAIS'
   ];
 
   const subcategoriasPorCategoria: { [key: string]: string[] } = {
