@@ -60,14 +60,8 @@ const CompanhiaPage = () => {
   const totalDespesasPeriodo = filteredDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
   const totalReceitasPeriodo = filteredReceitas.reduce((sum, r) => sum + r.valor, 0);
   
-  // NOVO: Calcular lucro baseado no período selecionado - passa os parâmetros customMonth e customYear
-  const lucroCalculado = calculateProfitByPeriod(
-    companhiaDespesas, 
-    companhiaReceitas, 
-    selectedPeriod, 
-    customMonth, 
-    customYear
-  );
+  // Calcular lucro simples baseado nos dados já filtrados pelo período
+  const lucroCalculado = totalReceitasPeriodo - totalDespesasPeriodo;
   const margemLucro = totalReceitasPeriodo > 0 ? (lucroCalculado / totalReceitasPeriodo) * 100 : 0;
 
   // Calcular CMV (Custo da Mercadoria Vendida) - apenas despesas de INSUMOS
