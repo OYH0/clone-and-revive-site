@@ -86,9 +86,9 @@ const CompanhiaPage = () => {
     switch (selectedPeriod) {
       case 'today': return 'Lucro Líquido Hoje';
       case 'week': return 'Lucro Líquido Semanal';
-      case 'month': return 'Lucro Líquido Acumulado';
+      case 'month': return 'Lucro Líquido Mensal';
       case 'year': return 'Lucro Líquido Anual';
-      case 'custom': return 'Lucro Líquido Acumulado';
+      case 'custom': return 'Lucro Líquido Personalizado';
       default: return 'Lucro Líquido';
     }
   };
