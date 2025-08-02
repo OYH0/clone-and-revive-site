@@ -222,7 +222,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
 
       // If categoria changed to RETIRADAS with subcategoria Implementação and it wasn't before
       const wasImplementacao = transaction.category === 'RETIRADAS' && transaction.subcategoria === 'IMPLEMENTACAO';
-      const isImplementacao = formData.categoria === 'RETIRADAS' && formData.subcategoria === 'Implementação';
+      const isImplementacao = formData.categoria === 'RETIRADAS' && formData.subcategoria === 'IMPLEMENTACAO';
       
       if (isImplementacao && !wasImplementacao) {
         await createImplementacaoReceita(updateData);
@@ -360,7 +360,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
             </Select>
           </div>
 
-          {formData.categoria === 'RETIRADAS' && formData.subcategoria === 'Implementação' && 
+          {formData.categoria === 'RETIRADAS' && formData.subcategoria === 'IMPLEMENTACAO' && 
            !(transaction?.category === 'RETIRADAS' && transaction?.subcategoria === 'IMPLEMENTACAO') && (
             <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
               <p className="text-sm text-blue-700">

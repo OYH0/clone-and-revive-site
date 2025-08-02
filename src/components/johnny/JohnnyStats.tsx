@@ -1,7 +1,8 @@
-
-import React from 'react';
-import { TrendingUp, DollarSign, BarChart3, Package } from 'lucide-react';
+import React, { useState } from 'react';
+import { TrendingUp, DollarSign, BarChart3, Package, Eye } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import TransactionsModal from '@/components/TransactionsModal';
 
 interface JohnnyStatsProps {
   despesas: any[];
@@ -10,6 +11,16 @@ interface JohnnyStatsProps {
 }
 
 const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas, selectedPeriod }) => {
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean;
+    type: 'receitas' | 'despesas';
+    title: string;
+  }>({
+    isOpen: false,
+    type: 'receitas',
+    title: ''
+  });
+
   const totalDespesas = despesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
   const totalReceitas = receitas.reduce((sum, r) => sum + r.valor, 0);
   const lucroLiquido = totalReceitas - totalDespesas;
@@ -22,83 +33,130 @@ const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas, selectedP
   
   const percentualCMV = totalReceitas > 0 ? (cmvTotal / totalReceitas) * 100 : 0;
 
-  const getPeriodLabel = () => {
-    switch (selectedPeriod) {
-      case 'today': return 'Hoje';
-      case 'week': return 'Esta Semana';
-      case 'month': return 'Este Mês';
-      case 'year': return 'Este Ano';
-      case 'custom': return 'Período Personalizado';
-      default: return 'Período';
-    }
+  // Função para obter cor do CMV baseado na porcentagem
+  const getCMVColor = (percentage: number) => {
+    if (percentage >= 35) return 'text-red-600';
+    if (percentage >= 25) return 'text-yellow-600';
+    return 'text-green-600';
+  };
+
+  const openModal = (type: 'receitas' | 'despesas', title: string) => {
+    setModalState({ isOpen: true, type, title });
+  };
+
+  const closeModal = () => {
+    setModalState({ isOpen: false, type: 'receitas', title: '' });
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-      <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-sm font-medium text-gray-600">Receita Total</CardTitle>
-          <div className="p-2 bg-gradient-to-r from-green-100 to-green-200 rounded-xl">
-            <TrendingUp className="h-4 w-4 text-green-600" />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-green-600">
-            R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-          </div>
-          <p className="text-xs text-gray-500 mt-1">{getPeriodLabel()} • {receitas.length} transações</p>
-        </CardContent>
-      </Card>
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm font-medium text-gray-600">
+              Receita Total
+            </CardTitle>
+            <TrendingUp className="h-5 w-5 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-green-600 mb-2">
+              R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </div>
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-gray-500">
+                {selectedPeriod === 'month' ? 'Este mês' : 
+                 selectedPeriod === 'year' ? 'Este ano' :
+                 selectedPeriod === 'week' ? 'Esta semana' :
+                 selectedPeriod === 'today' ? 'Hoje' : 'Período selecionado'}
+              </p>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={() => openModal('receitas', 'Receitas')}
+                className="h-6 px-2 text-xs"
+              >
+                <Eye className="h-3 w-3 mr-1" />
+                Ver
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-      <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-sm font-medium text-gray-600">Despesas Totais</CardTitle>
-          <div className="p-2 bg-gradient-to-r from-red-100 to-red-200 rounded-xl">
-            <DollarSign className="h-4 w-4 text-red-600" />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-red-600">
-            R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-          </div>
-          <p className="text-xs text-gray-500 mt-1">{getPeriodLabel()} • {despesas.length} transações</p>
-        </CardContent>
-      </Card>
+        <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm font-medium text-gray-600">
+              Despesas Totais
+            </CardTitle>
+            <DollarSign className="h-5 w-5 text-red-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-red-600 mb-2">
+              R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </div>
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-gray-500">
+                {selectedPeriod === 'month' ? 'Este mês' : 
+                 selectedPeriod === 'year' ? 'Este ano' :
+                 selectedPeriod === 'week' ? 'Esta semana' :
+                 selectedPeriod === 'today' ? 'Hoje' : 'Período selecionado'}
+              </p>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={() => openModal('despesas', 'Despesas')}
+                className="h-6 px-2 text-xs"
+              >
+                <Eye className="h-3 w-3 mr-1" />
+                Ver
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-      <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-sm font-medium text-gray-600">Lucro Líquido</CardTitle>
-          <div className="p-2 bg-gradient-to-r from-blue-100 to-blue-200 rounded-xl">
-            <BarChart3 className="h-4 w-4 text-blue-600" />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className={`text-2xl font-bold ${lucroLiquido >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            R$ {lucroLiquido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-          </div>
-          <p className="text-xs text-gray-500 mt-1">
-            {lucroLiquido >= 0 ? '+' : ''}{margemLucro.toFixed(1)}% margem • {getPeriodLabel()}
-          </p>
-        </CardContent>
-      </Card>
+        <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm font-medium text-gray-600">
+              Lucro Líquido
+            </CardTitle>
+            <BarChart3 className="h-5 w-5 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <div className={`text-3xl font-bold ${lucroLiquido >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              R$ {lucroLiquido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              {lucroLiquido >= 0 ? '+' : ''}{margemLucro.toFixed(1)}% margem
+            </p>
+          </CardContent>
+        </Card>
 
-      <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-sm font-medium text-gray-600">CMV (Insumos)</CardTitle>
-          <div className="p-2 bg-gradient-to-r from-orange-100 to-orange-200 rounded-xl">
-            <Package className="h-4 w-4 text-orange-600" />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-orange-600">
-            R$ {cmvTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-          </div>
-          <p className="text-xs text-gray-500 mt-1">
-            {percentualCMV.toFixed(1)}% das vendas
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+        <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm font-medium text-gray-600">
+              CMV (Insumos)
+            </CardTitle>
+            <Package className="h-5 w-5 text-orange-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-orange-600">
+              R$ {cmvTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </div>
+            <p className={`text-xs mt-1 font-medium ${getCMVColor(percentualCMV)}`}>
+              {percentualCMV.toFixed(1)}% das vendas
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <TransactionsModal
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        type={modalState.type}
+        transactions={modalState.type === 'receitas' ? receitas : despesas}
+        empresa="Johnny Rockets"
+        title={modalState.title}
+      />
+    </>
   );
 };
 

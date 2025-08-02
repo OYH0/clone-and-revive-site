@@ -49,20 +49,37 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   };
 
   // Get subcategories based on selected company and category
-  const getSubcategoriesForCompanyAndCategory = (empresa: string, categoria: string): string[] => {
+  const getSubcategoriesForCompanyAndCategory = (empresa: string, categoria: string) => {
     // Camerino and Implementação don't have subcategories
     if (empresa === 'Camerino' || empresa === 'Implementação') {
       return [];
     }
 
-    const subcategoriasPorCategoria: { [key: string]: string[] } = {
-      INSUMOS: ['Proteínas', 'Hortifrúti', 'Bebidas', 'Mercado Comum', 'Descartáveis e Limpeza', 'Combustível e Transporte'],
-      FIXAS: ['Taxa de Ocupação', 'Folha Salarial', 'Empréstimos e Prestações'],
-      VARIÁVEIS: ['Manutenção', 'Sazonais'],
-      RETIRADAS: ['Prolabore', 'Implementação']
+    const subcategories: { [key: string]: { value: string; label: string }[] } = {
+      'INSUMOS': [
+        { value: 'PROTEINAS', label: 'Proteínas' },
+        { value: 'HORTIFRUTI', label: 'Hortifrúti' },
+        { value: 'BEBIDAS', label: 'Bebidas' },
+        { value: 'MERCADO_COMUM', label: 'Mercado Comum' },
+        { value: 'DESCARTAVEIS_LIMPEZA', label: 'Descartáveis e Limpeza' },
+        { value: 'COMBUSTIVEL_TRANSPORTE', label: 'Combustível e Transporte' }
+      ],
+      'FIXAS': [
+        { value: 'TAXA_OCUPACAO', label: 'Taxa de Ocupação' },
+        { value: 'FOLHA_SALARIAL', label: 'Folha Salarial' },
+        { value: 'EMPRESTIMOS_PRESTACOES', label: 'Empréstimos e Prestações' }
+      ],
+      'VARIÁVEIS': [
+        { value: 'MANUTENCAO', label: 'Manutenção' },
+        { value: 'SAZONAIS', label: 'Sazonais' }
+      ],
+      'RETIRADAS': [
+        { value: 'PROLABORE', label: 'Prolabore' },
+        { value: 'IMPLEMENTACAO', label: 'Implementação' }
+      ]
     };
 
-    return subcategoriasPorCategoria[categoria] || [];
+    return subcategories[categoria] || [];
   };
 
   const companies = ['Churrasco', 'Johnny', 'Camerino', 'Implementação'];
@@ -179,13 +196,13 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       console.log('Despesa inserted successfully:', insertedDespesa);
 
       // If subcategoria is Implementação in RETIRADAS, create corresponding receita
-      if (formData.categoria === 'RETIRADAS' && formData.subcategoria === 'Implementação') {
+      if (formData.categoria === 'RETIRADAS' && formData.subcategoria === 'IMPLEMENTACAO') {
         await createImplementacaoReceita(insertData);
       }
 
       toast({
         title: "Sucesso!",
-        description: formData.categoria === 'RETIRADAS' && formData.subcategoria === 'Implementação'
+        description: formData.categoria === 'RETIRADAS' && formData.subcategoria === 'IMPLEMENTACAO'
           ? "Despesa adicionada e receita de Implementação criada com sucesso."
           : "Transação adicionada com sucesso.",
       });
@@ -332,7 +349,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             </Select>
           </div>
 
-          {formData.categoria === 'RETIRADAS' && formData.subcategoria === 'Implementação' && (
+          {formData.categoria === 'RETIRADAS' && formData.subcategoria === 'IMPLEMENTACAO' && (
             <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
               <p className="text-sm text-blue-700">
                 <strong>Nota:</strong> Esta despesa de implementação criará automaticamente uma receita correspondente para a empresa Implementação.
@@ -349,8 +366,8 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                 </SelectTrigger>
                 <SelectContent className="rounded-2xl">
                   {getSubcategoriesForCompanyAndCategory(formData.empresa, formData.categoria).map(subcategory => (
-                    <SelectItem key={subcategory} value={subcategory}>
-                      {subcategory}
+                    <SelectItem key={subcategory.value} value={subcategory.value}>
+                      {subcategory.label}
                     </SelectItem>
                   ))}
                 </SelectContent>

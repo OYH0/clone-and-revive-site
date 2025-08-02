@@ -68,14 +68,14 @@ const ProjectionsModal: React.FC<ProjectionsModalProps> = ({ isOpen, onClose, de
 
   const { mediaReceitas, mediaDespesas } = calcularMedias();
 
-  // Projeções para os próximos 6 meses
+  // Projeções para os próximos 3 meses
   const projecoes = React.useMemo(() => {
     const now = new Date();
     const mesesFuturos = [];
     const crescimentoReceitas = 1.05; // 5% de crescimento
     const crescimentoDespesas = 1.03; // 3% de crescimento
 
-    for (let i = 1; i <= 6; i++) {
+    for (let i = 1; i <= 3; i++) {
       const futureDate = new Date(now.getFullYear(), now.getMonth() + i, 1);
       const mes = futureDate.toLocaleDateString('pt-BR', { month: 'short' });
       
@@ -125,7 +125,7 @@ const ProjectionsModal: React.FC<ProjectionsModalProps> = ({ isOpen, onClose, de
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Projeções Financeiras - {empresa}</DialogTitle>
           <DialogDescription>
-            Projeções baseadas no histórico dos últimos 6 meses
+            Projeções baseadas no histórico dos últimos 6 meses para os próximos 3 meses
           </DialogDescription>
         </DialogHeader>
 
@@ -136,7 +136,7 @@ const ProjectionsModal: React.FC<ProjectionsModalProps> = ({ isOpen, onClose, de
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm flex items-center gap-2">
                   <TrendingUp className="h-4 w-4 text-green-500" />
-                  Receita Projetada (6m)
+                  Receita Projetada (3m)
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -151,7 +151,7 @@ const ProjectionsModal: React.FC<ProjectionsModalProps> = ({ isOpen, onClose, de
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm flex items-center gap-2">
                   <Calculator className="h-4 w-4 text-red-500" />
-                  Despesa Projetada (6m)
+                  Despesa Projetada (3m)
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -166,7 +166,7 @@ const ProjectionsModal: React.FC<ProjectionsModalProps> = ({ isOpen, onClose, de
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm flex items-center gap-2">
                   <Target className="h-4 w-4 text-blue-500" />
-                  Lucro Projetado (6m)
+                  Lucro Projetado (3m)
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -183,7 +183,7 @@ const ProjectionsModal: React.FC<ProjectionsModalProps> = ({ isOpen, onClose, de
           {/* Gráfico de Projeções */}
           <Card>
             <CardHeader>
-              <CardTitle>Evolução Projetada (Próximos 6 Meses)</CardTitle>
+              <CardTitle>Evolução Projetada (Próximos 3 Meses)</CardTitle>
               <CardDescription>Projeção baseada na tendência histórica dos últimos 6 meses</CardDescription>
             </CardHeader>
             <CardContent>
@@ -207,7 +207,7 @@ const ProjectionsModal: React.FC<ProjectionsModalProps> = ({ isOpen, onClose, de
           <Card>
             <CardHeader>
               <CardTitle>Análise de Cenários</CardTitle>
-              <CardDescription>Diferentes possibilidades para os próximos 6 meses</CardDescription>
+              <CardDescription>Diferentes possibilidades para os próximos 3 meses</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
