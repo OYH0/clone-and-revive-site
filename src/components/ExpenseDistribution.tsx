@@ -81,11 +81,15 @@ const ExpenseDistribution: React.FC<ExpenseDistributionProps> = ({ despesas, emp
           {subcategorias && Object.keys(subcategorias).length > 0 && (
             <div className="mt-2 pt-2 border-t border-gray-200">
               <p className="text-xs font-medium text-gray-700 mb-1">Subcategorias:</p>
-              {Object.entries(subcategorias).map(([subcat, valor]: [string, any]) => (
-                <p key={subcat} className="text-xs text-gray-600">
-                  {subcat}: R$ {valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </p>
-              ))}
+              {Object.entries(subcategorias).map(([subcat, valor]: [string, any]) => {
+                const percentualSub = ((valor / data.value) * 100);
+                return (
+                  <p key={subcat} className="text-xs text-gray-600">
+                    {subcat}: R$ {valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} 
+                    <span className="text-gray-500"> ({percentualSub.toFixed(1)}%)</span>
+                  </p>
+                );
+              })}
             </div>
           )}
         </div>
