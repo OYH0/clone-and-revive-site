@@ -9,6 +9,7 @@ import NextActions from '@/components/NextActions';
 import { filterDataByPeriod } from '@/components/dashboard/utils';
 import PeriodSelector from '@/components/PeriodSelector';
 import CamerinoCharts from '@/components/camerino/CamerinoCharts';
+import CamerinoStats from '@/components/camerino/CamerinoStats';
 import CamerinoPasswordProtection from '@/components/CamerinoPasswordProtection';
 
 const CamerinoPage = () => {
@@ -102,38 +103,12 @@ const CamerinoPage = () => {
             </div>
           </div>
 
-          {/* Stats Cards - Only Revenue and Expenses */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">Receita Total</CardTitle>
-                <div className="p-2 bg-gradient-to-r from-green-100 to-green-200 rounded-xl">
-                  <TrendingUp className="h-4 w-4 text-green-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-600">
-                  R$ {totalReceitasPeriodo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">{filteredReceitas.length} transações</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">Despesas Totais</CardTitle>
-                <div className="p-2 bg-gradient-to-r from-red-100 to-red-200 rounded-xl">
-                  <DollarSign className="h-4 w-4 text-red-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-red-600">
-                  R$ {totalDespesasPeriodo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">{filteredDespesas.length} transações</p>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Stats Cards */}
+          <CamerinoStats 
+            despesas={filteredDespesas} 
+            receitas={filteredReceitas} 
+            selectedPeriod={selectedPeriod} 
+          />
 
           {/* Charts Component */}
           <CamerinoCharts despesas={filteredDespesas} receitas={filteredReceitas} />

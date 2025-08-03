@@ -15,6 +15,7 @@ import NextActions from '@/components/NextActions';
 import { filterDataByPeriod } from '@/components/dashboard/utils';
 import { calculateProfitByPeriod } from '@/utils/dateUtils';
 import CompanhiaCharts from '@/components/companhia/CompanhiaCharts';
+import CompanhiaStats from '@/components/companhia/CompanhiaStats';
 
 const CompanhiaPage = () => {
   const { data: despesas } = useDespesas();
@@ -152,71 +153,11 @@ const CompanhiaPage = () => {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">Receita Total</CardTitle>
-                <div className="p-2 bg-gradient-to-r from-green-100 to-green-200 rounded-xl">
-                  <TrendingUp className="h-4 w-4 text-green-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-600">
-                  R$ {totalReceitasPeriodo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">{filteredReceitas.length} transações</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">Despesas Totais</CardTitle>
-                <div className="p-2 bg-gradient-to-r from-red-100 to-red-200 rounded-xl">
-                  <DollarSign className="h-4 w-4 text-red-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-red-600">
-                  R$ {totalDespesasPeriodo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">{filteredDespesas.length} transações</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">{getLucroLabel()}</CardTitle>
-                <div className="p-2 bg-gradient-to-r from-blue-100 to-blue-200 rounded-xl">
-                  <BarChart3 className="h-4 w-4 text-blue-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className={`text-2xl font-bold ${lucroCalculado >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  R$ {lucroCalculado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  {lucroCalculado >= 0 ? '+' : ''}{margemLucro.toFixed(1)}% margem
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">CMV (Insumos)</CardTitle>
-                <div className="p-2 bg-gradient-to-r from-orange-100 to-orange-200 rounded-xl">
-                  <Package className="h-4 w-4 text-orange-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-orange-600">
-                  R$ {cmvTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  {percentualCMV.toFixed(1)}% das vendas
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+          <CompanhiaStats 
+            despesas={filteredDespesas} 
+            receitas={filteredReceitas} 
+            selectedPeriod={selectedPeriod} 
+          />
 
           {/* Charts Component */}
           <CompanhiaCharts despesas={filteredDespesas} receitas={filteredReceitas} />
