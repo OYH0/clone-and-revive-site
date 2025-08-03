@@ -196,7 +196,8 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
   return (
     <>
       <div className="overflow-x-auto">
-        <table className="w-full table-fixed">
+        {/* Versão desktop da tabela */}
+        <table className="w-full table-fixed hidden lg:table">
           <thead>
             <tr className="border-b border-gray-200">
               <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Data de Pagamento</th>
@@ -264,6 +265,70 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
             ))}
           </tbody>
         </table>
+
+        {/* Versão mobile - Cards */}
+        <div className="lg:hidden space-y-4">
+          {transactions.map((transaction) => (
+            <div key={transaction.id} className="bg-white rounded-lg shadow-md p-4 border border-gray-200">
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex-1">
+                  <div className="font-medium text-gray-900 mb-1">
+                    <DescriptionCell description={transaction.description} />
+                  </div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="px-2 py-1 rounded text-xs bg-blue-500 text-white">
+                      {transaction.company}
+                    </span>
+                    <CategoryCell category={transaction.category} />
+                  </div>
+                </div>
+                <StatusCell transaction={transaction} />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 text-sm text-gray-600 mb-3">
+                <div>
+                  <span className="font-medium">Vencimento:</span>
+                  <div>{transaction.data_vencimento ? formatDate(transaction.data_vencimento) : '-'}</div>
+                </div>
+                <div>
+                  <span className="font-medium">Pagamento:</span>
+                  <div>{transaction.status === 'PAGO' ? formatDate(transaction.date) : '-'}</div>
+                </div>
+                <div>
+                  <span className="font-medium">Valor:</span>
+                  <div className="text-gray-900 font-medium">
+                    R$ {transaction.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </div>
+                </div>
+                <div>
+                  <span className="font-medium">Total:</span>
+                  <div className="text-gray-900 font-medium">
+                    R$ {(transaction.valor_total || transaction.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </div>
+                </div>
+              </div>
+
+              {transaction.valor_juros && transaction.valor_juros > 0 && (
+                <div className="text-sm text-gray-600 mb-3">
+                  <span className="font-medium">Juros:</span> R$ {transaction.valor_juros.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </div>
+              )}
+
+              <div className="flex justify-end">
+                <ActionsCell
+                  transaction={transaction}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onMarkAsPaid={handleMarkAsPaidRequest}
+                  onAttachReceipt={handleAttachReceipt}
+                  onViewReceipt={handleViewReceipt}
+                  canEdit={isAdmin || transaction.user_id === user?.id}
+                  canDelete={isAdmin || transaction.user_id === user?.id}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <EditTransactionModal
