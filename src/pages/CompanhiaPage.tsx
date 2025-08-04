@@ -97,20 +97,20 @@ const CompanhiaPage = () => {
     <div className="flex min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50">
       <Sidebar />
       
-      <div className="flex-1 p-8">
+      <div className="flex-1 lg:ml-64 transition-all duration-300 p-4 lg:p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}
           <div className="mb-8">
-            <div className="flex items-center justify-between gap-3 mb-6">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-6">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl shadow-lg">
-                  <Building2 className="h-8 w-8 text-white" />
+                <div className="p-2 lg:p-3 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl shadow-lg">
+                  <Building2 className="h-6 w-6 lg:h-8 lg:w-8 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-4xl font-bold bg-gradient-to-r from-red-600 via-red-700 to-red-800 bg-clip-text text-transparent">
+                  <h1 className="text-2xl lg:text-4xl font-bold bg-gradient-to-r from-red-600 via-red-700 to-red-800 bg-clip-text text-transparent">
                     Companhia do Churrasco
                   </h1>
-                  <p className="text-gray-600 text-lg">Análise financeira detalhada da empresa</p>
+                  <p className="text-gray-600 text-sm lg:text-lg">Análise financeira detalhada da empresa</p>
                 </div>
               </div>
 
@@ -124,27 +124,27 @@ const CompanhiaPage = () => {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Button className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-2xl h-12">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-4">
+              <Button className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-2xl h-10 lg:h-12 text-sm lg:text-base">
                 Relatório Mensal
               </Button>
               <Button 
                 variant="outline" 
-                className="rounded-2xl h-12"
+                className="rounded-2xl h-10 lg:h-12 text-sm lg:text-base"
                 onClick={() => setActiveModal('costs')}
               >
                 Análise de Custos
               </Button>
               <Button 
                 variant="outline" 
-                className="rounded-2xl h-12"
+                className="rounded-2xl h-10 lg:h-12 text-sm lg:text-base"
                 onClick={() => setActiveModal('projections')}
               >
                 Projeções
               </Button>
               <Button 
                 variant="outline" 
-                className="rounded-2xl h-12"
+                className="rounded-2xl h-10 lg:h-12 text-sm lg:text-base"
                 onClick={() => setActiveModal('comparative')}
               >
                 Comparativo

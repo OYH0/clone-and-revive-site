@@ -111,19 +111,19 @@ const ConfiguracoesPage = () => {
     <div className={`flex min-h-screen ${settings.darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-gray-50 via-purple-50 to-indigo-100'}`}>
       <Sidebar />
       
-      <div className="flex-1 p-8">
+      <div className="flex-1 lg:ml-64 transition-all duration-300 p-4 lg:p-8">
         <div className="max-w-4xl mx-auto">
           {/* Header Section */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl shadow-lg">
-                <Settings className="h-8 w-8 text-white" />
+              <div className="p-2 lg:p-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl shadow-lg">
+                <Settings className="h-6 w-6 lg:h-8 lg:w-8 text-white" />
               </div>
               <div>
-                <h1 className={`text-4xl font-bold bg-gradient-to-r ${settings.darkMode ? 'from-white to-gray-300' : 'from-gray-900 via-gray-800 to-gray-700'} bg-clip-text text-transparent`}>
+                <h1 className={`text-2xl lg:text-4xl font-bold bg-gradient-to-r ${settings.darkMode ? 'from-white to-gray-300' : 'from-gray-900 via-gray-800 to-gray-700'} bg-clip-text text-transparent`}>
                   Configurações
                 </h1>
-                <p className={`${settings.darkMode ? 'text-gray-300' : 'text-gray-600'} text-lg`}>
+                <p className={`${settings.darkMode ? 'text-gray-300' : 'text-gray-600'} text-sm lg:text-lg`}>
                   Gerencie as configurações do sistema
                 </p>
               </div>

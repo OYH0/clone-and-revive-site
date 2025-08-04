@@ -36,14 +36,14 @@ const ImplementacaoStats: React.FC<ImplementacaoStatsProps> = ({ despesas, recei
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
       <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
           <CardTitle className="text-sm font-medium text-gray-600">Total de Receitas</CardTitle>
           <TrendingUp className="h-5 w-5 text-green-500" />
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold text-green-600 mb-2">
+          <div className="text-xl lg:text-3xl font-bold text-green-600 mb-2">
             R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </div>
           <div className="flex items-center justify-between">
@@ -67,7 +67,7 @@ const ImplementacaoStats: React.FC<ImplementacaoStatsProps> = ({ despesas, recei
           <DollarSign className="h-5 w-5 text-red-500" />
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold text-red-600 mb-2">
+          <div className="text-xl lg:text-3xl font-bold text-red-600 mb-2">
             R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </div>
           <div className="flex items-center justify-between">
@@ -99,7 +99,7 @@ const ImplementacaoStats: React.FC<ImplementacaoStatsProps> = ({ despesas, recei
           </div>
         </CardHeader>
         <CardContent>
-          <div className={`text-3xl font-bold ${
+          <div className={`text-xl lg:text-3xl font-bold ${
             valorRestante >= 0 
               ? 'bg-gradient-to-r from-purple-600 to-purple-700 bg-clip-text text-transparent'
               : 'bg-gradient-to-r from-red-600 to-red-700 bg-clip-text text-transparent'
@@ -122,7 +122,7 @@ const ImplementacaoStats: React.FC<ImplementacaoStatsProps> = ({ despesas, recei
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold text-gray-800">{despesasPendentes}</div>
+          <div className="text-xl lg:text-3xl font-bold text-gray-800">{despesasPendentes}</div>
           <p className="text-xs text-gray-500 mt-1">Aguardando pagamento</p>
         </CardContent>
       </Card>

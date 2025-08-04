@@ -98,25 +98,25 @@ const AdminPage = () => {
       <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-red-50 to-pink-100">
         <Sidebar />
         
-        <div className="flex-1 p-8">
+        <div className="flex-1 lg:ml-64 transition-all duration-300 p-4 lg:p-8">
           <div className="max-w-6xl mx-auto">
             {/* Header Section */}
             <div className="mb-8">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl shadow-lg">
-                  <Shield className="h-8 w-8 text-white" />
+                <div className="p-2 lg:p-3 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl shadow-lg">
+                  <Shield className="h-6 w-6 lg:h-8 lg:w-8 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent">
+                  <h1 className="text-2xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent">
                     Painel de Administração
                   </h1>
-                  <p className="text-gray-600 text-lg">Gerencie usuários e permissões do sistema</p>
+                  <p className="text-gray-600 text-sm lg:text-lg">Gerencie usuários e permissões do sistema</p>
                 </div>
               </div>
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 mb-8">
               <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium text-gray-600">Total de Usuários</CardTitle>
@@ -126,7 +126,7 @@ const AdminPage = () => {
                     <div className="p-2 bg-gradient-to-r from-blue-100 to-blue-200 rounded-lg">
                       <Users className="h-5 w-5 text-blue-500" />
                     </div>
-                    <span className="text-3xl font-bold text-gray-800">{profiles.length}</span>
+                    <span className="text-2xl lg:text-3xl font-bold text-gray-800">{profiles.length}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -140,7 +140,7 @@ const AdminPage = () => {
                     <div className="p-2 bg-gradient-to-r from-green-100 to-green-200 rounded-lg">
                       <UserCheck className="h-5 w-5 text-green-500" />
                     </div>
-                    <span className="text-3xl font-bold text-gray-800">{profiles.filter(p => p.is_admin).length}</span>
+                    <span className="text-2xl lg:text-3xl font-bold text-gray-800">{profiles.filter(p => p.is_admin).length}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -154,7 +154,7 @@ const AdminPage = () => {
                     <div className="p-2 bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg">
                       <UserX className="h-5 w-5 text-gray-500" />
                     </div>
-                    <span className="text-3xl font-bold text-gray-800">{profiles.filter(p => !p.is_admin).length}</span>
+                    <span className="text-2xl lg:text-3xl font-bold text-gray-800">{profiles.filter(p => !p.is_admin).length}</span>
                   </div>
                 </CardContent>
               </Card>

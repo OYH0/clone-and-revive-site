@@ -50,7 +50,7 @@ const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas, selectedP
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
         <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="text-sm font-medium text-gray-600">
@@ -59,7 +59,7 @@ const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas, selectedP
             <TrendingUp className="h-5 w-5 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-green-600 mb-2">
+            <div className="text-xl lg:text-3xl font-bold text-green-600 mb-2">
               R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
             <div className="flex items-center justify-between">
@@ -90,7 +90,7 @@ const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas, selectedP
             <DollarSign className="h-5 w-5 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-red-600 mb-2">
+            <div className="text-xl lg:text-3xl font-bold text-red-600 mb-2">
               R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
             <div className="flex items-center justify-between">
@@ -121,7 +121,7 @@ const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas, selectedP
             <BarChart3 className="h-5 w-5 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className={`text-3xl font-bold ${lucroLiquido >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <div className={`text-xl lg:text-3xl font-bold ${lucroLiquido >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               R$ {lucroLiquido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
             <p className="text-xs text-gray-500 mt-1">
@@ -138,7 +138,7 @@ const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas, selectedP
             <Package className="h-5 w-5 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-orange-600">
+            <div className="text-xl lg:text-3xl font-bold text-orange-600">
               R$ {cmvTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
             <p className={`text-xs mt-1 font-medium ${getCMVColor(percentualCMV)}`}>
