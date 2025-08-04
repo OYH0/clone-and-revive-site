@@ -98,25 +98,25 @@ const AdminPage = () => {
       <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-red-50 to-pink-100">
         <Sidebar />
         
-        <div className="flex-1 p-8">
+        <div className="flex-1 lg:ml-64 transition-all duration-300 p-4 lg:p-8">
           <div className="max-w-6xl mx-auto">
             {/* Header Section */}
             <div className="mb-8">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl shadow-lg">
-                  <Shield className="h-8 w-8 text-white" />
+                <div className="p-2 lg:p-3 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl shadow-lg">
+                  <Shield className="h-6 w-6 lg:h-8 lg:w-8 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent">
+                  <h1 className="text-2xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent">
                     Painel de Administração
                   </h1>
-                  <p className="text-gray-600 text-lg">Gerencie usuários e permissões do sistema</p>
+                  <p className="text-gray-600 text-sm lg:text-lg">Gerencie usuários e permissões do sistema</p>
                 </div>
               </div>
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
               <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium text-gray-600">Total de Usuários</CardTitle>
@@ -193,43 +193,45 @@ const AdminPage = () => {
                   ) : (
                     <div className="space-y-4">
                       {filteredProfiles.map((profile) => (
-                        <div key={profile.id} className="flex items-center justify-between p-4 bg-white/50 border border-gray-100 rounded-lg">
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
-                              <Users className="h-6 w-6 text-gray-600" />
+                        <div key={profile.id} className="flex flex-col lg:flex-row lg:items-center justify-between p-4 bg-white/50 border border-gray-100 rounded-lg gap-4">
+                          <div className="flex items-center gap-3 lg:gap-4">
+                            <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+                              <Users className="h-5 w-5 lg:h-6 lg:w-6 text-gray-600" />
                             </div>
-                            <div>
-                              <p className="font-medium text-gray-900">{profile.email}</p>
-                              <p className="text-sm text-gray-500">
+                            <div className="min-w-0 flex-1">
+                              <p className="font-medium text-gray-900 text-sm lg:text-base truncate">{profile.email}</p>
+                              <p className="text-xs lg:text-sm text-gray-500">
                                 Criado em: {new Date(profile.created_at).toLocaleDateString('pt-BR')}
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2 lg:gap-3 justify-end">
                             <Badge 
                               variant={profile.is_admin ? "default" : "secondary"}
-                              className={profile.is_admin ? "bg-green-100 text-green-800" : ""}
+                              className={`text-xs ${profile.is_admin ? "bg-green-100 text-green-800" : ""}`}
                             >
-                              {profile.is_admin ? 'Administrador' : 'Usuário'}
+                              {profile.is_admin ? 'Admin' : 'Usuário'}
                             </Badge>
                             <Button
                               onClick={() => toggleAdminStatus(profile.id, profile.is_admin)}
                               variant={profile.is_admin ? "destructive" : "default"}
                               size="sm"
-                              className={profile.is_admin 
+                              className={`text-xs lg:text-sm ${profile.is_admin 
                                 ? "bg-red-500 hover:bg-red-600" 
                                 : "bg-green-500 hover:bg-green-600 text-white"
-                              }
+                              }`}
                             >
                               {profile.is_admin ? (
                                 <>
-                                  <UserX className="h-4 w-4 mr-2" />
-                                  Remover Admin
+                                  <UserX className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
+                                  <span className="hidden sm:inline">Remover Admin</span>
+                                  <span className="sm:hidden">Remover</span>
                                 </>
                               ) : (
                                 <>
-                                  <UserCheck className="h-4 w-4 mr-2" />
-                                  Tornar Admin
+                                  <UserCheck className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
+                                  <span className="hidden sm:inline">Tornar Admin</span>
+                                  <span className="sm:hidden">Admin</span>
                                 </>
                               )}
                             </Button>
