@@ -75,33 +75,31 @@ const CamerinoPage = () => {
     <div className="flex min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50">
       <Sidebar />
       
-      <div className="flex-1 lg:ml-64 transition-all duration-300 p-4 lg:p-8">
+      <div className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}
           <div className="mb-8">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-6">
+            <div className="flex items-center justify-between gap-3 mb-6">
               <div className="flex items-center gap-3">
-                <div className="p-2 lg:p-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl shadow-lg">
-                  <Building2 className="h-6 w-6 lg:h-8 lg:w-8 text-white" />
+                <div className="p-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl shadow-lg">
+                  <Building2 className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl lg:text-4xl font-bold bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 bg-clip-text text-transparent">
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 bg-clip-text text-transparent">
                     Camerino
                   </h1>
-                  <p className="text-gray-600 text-sm lg:text-lg">Análise financeira detalhada da empresa</p>
+                  <p className="text-gray-600 text-lg">Análise financeira detalhada da empresa</p>
                 </div>
               </div>
 
               {/* Filtros de Período */}
-              <div className="w-full lg:w-auto">
-                <PeriodSelector
-                  selectedPeriod={selectedPeriod}
-                  onPeriodChange={setSelectedPeriod}
-                  customMonth={customMonth}
-                  customYear={customYear}
-                  onCustomDateChange={handleCustomDateChange}
-                />
-              </div>
+              <PeriodSelector
+                selectedPeriod={selectedPeriod}
+                onPeriodChange={setSelectedPeriod}
+                customMonth={customMonth}
+                customYear={customYear}
+                onCustomDateChange={handleCustomDateChange}
+              />
             </div>
           </div>
 
@@ -116,7 +114,7 @@ const CamerinoPage = () => {
           <CamerinoCharts despesas={filteredDespesas} receitas={filteredReceitas} />
 
           {/* Próximas Ações */}
-          <div className="grid grid-cols-1 gap-4 lg:gap-6">
+          <div className="grid grid-cols-1 gap-6">
             <NextActions empresa="Camerino" />
           </div>
         </div>
