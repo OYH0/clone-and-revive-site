@@ -83,7 +83,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
     setMarkingAsPaidTransaction(transaction);
   };
 
-  const handleMarkAsPaidConfirm = async (transaction: Transaction) => {
+  const handleMarkAsPaidConfirm = async (transaction: Transaction, paymentSource: 'cofre' | 'conta') => {
     if (!user) return;
 
     try {
@@ -97,6 +97,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
         status: 'PAGO'
       };
 
+      // Atualizar a despesa como paga
       const { error, data } = await supabase
         .from('despesas')
         .update(updateData)
@@ -108,13 +109,36 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
         throw error;
       }
 
+      // Subtrair o valor do cofre ou conta correspondente
+      const valorPago = transaction.valor_total || transaction.valor;
+      const categoria = paymentSource === 'cofre' ? 'Em Cofre' : 'Em Conta';
+      
+      // Criar uma entrada negativa nas receitas para subtrair o valor
+      const { error: receitaError } = await supabase
+        .from('receitas')
+        .insert({
+          data: today,
+          valor: -valorPago,
+          descricao: `Pagamento: ${transaction.description}`,
+          empresa: transaction.company,
+          categoria: categoria,
+          data_recebimento: today,
+          user_id: user.id
+        });
+
+      if (receitaError) {
+        console.error('Error creating negative receipt:', receitaError);
+        // Continue even if the receipt creation fails
+      }
+
       console.log('Transaction updated successfully:', data);
 
       const formattedDate = new Date(today).toLocaleDateString('pt-BR');
+      const sourceText = paymentSource === 'cofre' ? 'cofre' : 'conta';
 
       toast({
         title: "Sucesso",
-        description: `Despesa marcada como paga em ${formattedDate}!`,
+        description: `Despesa marcada como paga em ${formattedDate} e valor deduzido do ${sourceText}!`,
       });
 
       onTransactionUpdated();

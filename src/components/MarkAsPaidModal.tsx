@@ -1,15 +1,16 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, AlertTriangle } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CheckCircle, AlertTriangle, Wallet } from 'lucide-react';
 import { Transaction } from '@/types/transaction';
 
 interface MarkAsPaidModalProps {
   isOpen: boolean;
   onClose: () => void;
   transaction: Transaction | null;
-  onConfirm: (transaction: Transaction) => void;
+  onConfirm: (transaction: Transaction, paymentSource: 'cofre' | 'conta') => void;
 }
 
 const MarkAsPaidModal: React.FC<MarkAsPaidModalProps> = ({
@@ -18,10 +19,12 @@ const MarkAsPaidModal: React.FC<MarkAsPaidModalProps> = ({
   transaction,
   onConfirm
 }) => {
+  const [paymentSource, setPaymentSource] = useState<'cofre' | 'conta'>('conta');
+  
   if (!transaction) return null;
 
   const handleConfirm = () => {
-    onConfirm(transaction);
+    onConfirm(transaction, paymentSource);
     onClose();
   };
 
@@ -65,12 +68,39 @@ const MarkAsPaidModal: React.FC<MarkAsPaidModalProps> = ({
             </div>
           </div>
           
-          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <div className="flex items-start gap-2">
-              <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
-              <div className="text-sm text-yellow-800">
-                <p className="font-medium">Atenção:</p>
-                <p>Esta ação marcará a despesa como paga na data de hoje. Se a categoria for "ATRASADOS", ela será alterada para "FIXAS".</p>
+          <div className="mt-4 space-y-3">
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                Forma de Pagamento:
+              </label>
+              <Select value={paymentSource} onValueChange={(value: 'cofre' | 'conta') => setPaymentSource(value)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione a forma de pagamento" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="conta">
+                    <div className="flex items-center gap-2">
+                      <Wallet className="h-4 w-4" />
+                      Dinheiro em Conta
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="cofre">
+                    <div className="flex items-center gap-2">
+                      <Wallet className="h-4 w-4" />
+                      Dinheiro em Cofre
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
+                <div className="text-sm text-yellow-800">
+                  <p className="font-medium">Atenção:</p>
+                  <p>Esta ação marcará a despesa como paga e deduzirá o valor do {paymentSource === 'cofre' ? 'Total em Cofre' : 'Total em Conta'} na aba de receitas.</p>
+                </div>
               </div>
             </div>
           </div>

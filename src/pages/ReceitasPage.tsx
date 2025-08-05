@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { Plus, TrendingUp, DollarSign, Calendar, Shield } from 'lucide-react';
+import { Plus, TrendingUp, DollarSign, Calendar, Shield, Wallet } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -51,10 +51,21 @@ const ReceitasPage = () => {
   }, [currentMonthReceitas, searchTerm, filterEmpresa, filterCategoria]);
 
   // Calcular estatísticas baseadas nas receitas filtradas
-  const totalReceitas = filteredReceitas.reduce((sum, receita) => sum + receita.valor, 0);
+  const totalReceitas = filteredReceitas
+    .filter(r => r.categoria !== 'Em Cofre' && r.categoria !== 'Em Conta')
+    .reduce((sum, receita) => sum + receita.valor, 0);
   const receitasRecebidas = filteredReceitas.filter(r => r.data_recebimento).length;
-  const receitasPendentes = filteredReceitas.filter(r => !r.data_recebimento).length;
-  const valorRecebido = filteredReceitas.filter(r => r.data_recebimento).reduce((sum, receita) => sum + receita.valor, 0);
+  const valorRecebido = filteredReceitas
+    .filter(r => r.data_recebimento && r.categoria !== 'Em Cofre' && r.categoria !== 'Em Conta')
+    .reduce((sum, receita) => sum + receita.valor, 0);
+  
+  // Novos cálculos para cofre e conta
+  const totalEmCofre = filteredReceitas
+    .filter(r => r.categoria === 'Em Cofre')
+    .reduce((sum, receita) => sum + receita.valor, 0);
+  const totalEmConta = filteredReceitas
+    .filter(r => r.categoria === 'Em Conta')
+    .reduce((sum, receita) => sum + receita.valor, 0);
 
   // Handle filter empresa change with Camerino auth check
   const handleFilterEmpresaChange = (value: string) => {
@@ -84,7 +95,7 @@ const ReceitasPage = () => {
       <Sidebar />
       
       <div className="flex-1 lg:ml-64 transition-all duration-300 p-4 lg:p-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full max-w-7xl mx-auto">
           {/* Header Section */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
@@ -144,7 +155,7 @@ const ReceitasPage = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
+                <div className="text-xl lg:text-3xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
                   R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">{filteredReceitas.length} receitas encontradas</p>
@@ -159,7 +170,7 @@ const ReceitasPage = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-800">
+                <div className="text-xl lg:text-3xl font-bold text-gray-800">
                   R$ {valorRecebido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">{receitasRecebidas} receitas recebidas</p>
@@ -168,29 +179,31 @@ const ReceitasPage = () => {
 
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">Receitas Pendentes</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600">Total em Cofre</CardTitle>
                 <div className="p-2 bg-gradient-to-r from-yellow-100 to-yellow-200 rounded-xl">
-                  <Calendar className="h-4 w-4 text-yellow-600" />
+                  <Wallet className="h-4 w-4 text-yellow-600" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-800">{receitasPendentes}</div>
-                <p className="text-xs text-gray-500 mt-1">Aguardando recebimento</p>
+                <div className="text-xl lg:text-3xl font-bold text-gray-800">
+                  R$ {totalEmCofre.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Disponível em cofre</p>
               </CardContent>
             </Card>
 
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">Taxa de Recebimento</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-600">Total em Conta</CardTitle>
                 <div className="p-2 bg-gradient-to-r from-purple-100 to-purple-200 rounded-xl">
-                  <TrendingUp className="h-4 w-4 text-purple-600" />
+                  <Wallet className="h-4 w-4 text-purple-600" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-800">
-                  {filteredReceitas.length ? Math.round((receitasRecebidas / filteredReceitas.length) * 100) : 0}%
+                <div className="text-xl lg:text-3xl font-bold text-gray-800">
+                  R$ {totalEmConta.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Receitas já recebidas</p>
+                <p className="text-xs text-gray-500 mt-1">Disponível em conta</p>
               </CardContent>
             </Card>
           </div>

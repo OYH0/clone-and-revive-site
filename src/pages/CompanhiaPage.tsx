@@ -98,10 +98,10 @@ const CompanhiaPage = () => {
       <Sidebar />
       
       <div className="flex-1 lg:ml-64 transition-all duration-300 p-4 lg:p-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full max-w-7xl mx-auto">
           {/* Header Section */}
           <div className="mb-8">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-6">
+            <div className="flex flex-col gap-4 mb-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 lg:p-3 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl shadow-lg">
                   <Building2 className="h-6 w-6 lg:h-8 lg:w-8 text-white" />
@@ -115,13 +115,15 @@ const CompanhiaPage = () => {
               </div>
 
               {/* Filtros de Período */}
-              <PeriodSelector
-                selectedPeriod={selectedPeriod}
-                onPeriodChange={setSelectedPeriod}
-                customMonth={customMonth}
-                customYear={customYear}
-                onCustomDateChange={handleCustomDateChange}
-              />
+              <div className="w-full lg:w-auto">
+                <PeriodSelector
+                  selectedPeriod={selectedPeriod}
+                  onPeriodChange={setSelectedPeriod}
+                  customMonth={customMonth}
+                  customYear={customYear}
+                  onCustomDateChange={handleCustomDateChange}
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-4">
