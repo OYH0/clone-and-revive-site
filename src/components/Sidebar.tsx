@@ -42,7 +42,7 @@ const Sidebar: React.FC = () => {
       <div className="lg:hidden fixed inset-0 bg-black/50 z-40" id="sidebar-overlay" style={{ display: 'none' }}></div>
       
       {/* Sidebar */}
-      <div className="fixed left-0 top-0 w-64 lg:w-64 md:w-60 sm:w-56 bg-gradient-to-b from-blue-600 via-blue-700 to-blue-800 text-white h-screen flex flex-col z-50 shadow-xl transform -translate-x-full lg:translate-x-0 transition-transform duration-300" id="sidebar">
+      <div className="fixed left-0 top-0 w-64 bg-gradient-to-b from-blue-600 via-blue-700 to-blue-800 text-white h-screen flex flex-col z-50 shadow-xl transform -translate-x-full lg:translate-x-0 transition-transform duration-300" id="sidebar">
         {/* Botão de fechar para mobile */}
         <div className="lg:hidden flex justify-end p-4">
           <button 

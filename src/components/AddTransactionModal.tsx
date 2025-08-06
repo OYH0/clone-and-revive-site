@@ -30,7 +30,8 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     categoria: 'INSUMOS',
     subcategoria: '',
     data_vencimento: '',
-    valor_juros: ''
+    valor_juros: '',
+    origem_pagamento: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -159,6 +160,15 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       return;
     }
 
+    if (formData.data && !formData.origem_pagamento) {
+      toast({
+        title: "Erro",
+        description: "Por favor, selecione a origem do pagamento quando a data de pagamento for informada.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsLoading(true);
     
     try {
@@ -171,9 +181,56 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         subcategoria: formData.subcategoria || null,
         data_vencimento: formData.data_vencimento,
         valor_juros: formData.valor_juros ? parseFloat(formData.valor_juros) : 0,
-        status: null,
+        status: formData.data ? 'PAGO' : null,
         user_id: user.id
       };
+
+      // Se foi marcado como pago na criação e tem origem de pagamento, deduzir do total correspondente
+      if (formData.data && formData.origem_pagamento) {
+        const valorTotal = parseFloat(formData.valor) + (formData.valor_juros ? parseFloat(formData.valor_juros) : 0);
+        
+        try {
+          const { data: currentReceitas, error: fetchError } = await supabase
+            .from('receitas')
+            .select('*')
+            .eq('categoria', formData.origem_pagamento === 'cofre' ? 'EM_COFRE' : 'EM_CONTA');
+
+          if (fetchError) throw fetchError;
+
+          const currentTotal = currentReceitas?.reduce((sum, r) => sum + (r.valor || 0), 0) || 0;
+          const newTotal = currentTotal - valorTotal;
+
+          if (newTotal < 0) {
+            toast({
+              title: "Aviso",
+              description: `Saldo insuficiente ${formData.origem_pagamento === 'cofre' ? 'no cofre' : 'na conta'}. Atual: R$ ${currentTotal.toFixed(2)}`,
+              variant: "destructive"
+            });
+            return;
+          }
+
+          // Criar uma receita negativa para representar a dedução
+          await supabase
+            .from('receitas')
+            .insert([{
+              data: formData.data,
+              valor: -valorTotal,
+              data_recebimento: formData.data,
+              descricao: `Pagamento de despesa: ${formData.descricao || 'Sem descrição'}`,
+              empresa: formData.empresa,
+              categoria: formData.origem_pagamento === 'cofre' ? 'EM_COFRE' : 'EM_CONTA',
+              user_id: user.id
+            }]);
+        } catch (error) {
+          console.error('Error updating cofre/conta totals:', error);
+          toast({
+            title: "Erro",
+            description: "Erro ao atualizar totais de cofre/conta.",
+            variant: "destructive"
+          });
+          return;
+        }
+      }
 
       console.log('Inserting despesa with data:', insertData);
 
@@ -216,7 +273,8 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         categoria: 'INSUMOS',
         subcategoria: '',
         data_vencimento: '',
-        valor_juros: ''
+        valor_juros: '',
+        origem_pagamento: ''
       });
 
       onTransactionAdded();
@@ -386,6 +444,22 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               className="rounded-2xl"
             />
           </div>
+
+          {formData.data && (
+            <div className="space-y-2">
+              <Label htmlFor="origem_pagamento">Origem do Pagamento *</Label>
+              <Select value={formData.origem_pagamento} onValueChange={(value) => handleInputChange('origem_pagamento', value)}>
+                <SelectTrigger className="rounded-full">
+                  <SelectValue placeholder="Selecione a origem do pagamento" />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl">
+                  <SelectItem value="cofre">Cofre</SelectItem>
+                  <SelectItem value="conta">Conta</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-gray-500">Obrigatório quando a data de pagamento é informada.</p>
+            </div>
+          )}
 
           <div className="flex justify-end gap-2 pt-4">
             <Button
