@@ -139,7 +139,7 @@ const DespesasPage = () => {
       <Sidebar />
       
       <div className="flex-1 lg:ml-64 transition-all duration-300 p-4 lg:p-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full">
           {/* Header Section */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
