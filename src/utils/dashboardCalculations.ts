@@ -1,6 +1,33 @@
 
 import { Despesa } from '@/hooks/useDespesas';
 
+// Função para normalizar subcategorias
+const normalizeSubcategoria = (subcategoria: string): string => {
+  if (!subcategoria) return 'Outros';
+  
+  // Mapeamento para normalizar subcategorias inconsistentes
+  const normalizationMap: { [key: string]: string } = {
+    'MERCADO_COMUM': 'Mercado Comum',
+    'DESCARTAVEIS_LIMPEZA': 'Descartáveis e Limpeza',
+    'DESCARTAVEIS': 'Descartáveis e Limpeza',
+    'Descartáveis': 'Descartáveis e Limpeza',
+    'COMBUSTIVEL_TRANSPORTE': 'Combustível e Transporte',
+    'EMPRESTIMOS_PRESTACOES': 'Empréstimos e Prestações',
+    'EMPRESTIMOS': 'Empréstimos e Prestações',
+    'FOLHA_SALARIAL': 'Folha Salarial',
+    'TAXA_OCUPACAO': 'Taxa de Ocupação',
+    'BEBIDAS': 'Bebidas',
+    'HORTIFRUTI': 'Hortifrúti',
+    'PROTEINAS': 'Proteínas',
+    'MANUTENCAO': 'Manutenção',
+    'SAZONAIS': 'Sazonais',
+    'PROLABORE': 'Pró-labore',
+    'SUPERMERCADO': 'Supermercado'
+  };
+  
+  return normalizationMap[subcategoria] || subcategoria;
+};
+
 export const calculateDistributionData = (despesas: Despesa[]) => {
   console.log('=== CALCULATING DISTRIBUTION DATA WITH SUBCATEGORIES ===');
   console.log('Despesas para calcular:', despesas?.length || 0);
@@ -21,7 +48,8 @@ export const calculateDistributionData = (despesas: Despesa[]) => {
   despesasSemCamerino.forEach(despesa => {
     const valor = despesa.valor_total || despesa.valor || 0;
     const categoria = despesa.categoria || 'Sem categoria';
-    const subcategoria = despesa.subcategoria || 'Outros';
+    const subcategoriaOriginal = despesa.subcategoria || 'Outros';
+    const subcategoria = normalizeSubcategoria(subcategoriaOriginal);
 
     if (!categoryGroups[categoria]) {
       categoryGroups[categoria] = { total: 0, subcategorias: {} };
