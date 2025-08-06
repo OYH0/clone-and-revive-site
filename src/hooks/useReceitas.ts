@@ -47,13 +47,24 @@ export const useReceitas = () => {
     if (!query.data) return { receitas: [], stats: null };
 
     const receitas = query.data;
-    const totalReceitas = receitas.reduce((sum, r) => sum + (r.valor || 0), 0);
-    const totalRecebidas = receitas
+    
+    // Separar receitas por categoria
+    const receitasNormais = receitas.filter(r => r.categoria !== 'EM_COFRE' && r.categoria !== 'EM_CONTA');
+    const receitasCofre = receitas.filter(r => r.categoria === 'EM_COFRE');
+    const receitasConta = receitas.filter(r => r.categoria === 'EM_CONTA');
+    
+    // Calcular totais das receitas normais (excluindo cofre e conta)
+    const totalReceitas = receitasNormais.reduce((sum, r) => sum + (r.valor || 0), 0);
+    const totalRecebidas = receitasNormais
       .filter(r => r.data_recebimento)
       .reduce((sum, r) => sum + (r.valor || 0), 0);
-    const totalPendentes = receitas
+    const totalPendentes = receitasNormais
       .filter(r => !r.data_recebimento)
       .reduce((sum, r) => sum + (r.valor || 0), 0);
+    
+    // Calcular totais de cofre e conta
+    const totalCofre = receitasCofre.reduce((sum, r) => sum + (r.valor || 0), 0);
+    const totalConta = receitasConta.reduce((sum, r) => sum + (r.valor || 0), 0);
 
     return {
       receitas,
@@ -61,9 +72,11 @@ export const useReceitas = () => {
         total: totalReceitas,
         recebidas: totalRecebidas,
         pendentes: totalPendentes,
-        count: receitas.length,
-        recebidasCount: receitas.filter(r => r.data_recebimento).length,
-        pendentesCount: receitas.filter(r => !r.data_recebimento).length,
+        totalCofre,
+        totalConta,
+        count: receitasNormais.length,
+        recebidasCount: receitasNormais.filter(r => r.data_recebimento).length,
+        pendentesCount: receitasNormais.filter(r => !r.data_recebimento).length,
       }
     };
   }, [query.data]);

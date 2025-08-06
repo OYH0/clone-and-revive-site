@@ -21,7 +21,7 @@ const ReceitasPage = () => {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   
-  const { data: receitas, isLoading } = useReceitas();
+  const { data: receitas, stats, isLoading } = useReceitas();
   const { isAdmin } = useAdminAccess();
   const { isAuthenticated, authenticate } = useCamerinoAuth();
 
@@ -52,19 +52,21 @@ const ReceitasPage = () => {
 
   // Calcular estatísticas baseadas nas receitas filtradas
   const totalReceitas = filteredReceitas
-    .filter(r => r.categoria !== 'Em Cofre' && r.categoria !== 'Em Conta')
+    .filter(r => r.categoria !== 'EM_COFRE' && r.categoria !== 'EM_CONTA')
     .reduce((sum, receita) => sum + receita.valor, 0);
-  const receitasRecebidas = filteredReceitas.filter(r => r.data_recebimento).length;
+  const receitasRecebidas = filteredReceitas
+    .filter(r => r.data_recebimento && r.categoria !== 'EM_COFRE' && r.categoria !== 'EM_CONTA')
+    .length;
   const valorRecebido = filteredReceitas
-    .filter(r => r.data_recebimento && r.categoria !== 'Em Cofre' && r.categoria !== 'Em Conta')
+    .filter(r => r.data_recebimento && r.categoria !== 'EM_COFRE' && r.categoria !== 'EM_CONTA')
     .reduce((sum, receita) => sum + receita.valor, 0);
   
   // Novos cálculos para cofre e conta
   const totalEmCofre = filteredReceitas
-    .filter(r => r.categoria === 'Em Cofre')
+    .filter(r => r.categoria === 'EM_COFRE')
     .reduce((sum, receita) => sum + receita.valor, 0);
   const totalEmConta = filteredReceitas
-    .filter(r => r.categoria === 'Em Conta')
+    .filter(r => r.categoria === 'EM_CONTA')
     .reduce((sum, receita) => sum + receita.valor, 0);
 
   // Handle filter empresa change with Camerino auth check
