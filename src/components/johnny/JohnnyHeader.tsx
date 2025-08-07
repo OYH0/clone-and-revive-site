@@ -12,7 +12,7 @@ interface JohnnyHeaderProps {
 const JohnnyHeader: React.FC<JohnnyHeaderProps> = ({ onModalOpen, selectedPeriod, onPeriodChange }) => {
   return (
     <div className="mb-8">
-      <div className="flex items-center justify-between gap-3 mb-6">
+      <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
         <div className="flex items-center gap-3">
           <div className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl shadow-lg">
             <Building2 className="h-8 w-8 text-white" />
@@ -26,9 +26,9 @@ const JohnnyHeader: React.FC<JohnnyHeaderProps> = ({ onModalOpen, selectedPeriod
         </div>
 
         {/* Filtros de Período */}
-        <div className="flex gap-2">
+        <div className="w-full md:w-auto flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
           <button 
-            className={`px-4 py-2 text-sm rounded-2xl ${
+            className={`shrink-0 px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm rounded-2xl ${
               selectedPeriod === 'today' 
                 ? 'bg-black text-white' 
                 : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
@@ -38,7 +38,7 @@ const JohnnyHeader: React.FC<JohnnyHeaderProps> = ({ onModalOpen, selectedPeriod
             Hoje
           </button>
           <button 
-            className={`px-4 py-2 text-sm rounded-2xl ${
+            className={`shrink-0 px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm rounded-2xl ${
               selectedPeriod === 'week' 
                 ? 'bg-black text-white' 
                 : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
@@ -48,7 +48,7 @@ const JohnnyHeader: React.FC<JohnnyHeaderProps> = ({ onModalOpen, selectedPeriod
             Semana
           </button>
           <button 
-            className={`px-4 py-2 text-sm rounded-2xl ${
+            className={`shrink-0 px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm rounded-2xl ${
               selectedPeriod === 'month' 
                 ? 'bg-black text-white' 
                 : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
@@ -58,7 +58,7 @@ const JohnnyHeader: React.FC<JohnnyHeaderProps> = ({ onModalOpen, selectedPeriod
             Mês
           </button>
           <button 
-            className={`px-4 py-2 text-sm rounded-2xl ${
+            className={`shrink-0 px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm rounded-2xl ${
               selectedPeriod === 'year' 
                 ? 'bg-black text-white' 
                 : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'

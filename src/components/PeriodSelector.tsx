@@ -57,106 +57,108 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
   };
 
   return (
-    <div className="flex gap-2">
-      <button 
-        className={`px-4 py-2 text-sm rounded-2xl ${
-          selectedPeriod === 'today' 
-            ? 'bg-black text-white' 
-            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-        }`}
-        onClick={() => onPeriodChange('today')}
-      >
-        Hoje
-      </button>
-      <button 
-        className={`px-4 py-2 text-sm rounded-2xl ${
-          selectedPeriod === 'week' 
-            ? 'bg-black text-white' 
-            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-        }`}
-        onClick={() => onPeriodChange('week')}
-      >
-        Semana
-      </button>
-      <button 
-        className={`px-4 py-2 text-sm rounded-2xl ${
-          selectedPeriod === 'month' 
-            ? 'bg-black text-white' 
-            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-        }`}
-        onClick={() => onPeriodChange('month')}
-      >
-        Mês
-      </button>
-      <button 
-        className={`px-4 py-2 text-sm rounded-2xl ${
-          selectedPeriod === 'year' 
-            ? 'bg-black text-white' 
-            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-        }`}
-        onClick={() => onPeriodChange('year')}
-      >
-        Ano
-      </button>
+    <div className="overflow-x-auto no-scrollbar -mx-1 px-1">
+      <div className="flex gap-2 w-max">
+        <button 
+          className={`shrink-0 px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm rounded-2xl ${
+            selectedPeriod === 'today' 
+              ? 'bg-black text-white' 
+              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+          }`}
+          onClick={() => onPeriodChange('today')}
+        >
+          Hoje
+        </button>
+        <button 
+          className={`shrink-0 px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm rounded-2xl ${
+            selectedPeriod === 'week' 
+              ? 'bg-black text-white' 
+              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+          }`}
+          onClick={() => onPeriodChange('week')}
+        >
+          Semana
+        </button>
+        <button 
+          className={`shrink-0 px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm rounded-2xl ${
+            selectedPeriod === 'month' 
+              ? 'bg-black text-white' 
+              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+          }`}
+          onClick={() => onPeriodChange('month')}
+        >
+          Mês
+        </button>
+        <button 
+          className={`shrink-0 px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm rounded-2xl ${
+            selectedPeriod === 'year' 
+              ? 'bg-black text-white' 
+              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+          }`}
+          onClick={() => onPeriodChange('year')}
+        >
+          Ano
+        </button>
 
-      {/* Custom Period Selector */}
-      <Popover>
-        <PopoverTrigger asChild>
-          <button 
-            className={`px-4 py-2 text-sm rounded-2xl flex items-center gap-2 ${
-              selectedPeriod === 'custom' 
-                ? 'bg-black text-white' 
-                : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            <Calendar className="h-4 w-4" />
-            {getCustomLabel()}
-          </button>
-        </PopoverTrigger>
-        <PopoverContent className="w-80 p-4" align="end">
-          <div className="space-y-4">
-            <h4 className="font-medium text-sm">Selecionar Período Personalizado</h4>
-            
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-gray-600">Mês</label>
-                <Select value={tempMonth.toString()} onValueChange={(value) => setTempMonth(parseInt(value))}>
-                  <SelectTrigger className="h-9">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {months.map((month) => (
-                      <SelectItem key={month.value} value={month.value.toString()}>
-                        {month.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+        {/* Custom Period Selector */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <button 
+              className={`shrink-0 px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm rounded-2xl flex items-center gap-2 ${
+                selectedPeriod === 'custom' 
+                  ? 'bg-black text-white' 
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <Calendar className="h-4 w-4" />
+              {getCustomLabel()}
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 p-4" align="end">
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm">Selecionar Período Personalizado</h4>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-gray-600">Mês</label>
+                  <Select value={tempMonth.toString()} onValueChange={(value) => setTempMonth(parseInt(value))}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {months.map((month) => (
+                        <SelectItem key={month.value} value={month.value.toString()}>
+                          {month.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-gray-600">Ano</label>
+                  <Select value={tempYear.toString()} onValueChange={(value) => setTempYear(parseInt(value))}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {years.map((year) => (
+                        <SelectItem key={year} value={year.toString()}>
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-gray-600">Ano</label>
-                <Select value={tempYear.toString()} onValueChange={(value) => setTempYear(parseInt(value))}>
-                  <SelectTrigger className="h-9">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {years.map((year) => (
-                      <SelectItem key={year} value={year.toString()}>
-                        {year}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <Button onClick={handleCustomSelection} className="w-full h-9">
+                Aplicar Filtro
+              </Button>
             </div>
-
-            <Button onClick={handleCustomSelection} className="w-full h-9">
-              Aplicar Filtro
-            </Button>
-          </div>
-        </PopoverContent>
-      </Popover>
+          </PopoverContent>
+        </Popover>
+      </div>
     </div>
   );
 };
