@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { Building2, TrendingUp, DollarSign, Users, BarChart3, Package } from 'lucide-react';
+
 import Sidebar from '@/components/Sidebar';
 import PeriodSelector from '@/components/PeriodSelector';
 import { Button } from '@/components/ui/button';
@@ -104,7 +104,12 @@ const CompanhiaPage = () => {
             <div className="flex flex-col gap-4 mb-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 lg:p-3 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl shadow-lg">
-                  <Building2 className="h-6 w-6 lg:h-8 lg:w-8 text-white" />
+                  <img 
+                    src="/lovable-uploads/03b0d678-930b-4cbb-bb9e-003cb3725a6e.png" 
+                    alt="Logo Companhia do Churrasco" 
+                    className="h-6 w-6 lg:h-8 lg:w-8 object-contain drop-shadow-sm" 
+                    loading="lazy"
+                  />
                 </div>
                 <div>
                   <h1 className="text-2xl lg:text-4xl font-bold bg-gradient-to-r from-red-600 via-red-700 to-red-800 bg-clip-text text-transparent">
