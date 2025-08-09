@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, DollarSign, Building2, Tag } from 'lucide-react';
 import { formatCurrency } from '@/utils/formatUtils';
+import { prettyLabel } from '@/utils/labelUtils';
+
 
 interface TransactionsModalProps {
   isOpen: boolean;
@@ -29,11 +31,15 @@ const TransactionsModal: React.FC<TransactionsModalProps> = ({
 
   const getStatusBadge = (transaction: any) => {
     if (type === 'despesas') {
+      const hoje = new Date();
+      const venc = transaction.data_vencimento ? new Date(transaction.data_vencimento + 'T00:00:00') : null;
       if (transaction.data) {
         return <Badge variant="default" className="bg-green-100 text-green-800">Pago</Badge>;
-      } else {
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">Pendente</Badge>;
       }
+      if (!transaction.data && venc && venc < hoje) {
+        return <Badge variant="destructive" className="bg-red-100 text-red-800">Atrasado</Badge>;
+      }
+      return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">Pendente</Badge>;
     } else {
       if (transaction.data_recebimento) {
         return <Badge variant="default" className="bg-green-100 text-green-800">Recebido</Badge>;
@@ -92,13 +98,13 @@ const TransactionsModal: React.FC<TransactionsModalProps> = ({
                         {transaction.categoria && (
                           <div className="flex items-center gap-1">
                             <Tag className="h-4 w-4" />
-                            <span>{transaction.categoria}</span>
+                            <span>{prettyLabel(transaction.categoria)}</span>
                           </div>
                         )}
                         {transaction.subcategoria && (
                           <div className="flex items-center gap-1">
                             <span className="text-gray-400">•</span>
-                            <span>{transaction.subcategoria}</span>
+                            <span>{prettyLabel(transaction.subcategoria)}</span>
                           </div>
                         )}
                       </div>
