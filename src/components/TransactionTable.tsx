@@ -276,13 +276,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
                 <td className="py-3 px-4">
                   <ActionsCell
                     transaction={transaction}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    onMarkAsPaid={handleMarkAsPaidRequest}
-                    onAttachReceipt={handleAttachReceipt}
-                    onViewReceipt={handleViewReceipt}
-                    canEdit={isAdmin || transaction.user_id === user?.id}
-                    canDelete={isAdmin || transaction.user_id === user?.id}
+                    onTransactionUpdated={onTransactionUpdated}
                   />
                 </td>
               </tr>
@@ -341,13 +335,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
               <div className="flex justify-end">
                 <ActionsCell
                   transaction={transaction}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  onMarkAsPaid={handleMarkAsPaidRequest}
-                  onAttachReceipt={handleAttachReceipt}
-                  onViewReceipt={handleViewReceipt}
-                  canEdit={isAdmin || transaction.user_id === user?.id}
-                  canDelete={isAdmin || transaction.user_id === user?.id}
+                  onTransactionUpdated={onTransactionUpdated}
                 />
               </div>
             </div>

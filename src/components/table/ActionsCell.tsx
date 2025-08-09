@@ -1,122 +1,96 @@
-
-import React from 'react';
-import { Edit, Trash2, CheckCircle, Paperclip, Eye, Lock } from 'lucide-react';
+import React, { useState } from 'react';
+import { MoreHorizontal, Eye, Edit, Trash2, Clock } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import EditTransactionModal from '@/components/EditTransactionModal';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
+import ViewReceiptModal from '@/components/ViewReceiptModal';
+import TransactionHistoryModal from '@/components/TransactionHistoryModal';
 import { Transaction } from '@/types/transaction';
-import { getTransactionStatus } from '@/utils/transactionUtils';
+import { useAdminAccess } from '@/hooks/useAdminAccess';
 
 interface ActionsCellProps {
   transaction: Transaction;
-  onEdit: (transaction: Transaction) => void;
-  onDelete: (transaction: Transaction) => void;
-  onMarkAsPaid: (transaction: Transaction) => void;
-  onAttachReceipt: (transaction: Transaction) => void;
-  onViewReceipt: (transaction: Transaction) => void;
-  canEdit?: boolean;
-  canDelete?: boolean;
+  onTransactionUpdated: () => void;
 }
 
-const ActionsCell: React.FC<ActionsCellProps> = ({
-  transaction,
-  onEdit,
-  onDelete,
-  onMarkAsPaid,
-  onAttachReceipt,
-  onViewReceipt,
-  canEdit = true,
-  canDelete = true
-}) => {
-  const status = getTransactionStatus(transaction);
+const ActionsCell: React.FC<ActionsCellProps> = ({ transaction, onTransactionUpdated }) => {
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const { isAdmin } = useAdminAccess();
 
   return (
-    <div className="flex gap-1">
-      {canEdit ? (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onEdit(transaction)}
-          className="h-8 w-8 p-0 hover:bg-blue-100"
-          title="Editar"
-        >
-          <Edit size={14} className="text-blue-600" />
-        </Button>
-      ) : (
-        <Button
-          variant="ghost"
-          size="sm"
-          disabled
-          className="h-8 w-8 p-0 opacity-50"
-          title="Sem permissão para editar"
-        >
-          <Lock size={14} className="text-gray-400" />
-        </Button>
+    <div className="flex items-center justify-center">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">Abrir menu</span>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => setIsReceiptModalOpen(true)}>
+            <Eye className="mr-2 h-4 w-4" />
+            Ver Comprovante
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setIsHistoryModalOpen(true)}>
+            <Clock className="mr-2 h-4 w-4" />
+            Ver Histórico
+          </DropdownMenuItem>
+          {isAdmin && (
+            <>
+              <DropdownMenuItem onClick={() => setIsEditModalOpen(true)}>
+                <Edit className="mr-2 h-4 w-4" />
+                Editar
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsDeleteModalOpen(true)}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Excluir
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {isAdmin && (
+        <EditTransactionModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          transaction={transaction}
+          onTransactionUpdated={onTransactionUpdated}
+        />
       )}
 
-      {canDelete ? (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onDelete(transaction)}
-          className="h-8 w-8 p-0 hover:bg-red-100"
-          title="Excluir"
-        >
-          <Trash2 size={14} className="text-red-600" />
-        </Button>
-      ) : (
-        <Button
-          variant="ghost"
-          size="sm"
-          disabled
-          className="h-8 w-8 p-0 opacity-50"
-          title="Sem permissão para excluir"
-        >
-          <Lock size={14} className="text-gray-400" />
-        </Button>
+      {isAdmin && (
+        <DeleteConfirmationModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          transaction={transaction}
+          onTransactionDeleted={onTransactionUpdated}
+          type="despesa"
+        />
       )}
 
-      {status !== 'PAGO' && canEdit && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onMarkAsPaid(transaction)}
-          className="h-8 w-8 p-0 hover:bg-green-100"
-          title="Marcar como pago"
-        >
-          <CheckCircle size={14} className="text-green-600" />
-        </Button>
-      )}
+      <ViewReceiptModal
+        isOpen={isReceiptModalOpen}
+        onClose={() => setIsReceiptModalOpen(false)}
+        receiptPath={transaction.comprovante || ''}
+        transactionDescription={transaction.description}
+      />
 
-      {transaction.comprovante ? (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onViewReceipt(transaction)}
-          className="h-8 w-8 p-0 hover:bg-purple-100"
-          title="Ver comprovante"
-        >
-          <Eye size={14} className="text-purple-600" />
-        </Button>
-      ) : canEdit ? (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onAttachReceipt(transaction)}
-          className="h-8 w-8 p-0 hover:bg-gray-100"
-          title="Anexar comprovante"
-        >
-          <Paperclip size={14} className="text-gray-600" />
-        </Button>
-      ) : (
-        <Button
-          variant="ghost"
-          size="sm"
-          disabled
-          className="h-8 w-8 p-0 opacity-50"
-          title="Sem permissão para anexar"
-        >
-          <Lock size={14} className="text-gray-400" />
-        </Button>
-      )}
+      <TransactionHistoryModal
+        isOpen={isHistoryModalOpen}
+        onClose={() => setIsHistoryModalOpen(false)}
+        transactionId={transaction.id}
+        transactionType="despesa"
+      />
     </div>
   );
 };

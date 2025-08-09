@@ -23,6 +23,7 @@ export type Database = {
           descricao: string | null
           empresa: string | null
           id: number
+          origem_pagamento: string | null
           status: string | null
           subcategoria: string | null
           user_id: string
@@ -38,6 +39,7 @@ export type Database = {
           descricao?: string | null
           empresa?: string | null
           id?: number
+          origem_pagamento?: string | null
           status?: string | null
           subcategoria?: string | null
           user_id: string
@@ -53,6 +55,7 @@ export type Database = {
           descricao?: string | null
           empresa?: string | null
           id?: number
+          origem_pagamento?: string | null
           status?: string | null
           subcategoria?: string | null
           user_id?: string
@@ -173,6 +176,48 @@ export type Database = {
         }
         Relationships: []
       }
+      transaction_history: {
+        Row: {
+          action_type: string
+          changed_fields: string[] | null
+          id: string
+          ip_address: unknown | null
+          new_data: Json | null
+          old_data: Json | null
+          timestamp: string
+          transaction_id: number
+          transaction_type: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          changed_fields?: string[] | null
+          id?: string
+          ip_address?: unknown | null
+          new_data?: Json | null
+          old_data?: Json | null
+          timestamp?: string
+          transaction_id: number
+          transaction_type: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          changed_fields?: string[] | null
+          id?: string
+          ip_address?: unknown | null
+          new_data?: Json | null
+          old_data?: Json | null
+          timestamp?: string
+          transaction_id?: number
+          transaction_type?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_tab_permissions: {
         Row: {
           created_at: string
@@ -227,6 +272,10 @@ export type Database = {
       is_admin_user: {
         Args: { user_id: string }
         Returns: boolean
+      }
+      normalize_category_label: {
+        Args: { category_code: string }
+        Returns: string
       }
     }
     Enums: {

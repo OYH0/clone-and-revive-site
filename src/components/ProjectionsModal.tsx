@@ -14,13 +14,14 @@ interface ProjectionsModalProps {
 }
 
 const ProjectionsModal: React.FC<ProjectionsModalProps> = ({ isOpen, onClose, despesas, receitas, empresa }) => {
-  // Calcular médias dos últimos 6 meses usando valor_total
+  // Calcular médias dos últimos 6 meses (atual + 5 anteriores) usando valor_total - INDEPENDENTE DOS FILTROS
   const calcularMedias = () => {
     const now = new Date();
     const receitasMensais = [];
     const despesasMensais = [];
     
-    for (let i = 5; i >= 0; i--) {
+    // Começar do mês atual e voltar 5 meses (total = 6 meses)
+    for (let i = 0; i <= 5; i++) {
       const targetDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const year = targetDate.getFullYear();
       const month = targetDate.getMonth();
@@ -125,7 +126,7 @@ const ProjectionsModal: React.FC<ProjectionsModalProps> = ({ isOpen, onClose, de
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Projeções Financeiras - {empresa}</DialogTitle>
           <DialogDescription>
-            Projeções baseadas no histórico dos últimos 6 meses para os próximos 3 meses
+            Projeções baseadas no histórico dos últimos 6 meses (mês atual + 5 anteriores) para os próximos 3 meses
           </DialogDescription>
         </DialogHeader>
 
