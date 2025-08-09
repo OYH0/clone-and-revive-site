@@ -6,18 +6,19 @@ import { normalizeCompanyName, getTransactionValue } from '@/utils/dashboardCalc
 interface MonthlyEvolutionChartProps {
   despesas?: any[];
   selectedPeriod: 'today' | 'week' | 'month' | 'year' | 'custom';
+  customYear?: number;
 }
 
-const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas, selectedPeriod }) => {
+const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas, selectedPeriod, customYear }) => {
   console.log('=== MONTHLY EVOLUTION CHART ===');
   console.log('Despesas recebidas:', despesas?.length || 0);
   console.log('Período selecionado:', selectedPeriod);
   
-  // Sempre gerar dados anuais (Jan-Dez) do ano corrente, ignorando filtros
+  // Gerar dados anuais (Jan-Dez) - ano atual ou customYear no filtro personalizado
   const chartData = React.useMemo(() => {
     if (!despesas) return [];
 
-    const currentYear = new Date().getFullYear();
+    const targetYear = selectedPeriod === 'custom' && customYear ? customYear : new Date().getFullYear();
 
     // Filtrar despesas para excluir Camerino e fora do ano atual
     const despesasProcessadas = despesas.filter(d => {
@@ -25,7 +26,7 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
       const date = new Date(d.data);
       return (
         empresa !== 'camerino' &&
-        date.getFullYear() === currentYear
+        date.getFullYear() === targetYear
       );
     });
 
@@ -44,7 +45,7 @@ const MonthlyEvolutionChart: React.FC<MonthlyEvolutionChartProps> = ({ despesas,
     const result = data.sort((a, b) => a.index - b.index);
     console.log('Dados finais do gráfico anual (sem Camerino):', result);
     return result;
-  }, [despesas]);
+  }, [despesas, selectedPeriod, customYear]);
   
   // Custom tooltip for the chart
   const CustomTooltip = ({ active, payload, label }: any) => {

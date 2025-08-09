@@ -143,6 +143,7 @@ const JohnnyPage = () => {
         isOpen={activeModal === 'costs'}
         onClose={() => setActiveModal(null)}
         despesas={filteredDespesas}
+        allDespesas={johnnyDespesas}
         empresa="Johnny Rockets"
       />
 
@@ -151,6 +152,8 @@ const JohnnyPage = () => {
         onClose={() => setActiveModal(null)}
         despesas={filteredDespesas}
         receitas={filteredReceitas}
+        allDespesas={johnnyDespesas}
+        allReceitas={johnnyReceitas}
         empresa="Johnny Rockets"
       />
 

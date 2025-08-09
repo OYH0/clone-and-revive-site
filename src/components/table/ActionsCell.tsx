@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import EditTransactionModal from '@/components/EditTransactionModal';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import ViewReceiptModal from '@/components/ViewReceiptModal';
-import TransactionHistoryModal from '@/components/TransactionHistoryModal';
 import { Transaction } from '@/types/transaction';
 import { useAdminAccess } from '@/hooks/useAdminAccess';
 
@@ -23,7 +22,7 @@ const ActionsCell: React.FC<ActionsCellProps> = ({ transaction, onTransactionUpd
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
-  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  
   const { isAdmin } = useAdminAccess();
 
   return (
@@ -39,10 +38,6 @@ const ActionsCell: React.FC<ActionsCellProps> = ({ transaction, onTransactionUpd
           <DropdownMenuItem onClick={() => setIsReceiptModalOpen(true)}>
             <Eye className="mr-2 h-4 w-4" />
             Ver Comprovante
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setIsHistoryModalOpen(true)}>
-            <Clock className="mr-2 h-4 w-4" />
-            Ver Histórico
           </DropdownMenuItem>
           {isAdmin && (
             <>
@@ -85,12 +80,6 @@ const ActionsCell: React.FC<ActionsCellProps> = ({ transaction, onTransactionUpd
         transactionDescription={transaction.description}
       />
 
-      <TransactionHistoryModal
-        isOpen={isHistoryModalOpen}
-        onClose={() => setIsHistoryModalOpen(false)}
-        transactionId={transaction.id}
-        transactionType="despesa"
-      />
     </div>
   );
 };

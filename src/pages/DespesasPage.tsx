@@ -4,6 +4,7 @@ import { Plus, TrendingDown, DollarSign, CheckCircle, Clock, AlertTriangle, Shie
 import Sidebar from '@/components/Sidebar';
 import TransactionTable from '@/components/TransactionTable';
 import AddTransactionModal from '@/components/AddTransactionModal';
+import TransactionHistoryModal from '@/components/TransactionHistoryModal';
 import DespesasFilterSimple from '@/components/DespesasFilterSimple';
 import CamerinoPasswordProtection from '@/components/CamerinoPasswordProtection';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,7 @@ const DespesasPage = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   
   const { data: despesas = [], isLoading, refetch } = useDespesas();
   const { user } = useAuth();
@@ -277,8 +279,16 @@ const DespesasPage = () => {
                   <CardDescription className="text-gray-600">
                     {filteredTransactions.length} despesa(s) encontrada(s) - Mês atual e pagamentos recentes
                   </CardDescription>
-                </div>
-              </div>
+                 </div>
+                 <Button
+                   variant="outline"
+                   onClick={() => setIsHistoryModalOpen(true)}
+                   className="flex items-center gap-2"
+                 >
+                   <Clock className="h-4 w-4" />
+                   Histórico
+                 </Button>
+               </div>
             </CardHeader>
             <CardContent className="p-6">
               <TransactionTable 
@@ -297,6 +307,13 @@ const DespesasPage = () => {
           onTransactionAdded={handleTransactionAdded}
         />
       )}
+
+      <TransactionHistoryModal
+        isOpen={isHistoryModalOpen}
+        onClose={() => setIsHistoryModalOpen(false)}
+        transactionId={0}
+        transactionType="despesa"
+      />
     </div>
   );
 };

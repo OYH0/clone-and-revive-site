@@ -9,10 +9,11 @@ interface AnalyseCostsModalProps {
   isOpen: boolean;
   onClose: () => void;
   despesas: any[];
+  allDespesas: any[];
   empresa: string;
 }
 
-const AnalyseCostsModal: React.FC<AnalyseCostsModalProps> = ({ isOpen, onClose, despesas, empresa }) => {
+const AnalyseCostsModal: React.FC<AnalyseCostsModalProps> = ({ isOpen, onClose, despesas, allDespesas, empresa }) => {
   // Análise por categoria usando valor_total ou valor
   const custosPorCategoria = [
     { 

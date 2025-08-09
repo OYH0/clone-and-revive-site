@@ -215,6 +215,7 @@ const CompanhiaPage = () => {
         isOpen={activeModal === 'costs'}
         onClose={() => setActiveModal(null)}
         despesas={filteredDespesas}
+        allDespesas={companhiaDespesas}
         empresa="Companhia do Churrasco"
       />
 
@@ -223,6 +224,8 @@ const CompanhiaPage = () => {
         onClose={() => setActiveModal(null)}
         despesas={filteredDespesas}
         receitas={filteredReceitas}
+        allDespesas={companhiaDespesas}
+        allReceitas={companhiaReceitas}
         empresa="Companhia do Churrasco"
       />
 

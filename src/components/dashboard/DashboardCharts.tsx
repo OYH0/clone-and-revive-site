@@ -7,9 +7,10 @@ import MonthlyEvolutionChart from '@/components/MonthlyEvolutionChart';
 interface DashboardChartsProps {
   despesas: any[];
   selectedPeriod: 'today' | 'week' | 'month' | 'year' | 'custom';
+  customYear?: number;
 }
 
-const DashboardCharts: React.FC<DashboardChartsProps> = ({ despesas, selectedPeriod }) => {
+const DashboardCharts: React.FC<DashboardChartsProps> = ({ despesas, selectedPeriod, customYear }) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
       {/* Distribuição por Categoria */}
@@ -30,7 +31,7 @@ const DashboardCharts: React.FC<DashboardChartsProps> = ({ despesas, selectedPer
           <CardDescription>Gastos ao longo dos meses</CardDescription>
         </CardHeader>
         <CardContent>
-          <MonthlyEvolutionChart despesas={despesas} selectedPeriod={selectedPeriod} />
+          <MonthlyEvolutionChart despesas={despesas} selectedPeriod={selectedPeriod} customYear={customYear} />
         </CardContent>
       </Card>
     </div>

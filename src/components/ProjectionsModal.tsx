@@ -10,23 +10,25 @@ interface ProjectionsModalProps {
   onClose: () => void;
   despesas: any[];
   receitas: any[];
+  allDespesas: any[];
+  allReceitas: any[];
   empresa: string;
 }
 
-const ProjectionsModal: React.FC<ProjectionsModalProps> = ({ isOpen, onClose, despesas, receitas, empresa }) => {
-  // Calcular médias dos últimos 6 meses (atual + 5 anteriores) usando valor_total - INDEPENDENTE DOS FILTROS
+const ProjectionsModal: React.FC<ProjectionsModalProps> = ({ isOpen, onClose, despesas, receitas, allDespesas, allReceitas, empresa }) => {
+  // Calcular médias dos últimos 6 meses (excluindo o atual) usando valor_total - INDEPENDENTE DOS FILTROS
   const calcularMedias = () => {
     const now = new Date();
     const receitasMensais = [];
     const despesasMensais = [];
     
-    // Começar do mês atual e voltar 5 meses (total = 6 meses)
-    for (let i = 0; i <= 5; i++) {
+    // Começar do mês anterior e voltar mais 5 meses (total = 6 meses históricos)
+    for (let i = 1; i <= 6; i++) {
       const targetDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const year = targetDate.getFullYear();
       const month = targetDate.getMonth();
       
-      const receitasMes = receitas.filter(r => {
+      const receitasMes = allReceitas.filter(r => {
         let itemDate: Date;
         
         if (r.data) {
@@ -40,7 +42,7 @@ const ProjectionsModal: React.FC<ProjectionsModalProps> = ({ isOpen, onClose, de
         return itemDate.getFullYear() === year && itemDate.getMonth() === month;
       }).reduce((sum, r) => sum + r.valor, 0);
       
-      const despesasMes = despesas.filter(d => {
+      const despesasMes = allDespesas.filter(d => {
         let itemDate: Date;
         
         if (d.data_vencimento) {
