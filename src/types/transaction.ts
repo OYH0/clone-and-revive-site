@@ -13,6 +13,7 @@ export interface Transaction {
   user_id: string;
   valor_juros?: number;
   valor_total?: number;
+  origem_pagamento?: string;
 }
 
 export type TransactionStatus = 'PAGO' | 'PENDENTE' | 'ATRASADO';

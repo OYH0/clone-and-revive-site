@@ -8,9 +8,11 @@ import TransactionsModal from '@/components/TransactionsModal';
 interface ImplementacaoStatsProps {
   despesas: any[];
   receitas: any[];
+  allDespesas?: any[];
+  allReceitas?: any[];
 }
 
-const ImplementacaoStats: React.FC<ImplementacaoStatsProps> = ({ despesas, receitas }) => {
+const ImplementacaoStats: React.FC<ImplementacaoStatsProps> = ({ despesas, receitas, allDespesas = [], allReceitas = [] }) => {
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     type: 'receitas' | 'despesas';
@@ -132,7 +134,7 @@ const ImplementacaoStats: React.FC<ImplementacaoStatsProps> = ({ despesas, recei
         isOpen={modalState.isOpen}
         onClose={closeModal}
         type={modalState.type}
-        transactions={modalState.type === 'receitas' ? receitas : despesas}
+        transactions={modalState.type === 'receitas' ? allReceitas : allDespesas}
         empresa="Implementação"
         title={modalState.title}
       />

@@ -109,7 +109,9 @@ const CamerinoPage = () => {
           <CamerinoStats 
             despesas={filteredDespesas} 
             receitas={filteredReceitas} 
-            selectedPeriod={selectedPeriod} 
+            selectedPeriod={selectedPeriod}
+            allDespesas={camerinoDespesas}
+            allReceitas={camerinoReceitas}
           />
 
           {/* Charts Component */}

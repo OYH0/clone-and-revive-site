@@ -76,7 +76,12 @@ const ImplementacaoPage = () => {
           </div>
 
           {/* Stats Cards */}
-          <ImplementacaoStats despesas={implementacaoDespesas} receitas={implementacaoReceitas} />
+          <ImplementacaoStats 
+            despesas={implementacaoDespesas} 
+            receitas={implementacaoReceitas}
+            allDespesas={implementacaoDespesas}
+            allReceitas={implementacaoReceitas}
+          />
 
           {/* Charts */}
           <ImplementacaoCharts despesas={implementacaoDespesas} receitas={implementacaoReceitas} />

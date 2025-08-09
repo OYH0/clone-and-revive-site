@@ -124,7 +124,9 @@ const JohnnyPage = () => {
           <JohnnyStats 
             despesas={filteredDespesas} 
             receitas={filteredReceitas} 
-            selectedPeriod={selectedPeriod} 
+            selectedPeriod={selectedPeriod}
+            allDespesas={johnnyDespesas}
+            allReceitas={johnnyReceitas}
           />
           <JohnnyCharts despesas={filteredDespesas} receitas={filteredReceitas} />
           <JohnnyInsights 

@@ -158,7 +158,9 @@ const CompanhiaPage = () => {
           <CompanhiaStats 
             despesas={filteredDespesas} 
             receitas={filteredReceitas} 
-            selectedPeriod={selectedPeriod} 
+            selectedPeriod={selectedPeriod}
+            allDespesas={companhiaDespesas}
+            allReceitas={companhiaReceitas}
           />
 
           {/* Charts Component */}

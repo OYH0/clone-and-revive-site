@@ -19,6 +19,7 @@ export interface Despesa {
   user_id: string;
   valor_juros?: number;
   valor_total?: number;
+  origem_pagamento?: string;
 }
 
 export const useDespesas = () => {

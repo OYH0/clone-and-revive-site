@@ -151,8 +151,9 @@ const EditReceitaModal: React.FC<EditReceitaModalProps> = ({ isOpen, onClose, re
                 <SelectContent>
                   <SelectItem value="VENDAS">Vendas</SelectItem>
                   <SelectItem value="VENDAS_DIARIAS">Vendas Diárias</SelectItem>
-                  <SelectItem value="SERVICOS">Serviços</SelectItem>
                   <SelectItem value="OUTROS">Outros</SelectItem>
+                  <SelectItem value="EM_COFRE">Em Cofre</SelectItem>
+                  <SelectItem value="EM_CONTA">Em Conta</SelectItem>
                 </SelectContent>
               </Select>
             </div>

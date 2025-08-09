@@ -8,9 +8,11 @@ interface CompanhiaStatsProps {
   despesas: any[];
   receitas: any[];
   selectedPeriod: 'today' | 'week' | 'month' | 'year' | 'custom';
+  allDespesas?: any[];
+  allReceitas?: any[];
 }
 
-const CompanhiaStats: React.FC<CompanhiaStatsProps> = ({ despesas, receitas, selectedPeriod }) => {
+const CompanhiaStats: React.FC<CompanhiaStatsProps> = ({ despesas, receitas, selectedPeriod, allDespesas = [], allReceitas = [] }) => {
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     type: 'receitas' | 'despesas';
@@ -110,12 +112,13 @@ const CompanhiaStats: React.FC<CompanhiaStatsProps> = ({ despesas, receitas, sel
             <Package className="h-5 w-5 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-xl lg:text-3xl font-bold text-orange-600">
+            <div className={`text-xl lg:text-3xl font-bold mb-1 ${getCMVColor(percentualCMV)}`}>
+              {percentualCMV.toFixed(1)}%
+            </div>
+            <div className="text-sm text-gray-600 mb-1">
               R$ {cmvTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
-            <p className={`text-xs mt-1 font-medium ${getCMVColor(percentualCMV)}`}>
-              {percentualCMV.toFixed(1)}% das vendas
-            </p>
+            <p className="text-xs text-gray-500">das vendas</p>
           </CardContent>
         </Card>
       </div>
@@ -124,7 +127,7 @@ const CompanhiaStats: React.FC<CompanhiaStatsProps> = ({ despesas, receitas, sel
         isOpen={modalState.isOpen}
         onClose={closeModal}
         type={modalState.type}
-        transactions={modalState.type === 'receitas' ? receitas : despesas}
+        transactions={modalState.type === 'receitas' ? allReceitas : allDespesas}
         empresa="Companhia do Churrasco"
         title={modalState.title}
       />

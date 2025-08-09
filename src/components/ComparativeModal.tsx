@@ -51,7 +51,7 @@ const ComparativeModal: React.FC<ComparativeModalProps> = ({ isOpen, onClose, em
     return { despesas, receitas };
   };
 
-  const empresas = ['Camerino', 'Johnny', 'Churrasco'];
+  const empresas = ['Johnny', 'Churrasco'];
   
   // Dados comparativos por período
   const periodos = ['month', 'year'] as const;
@@ -231,7 +231,6 @@ const ComparativeModal: React.FC<ComparativeModalProps> = ({ isOpen, onClose, em
                     <YAxis />
                     <Tooltip formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
                     <Legend />
-                    <Line type="monotone" dataKey="Camerino_lucro" stroke="#8b5cf6" strokeWidth={3} name="Camerino" />
                     <Line type="monotone" dataKey="Johnny_lucro" stroke="#3b82f6" strokeWidth={3} name="Johnny" />
                     <Line type="monotone" dataKey="Churrasco_lucro" stroke="#10b981" strokeWidth={3} name="Churrasco" />
                   </LineChart>

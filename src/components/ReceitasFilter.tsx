@@ -99,9 +99,10 @@ const ReceitasFilter: React.FC<ReceitasFilterProps> = ({
                 <SelectItem value="all">Todas as categorias</SelectItem>
                 <SelectItem value="VENDAS">Vendas</SelectItem>
                 <SelectItem value="VENDAS_DIARIAS">Vendas Diárias</SelectItem>
-                <SelectItem value="SERVICOS">Serviços</SelectItem>
-                <SelectItem value="IMPLEMENTACAO">Implementação</SelectItem>
                 <SelectItem value="OUTROS">Outros</SelectItem>
+                <SelectItem value="EM_COFRE">Em Cofre</SelectItem>
+                <SelectItem value="EM_CONTA">Em Conta</SelectItem>
+                <SelectItem value="PAGAMENTO_DESPESA">Pagamento de Despesa</SelectItem>
               </SelectContent>
             </Select>
           </div>

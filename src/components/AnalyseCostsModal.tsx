@@ -42,17 +42,12 @@ const AnalyseCostsModal: React.FC<AnalyseCostsModalProps> = ({ isOpen, onClose, 
     }
   ].filter(item => item.value > 0);
 
-  // Evolução dos custos (últimos 12 meses)
+  // Evolução dos custos (últimos 12 meses do ano atual)
   const evolucaoCustos = React.useMemo(() => {
-    const now = new Date();
-    const months = [];
+    const currentYear = new Date().getFullYear();
+    const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
     
-    for (let i = 11; i >= 0; i--) {
-      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthName = date.toLocaleDateString('pt-BR', { month: 'short' });
-      const year = date.getFullYear();
-      const month = date.getMonth();
-      
+    return months.map((monthName, index) => {
       const monthDespesas = despesas.filter(d => {
         let itemDate: Date;
         
@@ -64,16 +59,14 @@ const AnalyseCostsModal: React.FC<AnalyseCostsModalProps> = ({ isOpen, onClose, 
           return false;
         }
         
-        return itemDate.getFullYear() === year && itemDate.getMonth() === month;
+        return itemDate.getFullYear() === currentYear && itemDate.getMonth() === index;
       }).reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
       
-      months.push({ 
-        month: `${monthName}/${year.toString().slice(-2)}`, 
+      return { 
+        month: monthName, 
         valor: monthDespesas 
-      });
-    }
-    
-    return months;
+      };
+    });
   }, [despesas]);
 
   const totalCustos = despesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
@@ -171,11 +164,11 @@ const AnalyseCostsModal: React.FC<AnalyseCostsModalProps> = ({ isOpen, onClose, 
               </CardContent>
             </Card>
 
-            {/* Evolução Mensal */}
+            {/* Evolução Anual */}
             <Card>
               <CardHeader>
                 <CardTitle>Evolução dos Custos</CardTitle>
-                <CardDescription>Custos mensais dos últimos 12 meses</CardDescription>
+                <CardDescription>Custos mensais do ano atual</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-64">

@@ -8,9 +8,11 @@ interface CamerinoStatsProps {
   despesas: any[];
   receitas: any[];
   selectedPeriod: 'today' | 'week' | 'month' | 'year' | 'custom';
+  allDespesas?: any[];
+  allReceitas?: any[];
 }
 
-const CamerinoStats: React.FC<CamerinoStatsProps> = ({ despesas, receitas, selectedPeriod }) => {
+const CamerinoStats: React.FC<CamerinoStatsProps> = ({ despesas, receitas, selectedPeriod, allDespesas = [], allReceitas = [] }) => {
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     type: 'receitas' | 'despesas';
@@ -91,7 +93,7 @@ const CamerinoStats: React.FC<CamerinoStatsProps> = ({ despesas, receitas, selec
         isOpen={modalState.isOpen}
         onClose={closeModal}
         type={modalState.type}
-        transactions={modalState.type === 'receitas' ? receitas : despesas}
+        transactions={modalState.type === 'receitas' ? allReceitas : allDespesas}
         empresa="Camerino"
         title={modalState.title}
       />

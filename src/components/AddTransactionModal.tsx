@@ -313,7 +313,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] rounded-3xl">
+      <DialogContent className="sm:max-w-[425px] max-h-[85vh] overflow-y-auto rounded-3xl">
         <DialogHeader>
           <DialogTitle>Nova Transação</DialogTitle>
         </DialogHeader>

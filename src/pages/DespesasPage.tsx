@@ -47,7 +47,8 @@ const DespesasPage = () => {
     status: despesa.status || null,
     user_id: despesa.user_id,
     valor_juros: despesa.valor_juros || 0,
-    valor_total: despesa.valor_total || despesa.valor
+    valor_total: despesa.valor_total || despesa.valor,
+    origem_pagamento: despesa.origem_pagamento
   }));
 
   // Aplicar filtro do mês atual - excluir Camerino apenas quando não há filtro de empresa específico

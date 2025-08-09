@@ -132,8 +132,6 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
                 <SelectContent>
                   <SelectItem value="VENDAS">Vendas</SelectItem>
                   <SelectItem value="VENDAS_DIARIAS">Vendas Diárias</SelectItem>
-                  <SelectItem value="SERVICOS">Serviços</SelectItem>
-                  <SelectItem value="IMPLEMENTACAO">Implementação</SelectItem>
                   <SelectItem value="OUTROS">Outros</SelectItem>
                   <SelectItem value="EM_COFRE">Em Cofre</SelectItem>
                   <SelectItem value="EM_CONTA">Em Conta</SelectItem>

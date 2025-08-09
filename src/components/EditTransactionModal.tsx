@@ -32,7 +32,8 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     categoria: '',
     subcategoria: '',
     data_vencimento: '',
-    valor_juros: ''
+    valor_juros: '',
+    origem_pagamento: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -111,7 +112,8 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
         categoria: transaction.category || '',
         subcategoria: transaction.subcategoria || '',
         data_vencimento: transaction.data_vencimento || '',
-        valor_juros: transaction.valor_juros?.toString() || ''
+        valor_juros: transaction.valor_juros?.toString() || '',
+        origem_pagamento: transaction.origem_pagamento || ''
       });
     }
   }, [transaction, isOpen]);
@@ -271,7 +273,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] rounded-3xl">
+      <DialogContent className="sm:max-w-[425px] max-h-[85vh] overflow-y-auto rounded-3xl">
         <DialogHeader>
           <DialogTitle>Editar Transação</DialogTitle>
         </DialogHeader>
@@ -387,7 +389,23 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
             </div>
           )}
 
-          <div className="space-y-2">
+          {formData.data && (
+            <div className="space-y-2">
+              <Label htmlFor="origem_pagamento">Origem do Pagamento *</Label>
+              <Select value={formData.origem_pagamento || ''} onValueChange={(value) => handleInputChange('origem_pagamento', value)}>
+                <SelectTrigger className="rounded-full">
+                  <SelectValue placeholder="Selecione a origem do pagamento" />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl">
+                  <SelectItem value="cofre">Cofre</SelectItem>
+                  <SelectItem value="conta">Conta</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-gray-500">Obrigatório quando há data de pagamento.</p>
+            </div>
+          )}
+
+          <div className="space-y-2">`
             <Label htmlFor="descricao">Descrição</Label>
             <Textarea
               id="descricao"
