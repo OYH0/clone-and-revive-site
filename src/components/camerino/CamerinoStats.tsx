@@ -93,7 +93,7 @@ const CamerinoStats: React.FC<CamerinoStatsProps> = ({ despesas, receitas, selec
         isOpen={modalState.isOpen}
         onClose={closeModal}
         type={modalState.type}
-        transactions={modalState.type === 'receitas' ? allReceitas : allDespesas}
+        transactions={modalState.type === 'receitas' ? receitas : despesas}
         empresa="Camerino"
         title={modalState.title}
       />

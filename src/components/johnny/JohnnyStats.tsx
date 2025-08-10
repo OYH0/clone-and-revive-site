@@ -155,7 +155,7 @@ const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas, selectedP
         isOpen={modalState.isOpen}
         onClose={closeModal}
         type={modalState.type}
-        transactions={modalState.type === 'receitas' ? allReceitas : allDespesas}
+        transactions={modalState.type === 'receitas' ? receitas : despesas}
         empresa="Johnny Rockets"
         title={modalState.title}
       />

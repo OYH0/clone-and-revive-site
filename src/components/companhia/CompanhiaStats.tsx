@@ -127,7 +127,7 @@ const CompanhiaStats: React.FC<CompanhiaStatsProps> = ({ despesas, receitas, sel
         isOpen={modalState.isOpen}
         onClose={closeModal}
         type={modalState.type}
-        transactions={modalState.type === 'receitas' ? allReceitas : allDespesas}
+        transactions={modalState.type === 'receitas' ? receitas : despesas}
         empresa="Companhia do Churrasco"
         title={modalState.title}
       />
