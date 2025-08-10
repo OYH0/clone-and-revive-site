@@ -128,7 +128,7 @@ const ProjectionsModal: React.FC<ProjectionsModalProps> = ({ isOpen, onClose, de
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Projeções Financeiras - {empresa}</DialogTitle>
           <DialogDescription>
-            Projeções baseadas no histórico dos últimos 6 meses (mês atual + 5 anteriores) para os próximos 3 meses
+            Projeções baseadas no histórico dos últimos 6 meses (excluindo o mês atual) para os próximos 3 meses
           </DialogDescription>
         </DialogHeader>
 
