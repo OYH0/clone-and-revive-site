@@ -122,8 +122,8 @@ const ReceitaTable: React.FC<ReceitaTableProps> = ({ receitas }) => {
                   <h3 className="font-semibold text-gray-800">
                     {date === 'pending' ? 'Pendentes' : formatDate(date)}
                   </h3>
-                  <span className="font-bold text-green-600">
-                    +{dailyTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                  <span className={`font-bold ${dailyTotal >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {dailyTotal >= 0 ? '+' : ''}{dailyTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                   </span>
                 </div>
               </div>
