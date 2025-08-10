@@ -262,14 +262,14 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
             return (
               <div key={date} className="mb-6">
                 {/* Data Header */}
-                <div className="bg-gray-50 border-b-2 border-gray-200 px-4 py-3 mb-2">
+                <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-l-4 border-primary px-6 py-4 mb-3 rounded-lg shadow-sm">
                   <div className="flex justify-between items-center">
-                    <h3 className="font-semibold text-gray-800">
+                    <h3 className="font-bold text-lg text-gray-800">
                       {date === 'pending' ? 'Pendentes' : formatDate(date)}
                     </h3>
-                    <span className="font-bold text-red-600">
+                    <div className="px-4 py-2 rounded-full font-bold text-sm shadow-md bg-red-500 text-white">
                       -{dailyTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                    </span>
+                    </div>
                   </div>
                 </div>
                 
@@ -351,14 +351,14 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
             return (
               <div key={date}>
                 {/* Data Header Mobile */}
-                <div className="bg-gray-50 border-b-2 border-gray-200 px-4 py-3 mb-4 rounded-t-lg">
+                <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-l-4 border-primary px-6 py-4 mb-3 rounded-lg shadow-sm">
                   <div className="flex justify-between items-center">
-                    <h3 className="font-semibold text-gray-800">
+                    <h3 className="font-bold text-lg text-gray-800">
                       {date === 'pending' ? 'Pendentes' : formatDate(date)}
                     </h3>
-                    <span className="font-bold text-red-600">
+                    <div className="px-4 py-2 rounded-full font-bold text-sm shadow-md bg-red-500 text-white">
                       -{dailyTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                    </span>
+                    </div>
                   </div>
                 </div>
                 
