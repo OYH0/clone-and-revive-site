@@ -24,12 +24,17 @@ const TransactionHistoryModal: React.FC<TransactionHistoryModalProps> = ({
   const { data: history, isLoading } = useQuery({
     queryKey: ['transaction-history', transactionType, transactionId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('transaction_history')
         .select('*')
-        .eq('transaction_type', transactionType)
-        .eq('transaction_id', transactionId)
-        .order('timestamp', { ascending: false });
+        .eq('transaction_type', transactionType);
+      
+      // Se transactionId for 0, buscar todo o histórico do tipo
+      if (transactionId !== 0) {
+        query = query.eq('transaction_id', transactionId);
+      }
+      
+      const { data, error } = await query.order('timestamp', { ascending: false });
 
       if (error) throw error;
       return data;
@@ -42,19 +47,19 @@ const TransactionHistoryModal: React.FC<TransactionHistoryModalProps> = ({
   };
 
   const getActionIcon = (action: string) => {
-    switch (action) {
-      case 'create': return <Plus className="h-4 w-4 text-green-500" />;
-      case 'update': return <Edit className="h-4 w-4 text-blue-500" />;
-      case 'delete': return <Trash2 className="h-4 w-4 text-red-500" />;
+    switch (action.toUpperCase()) {
+      case 'CREATE': return <Plus className="h-4 w-4 text-green-500" />;
+      case 'UPDATE': return <Edit className="h-4 w-4 text-blue-500" />;
+      case 'DELETE': return <Trash2 className="h-4 w-4 text-red-500" />;
       default: return <Clock className="h-4 w-4 text-gray-500" />;
     }
   };
 
   const getActionLabel = (action: string) => {
-    switch (action) {
-      case 'create': return 'Criado';
-      case 'update': return 'Atualizado';
-      case 'delete': return 'Excluído';
+    switch (action.toUpperCase()) {
+      case 'CREATE': return 'Criado';
+      case 'UPDATE': return 'Atualizado';
+      case 'DELETE': return 'Excluído';
       default: return action;
     }
   };
@@ -84,7 +89,10 @@ const TransactionHistoryModal: React.FC<TransactionHistoryModalProps> = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
-            Histórico da Transação
+            {transactionId === 0 
+              ? `Histórico Completo de ${transactionType === 'despesa' ? 'Despesas' : 'Receitas'}`
+              : 'Histórico da Transação'
+            }
           </DialogTitle>
         </DialogHeader>
 
@@ -102,12 +110,25 @@ const TransactionHistoryModal: React.FC<TransactionHistoryModalProps> = ({
                       {getActionIcon(entry.action_type)}
                       <CardTitle className="text-lg">
                         {getActionLabel(entry.action_type)}
+                        {transactionId === 0 && (
+                          <span className="text-sm font-normal text-gray-600 ml-2">
+                            - ID: {entry.transaction_id}
+                          </span>
+                        )}
                       </CardTitle>
                     </div>
                     <Badge variant="outline">
                       {formatDate(entry.timestamp)}
                     </Badge>
                   </div>
+                  {transactionId === 0 && entry.new_data && (
+                    <div className="mt-2 text-sm text-gray-600">
+                      <span className="font-medium">Descrição: </span>
+                      {(entry.new_data as any)?.descricao || 'N/A'} - 
+                      <span className="font-medium"> Empresa: </span>
+                      {(entry.new_data as any)?.empresa || 'N/A'}
+                    </div>
+                  )}
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
@@ -178,7 +199,12 @@ const TransactionHistoryModal: React.FC<TransactionHistoryModalProps> = ({
             ))
           ) : (
             <div className="text-center py-8">
-              <p className="text-gray-500">Nenhum histórico encontrado para esta transação.</p>
+              <p className="text-gray-500">
+                {transactionId === 0 
+                  ? `Nenhum histórico encontrado para ${transactionType === 'despesa' ? 'despesas' : 'receitas'}.`
+                  : 'Nenhum histórico encontrado para esta transação.'
+                }
+              </p>
             </div>
           )}
         </div>

@@ -1,11 +1,12 @@
 
 import React, { useState, useMemo } from 'react';
-import { Plus, TrendingUp, DollarSign, Calendar, Shield, Wallet } from 'lucide-react';
+import { Plus, TrendingUp, DollarSign, Calendar, Shield, Wallet, Clock } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AddReceitaModal from '@/components/AddReceitaModal';
 import ReceitaTable from '@/components/ReceitaTable';
+import TransactionHistoryModal from '@/components/TransactionHistoryModal';
 import ReceitasFilter from '@/components/ReceitasFilter';
 import CamerinoPasswordProtection from '@/components/CamerinoPasswordProtection';
 import { useReceitas } from '@/hooks/useReceitas';
@@ -15,6 +16,7 @@ import { filterReceitasCurrentMonth } from '@/utils/currentMonthFilter';
 
 const ReceitasPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterEmpresa, setFilterEmpresa] = useState('all');
   const [filterCategoria, setFilterCategoria] = useState('all');
@@ -220,6 +222,14 @@ const ReceitasPage = () => {
                     {filteredReceitas.length} receita(s) encontrada(s) - Mês atual e recebimentos recentes
                   </CardDescription>
                 </div>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsHistoryModalOpen(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Clock className="h-4 w-4" />
+                  Histórico
+                </Button>
               </div>
             </CardHeader>
             <CardContent className="p-6">
@@ -232,6 +242,13 @@ const ReceitasPage = () => {
       {isAdmin && (
         <AddReceitaModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       )}
+
+      <TransactionHistoryModal
+        isOpen={isHistoryModalOpen}
+        onClose={() => setIsHistoryModalOpen(false)}
+        transactionId={0}
+        transactionType="receita"
+      />
     </div>
   );
 };
