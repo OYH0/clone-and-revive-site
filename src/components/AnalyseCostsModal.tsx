@@ -43,13 +43,28 @@ const AnalyseCostsModal: React.FC<AnalyseCostsModalProps> = ({ isOpen, onClose, 
     }
   ].filter(item => item.value > 0);
 
-  // Evolução dos custos (últimos 12 meses do ano atual)
+  // Dados anuais sempre baseados em allDespesas (independente do filtro de período)
+  const currentYear = new Date().getFullYear();
+  const despesasAnuais = allDespesas.filter(d => {
+    let itemDate: Date;
+    
+    if (d.data_vencimento) {
+      itemDate = new Date(d.data_vencimento + 'T00:00:00');
+    } else if (d.data) {
+      itemDate = new Date(d.data + 'T00:00:00');
+    } else {
+      return false;
+    }
+    
+    return itemDate.getFullYear() === currentYear;
+  });
+
+  // Evolução dos custos (últimos 12 meses do ano atual) - sempre anual
   const evolucaoCustos = React.useMemo(() => {
-    const currentYear = new Date().getFullYear();
     const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
     
     return months.map((monthName, index) => {
-      const monthDespesas = despesas.filter(d => {
+      const monthDespesas = despesasAnuais.filter(d => {
         let itemDate: Date;
         
         if (d.data_vencimento) {
@@ -60,7 +75,7 @@ const AnalyseCostsModal: React.FC<AnalyseCostsModalProps> = ({ isOpen, onClose, 
           return false;
         }
         
-        return itemDate.getFullYear() === currentYear && itemDate.getMonth() === index;
+        return itemDate.getMonth() === index;
       }).reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
       
       return { 
@@ -68,9 +83,10 @@ const AnalyseCostsModal: React.FC<AnalyseCostsModalProps> = ({ isOpen, onClose, 
         valor: monthDespesas 
       };
     });
-  }, [despesas]);
+  }, [allDespesas]);
 
-  const totalCustos = despesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
+  // Totais anuais (independente do filtro de período)
+  const totalCustos = despesasAnuais.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
   const mediaMaxima = Math.max(...evolucaoCustos.map(e => e.valor));
   const mediaMinima = Math.min(...evolucaoCustos.filter(e => e.valor > 0).map(e => e.valor));
 
@@ -100,7 +116,7 @@ const AnalyseCostsModal: React.FC<AnalyseCostsModalProps> = ({ isOpen, onClose, 
                 <div className="text-2xl font-bold text-red-600">
                   R$ {totalCustos.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">{despesas.length} despesas</p>
+                <p className="text-xs text-gray-500 mt-1">{despesasAnuais.length} despesas</p>
               </CardContent>
             </Card>
 
