@@ -9,6 +9,8 @@ import DescriptionCell from './table/DescriptionCell';
 import StatusCell from './table/StatusCell';
 import CategoryCell from './table/CategoryCell';
 import ActionsCell from './table/ActionsCell';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -273,70 +275,55 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
                   </div>
                 </div>
                 
-                <table className="w-full table-fixed">
-                  <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Data de Pagamento</th>
-                      <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Vencimento</th>
-                      <th className="text-left text-gray-700 py-3 px-4 font-medium w-28">Empresa</th>
-                      <th className="text-left text-gray-700 py-3 px-4 font-medium w-32">Descrição</th>
-                      <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Categoria</th>
-                      <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Valor</th>
-                      <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Juros</th>
-                      <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Total</th>
-                      <th className="text-left text-gray-700 py-3 px-4 font-medium w-20">Status</th>
-                      <th className="text-left text-gray-700 py-3 px-4 font-medium w-36">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {dateTransactions.map((transaction) => (
-                      <tr key={transaction.id} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="py-3 px-4 text-gray-900 text-sm">
-                          {transaction.status === 'PAGO' ? formatDate(transaction.date) : '-'}
-                        </td>
-                        <td className="py-3 px-4 text-gray-900 text-sm">
-                          {transaction.data_vencimento ? formatDate(transaction.data_vencimento) : '-'}
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className="px-2 py-1 rounded text-xs bg-blue-500 text-white">
-                            {transaction.company}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="max-w-full overflow-hidden">
-                            <DescriptionCell description={transaction.description} />
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <CategoryCell category={transaction.category} />
-                        </td>
-                        <td className="py-3 px-4 text-gray-900 font-medium text-sm">
-                          R$ {transaction.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </td>
-                        <td className="py-3 px-4 text-gray-900 text-sm">
-                          {transaction.valor_juros && transaction.valor_juros > 0 ? 
-                            `R$ ${transaction.valor_juros.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : 
-                            '-'
-                          }
-                        </td>
-                        <td className="py-3 px-4 text-gray-900 font-medium text-sm">
-                          R$ {(transaction.valor_total || transaction.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </td>
-                        <td className="py-3 px-4">
-                          <StatusCell transaction={transaction} />
-                        </td>
-                        <td className="py-3 px-4">
-                          <ActionsCell
-                            transaction={transaction}
-                            onTransactionUpdated={onTransactionUpdated}
-                            onMarkAsPaidRequest={handleMarkAsPaidRequest}
-                            onAttachReceipt={handleAttachReceipt}
-                          />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <div className="rounded-xl border bg-white overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Data</TableHead>
+                        <TableHead>Empresa</TableHead>
+                        <TableHead>Descrição</TableHead>
+                        <TableHead>Categoria</TableHead>
+                        <TableHead>Valor</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {dateTransactions.map((transaction) => (
+                        <TableRow key={transaction.id}>
+                          <TableCell>
+                            {formatDate(transaction.date)}
+                          </TableCell>
+                          <TableCell>
+                            <Badge className="bg-blue-500 text-white">
+                              {transaction.company}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="max-w-xs truncate">
+                            {transaction.description}
+                          </TableCell>
+                          <TableCell>
+                            <CategoryCell category={transaction.category} />
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            R$ {transaction.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </TableCell>
+                          <TableCell>
+                            <StatusCell transaction={transaction} />
+                          </TableCell>
+                          <TableCell>
+                            <ActionsCell
+                              transaction={transaction}
+                              onTransactionUpdated={onTransactionUpdated}
+                              onMarkAsPaidRequest={handleMarkAsPaidRequest}
+                              onAttachReceipt={handleAttachReceipt}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
             );
           })}
