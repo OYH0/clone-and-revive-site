@@ -264,7 +264,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
             return (
               <div key={date} className="mb-6">
                 {/* Data Header */}
-                <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-l-4 border-primary px-6 py-4 mb-3 rounded-lg shadow-sm">
+                <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-l-4 border-primary px-6 py-4 mb-3 rounded-2xl shadow-sm">
                   <div className="flex justify-between items-center">
                     <h3 className="font-bold text-lg text-gray-800">
                       {date === 'pending' ? 'Pendentes' : formatDate(date)}
@@ -338,7 +338,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
             return (
               <div key={date}>
                 {/* Data Header Mobile */}
-                <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-l-4 border-primary px-6 py-4 mb-3 rounded-lg shadow-sm">
+                <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-l-4 border-primary px-6 py-4 mb-3 rounded-2xl shadow-sm">
                   <div className="flex justify-between items-center">
                     <h3 className="font-bold text-lg text-gray-800">
                       {date === 'pending' ? 'Pendentes' : formatDate(date)}
