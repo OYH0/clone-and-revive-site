@@ -2,6 +2,7 @@
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { Despesa } from '@/hooks/useDespesas';
+import { prettyLabel } from '@/utils/labelUtils';
 
 interface ExpenseDistributionProps {
   despesas: Despesa[];
@@ -85,7 +86,7 @@ const ExpenseDistribution: React.FC<ExpenseDistributionProps> = ({ despesas, emp
                 const percentualSub = ((valor / data.value) * 100);
                 return (
                   <p key={subcat} className="text-xs text-gray-600">
-                    {subcat}: R$ {valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} 
+                    {prettyLabel(subcat)}: R$ {valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} 
                     <span className="text-gray-500"> ({percentualSub.toFixed(1)}%)</span>
                   </p>
                 );

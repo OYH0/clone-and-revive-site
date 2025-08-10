@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 import { TrendingDown, TrendingUp, AlertTriangle } from 'lucide-react';
+import { prettyLabel } from '@/utils/labelUtils';
 
 interface AnalyseCostsModalProps {
   isOpen: boolean;
@@ -214,7 +215,7 @@ const AnalyseCostsModal: React.FC<AnalyseCostsModalProps> = ({ isOpen, onClose, 
               {categoriaMaiorGasto && (
                 <div className="p-3 bg-yellow-50 rounded-lg border-l-4 border-yellow-400">
                   <p className="text-sm">
-                    <strong>Categoria com maior gasto:</strong> {categoriaMaiorGasto.name} - 
+                    <strong>Categoria com maior gasto:</strong> {prettyLabel(categoriaMaiorGasto.name)} - 
                     R$ {categoriaMaiorGasto.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </p>
                 </div>
@@ -226,7 +227,7 @@ const AnalyseCostsModal: React.FC<AnalyseCostsModalProps> = ({ isOpen, onClose, 
               </div>
               <div className="p-3 bg-green-50 rounded-lg border-l-4 border-green-400">
                 <p className="text-sm">
-                  <strong>Oportunidade:</strong> {categoriaMaiorGasto ? `Considere revisar contratos da categoria ${categoriaMaiorGasto.name} para possíveis reduções` : 'Mantenha o controle das categorias de despesas'}
+                  <strong>Oportunidade:</strong> {categoriaMaiorGasto ? `Considere revisar contratos da categoria ${prettyLabel(categoriaMaiorGasto.name)} para possíveis reduções` : 'Mantenha o controle das categorias de despesas'}
                 </p>
               </div>
             </CardContent>

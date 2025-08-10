@@ -2,6 +2,7 @@
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { calculateDistributionData } from '@/utils/dashboardCalculations';
+import { prettyLabel } from '@/utils/labelUtils';
 
 interface ExpenseDistributionChartProps {
   despesas?: any[];
@@ -41,7 +42,7 @@ const ExpenseDistributionChart: React.FC<ExpenseDistributionChartProps> = ({ des
               <p className="text-xs font-medium text-gray-700 mb-1">Subcategorias:</p>
               {Object.entries(subcategorias).map(([subcat, valor]: [string, any]) => (
                 <p key={subcat} className="text-xs text-gray-600">
-                  {subcat}: R$ {valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  {prettyLabel(subcat)}: R$ {valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </p>
               ))}
             </div>
