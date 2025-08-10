@@ -217,133 +217,212 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
     input.click();
   };
 
+  // Group transactions by payment date for bank statement format
+  const groupedTransactions = () => {
+    const groups: { [date: string]: Transaction[] } = {};
+    
+    transactions.forEach(transaction => {
+      // Use payment date for paid transactions, otherwise group as "Pendentes"
+      const groupKey = transaction.status === 'PAGO' && transaction.date 
+        ? transaction.date 
+        : 'pending';
+      
+      if (!groups[groupKey]) {
+        groups[groupKey] = [];
+      }
+      groups[groupKey].push(transaction);
+    });
+    
+    return groups;
+  };
+
+  const groups = groupedTransactions();
+  const sortedDates = Object.keys(groups).sort((a, b) => {
+    if (a === 'pending') return 1;
+    if (b === 'pending') return -1;
+    return new Date(b).getTime() - new Date(a).getTime();
+  });
+
+  const calculateDailyTotal = (transactions: Transaction[]) => {
+    return transactions.reduce((total, transaction) => 
+      total + (transaction.valor_total || transaction.valor), 0
+    );
+  };
+
   return (
     <>
       <div className="overflow-x-auto">
         {/* Versão desktop da tabela */}
-        <table className="w-full table-fixed hidden lg:table">
-          <thead>
-            <tr className="border-b border-gray-200">
-              <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Data de Pagamento</th>
-              <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Vencimento</th>
-              <th className="text-left text-gray-700 py-3 px-4 font-medium w-28">Empresa</th>
-              <th className="text-left text-gray-700 py-3 px-4 font-medium w-32">Descrição</th>
-              <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Categoria</th>
-              <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Valor</th>
-              <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Juros</th>
-              <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Total</th>
-              <th className="text-left text-gray-700 py-3 px-4 font-medium w-20">Status</th>
-              <th className="text-left text-gray-700 py-3 px-4 font-medium w-36">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {transactions.map((transaction) => (
-              <tr key={transaction.id} className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="py-3 px-4 text-gray-900 text-sm">
-                  {transaction.status === 'PAGO' ? formatDate(transaction.date) : '-'}
-                </td>
-                <td className="py-3 px-4 text-gray-900 text-sm">
-                  {transaction.data_vencimento ? formatDate(transaction.data_vencimento) : '-'}
-                </td>
-                <td className="py-3 px-4">
-                  <span className="px-2 py-1 rounded text-xs bg-blue-500 text-white">
-                    {transaction.company}
-                  </span>
-                </td>
-                <td className="py-3 px-4">
-                  <div className="max-w-full overflow-hidden">
-                    <DescriptionCell description={transaction.description} />
+        <div className="hidden lg:block">
+          {sortedDates.map((date) => {
+            const dateTransactions = groups[date];
+            const dailyTotal = calculateDailyTotal(dateTransactions);
+            const isToday = date !== 'pending';
+            
+            return (
+              <div key={date} className="mb-6">
+                {/* Data Header */}
+                <div className="bg-gray-50 border-b-2 border-gray-200 px-4 py-3 mb-2">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-semibold text-gray-800">
+                      {date === 'pending' ? 'Pendentes' : formatDate(date)}
+                    </h3>
+                    <span className="font-bold text-red-600">
+                      -{dailyTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </span>
                   </div>
-                </td>
-                <td className="py-3 px-4">
-                  <CategoryCell category={transaction.category} />
-                </td>
-                <td className="py-3 px-4 text-gray-900 font-medium text-sm">
-                  R$ {transaction.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </td>
-                <td className="py-3 px-4 text-gray-900 text-sm">
-                  {transaction.valor_juros && transaction.valor_juros > 0 ? 
-                    `R$ ${transaction.valor_juros.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : 
-                    '-'
-                  }
-                </td>
-                <td className="py-3 px-4 text-gray-900 font-medium text-sm">
-                  R$ {(transaction.valor_total || transaction.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </td>
-                <td className="py-3 px-4">
-                  <StatusCell transaction={transaction} />
-                </td>
-                <td className="py-3 px-4">
-                  <ActionsCell
-                    transaction={transaction}
-                    onTransactionUpdated={onTransactionUpdated}
-                    onMarkAsPaidRequest={handleMarkAsPaidRequest}
-                    onAttachReceipt={handleAttachReceipt}
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </div>
+                
+                <table className="w-full table-fixed">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Data de Pagamento</th>
+                      <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Vencimento</th>
+                      <th className="text-left text-gray-700 py-3 px-4 font-medium w-28">Empresa</th>
+                      <th className="text-left text-gray-700 py-3 px-4 font-medium w-32">Descrição</th>
+                      <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Categoria</th>
+                      <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Valor</th>
+                      <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Juros</th>
+                      <th className="text-left text-gray-700 py-3 px-4 font-medium w-24">Total</th>
+                      <th className="text-left text-gray-700 py-3 px-4 font-medium w-20">Status</th>
+                      <th className="text-left text-gray-700 py-3 px-4 font-medium w-36">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dateTransactions.map((transaction) => (
+                      <tr key={transaction.id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="py-3 px-4 text-gray-900 text-sm">
+                          {transaction.status === 'PAGO' ? formatDate(transaction.date) : '-'}
+                        </td>
+                        <td className="py-3 px-4 text-gray-900 text-sm">
+                          {transaction.data_vencimento ? formatDate(transaction.data_vencimento) : '-'}
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="px-2 py-1 rounded text-xs bg-blue-500 text-white">
+                            {transaction.company}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="max-w-full overflow-hidden">
+                            <DescriptionCell description={transaction.description} />
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <CategoryCell category={transaction.category} />
+                        </td>
+                        <td className="py-3 px-4 text-gray-900 font-medium text-sm">
+                          R$ {transaction.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="py-3 px-4 text-gray-900 text-sm">
+                          {transaction.valor_juros && transaction.valor_juros > 0 ? 
+                            `R$ ${transaction.valor_juros.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : 
+                            '-'
+                          }
+                        </td>
+                        <td className="py-3 px-4 text-gray-900 font-medium text-sm">
+                          R$ {(transaction.valor_total || transaction.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="py-3 px-4">
+                          <StatusCell transaction={transaction} />
+                        </td>
+                        <td className="py-3 px-4">
+                          <ActionsCell
+                            transaction={transaction}
+                            onTransactionUpdated={onTransactionUpdated}
+                            onMarkAsPaidRequest={handleMarkAsPaidRequest}
+                            onAttachReceipt={handleAttachReceipt}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            );
+          })}
+        </div>
 
         {/* Versão mobile - Cards */}
-        <div className="lg:hidden space-y-4">
-          {transactions.map((transaction) => (
-            <div key={transaction.id} className="bg-white rounded-lg shadow-md p-4 border border-gray-200">
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex-1">
-                  <div className="font-medium text-gray-900 mb-1">
-                    <DescriptionCell description={transaction.description} />
-                  </div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="px-2 py-1 rounded text-xs bg-blue-500 text-white">
-                      {transaction.company}
+        <div className="lg:hidden space-y-6">
+          {sortedDates.map((date) => {
+            const dateTransactions = groups[date];
+            const dailyTotal = calculateDailyTotal(dateTransactions);
+            
+            return (
+              <div key={date}>
+                {/* Data Header Mobile */}
+                <div className="bg-gray-50 border-b-2 border-gray-200 px-4 py-3 mb-4 rounded-t-lg">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-semibold text-gray-800">
+                      {date === 'pending' ? 'Pendentes' : formatDate(date)}
+                    </h3>
+                    <span className="font-bold text-red-600">
+                      -{dailyTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                     </span>
-                    <CategoryCell category={transaction.category} />
                   </div>
                 </div>
-                <StatusCell transaction={transaction} />
-              </div>
+                
+                <div className="space-y-4">
+                  {dateTransactions.map((transaction) => (
+                    <div key={transaction.id} className="bg-white rounded-lg shadow-md p-4 border border-gray-200">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900 mb-1">
+                            <DescriptionCell description={transaction.description} />
+                          </div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="px-2 py-1 rounded text-xs bg-blue-500 text-white">
+                              {transaction.company}
+                            </span>
+                            <CategoryCell category={transaction.category} />
+                          </div>
+                        </div>
+                        <StatusCell transaction={transaction} />
+                      </div>
 
-              <div className="grid grid-cols-2 gap-3 text-sm text-gray-600 mb-3">
-                <div>
-                  <span className="font-medium">Vencimento:</span>
-                  <div>{transaction.data_vencimento ? formatDate(transaction.data_vencimento) : '-'}</div>
-                </div>
-                <div>
-                  <span className="font-medium">Pagamento:</span>
-                  <div>{transaction.status === 'PAGO' ? formatDate(transaction.date) : '-'}</div>
-                </div>
-                <div>
-                  <span className="font-medium">Valor:</span>
-                  <div className="text-gray-900 font-medium">
-                    R$ {transaction.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </div>
-                </div>
-                <div>
-                  <span className="font-medium">Total:</span>
-                  <div className="text-gray-900 font-medium">
-                    R$ {(transaction.valor_total || transaction.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </div>
+                      <div className="grid grid-cols-2 gap-3 text-sm text-gray-600 mb-3">
+                        <div>
+                          <span className="font-medium">Vencimento:</span>
+                          <div>{transaction.data_vencimento ? formatDate(transaction.data_vencimento) : '-'}</div>
+                        </div>
+                        <div>
+                          <span className="font-medium">Pagamento:</span>
+                          <div>{transaction.status === 'PAGO' ? formatDate(transaction.date) : '-'}</div>
+                        </div>
+                        <div>
+                          <span className="font-medium">Valor:</span>
+                          <div className="text-gray-900 font-medium">
+                            R$ {transaction.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </div>
+                        </div>
+                        <div>
+                          <span className="font-medium">Total:</span>
+                          <div className="text-gray-900 font-medium">
+                            R$ {(transaction.valor_total || transaction.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </div>
+                        </div>
+                      </div>
+
+                      {transaction.valor_juros && transaction.valor_juros > 0 && (
+                        <div className="text-sm text-gray-600 mb-3">
+                          <span className="font-medium">Juros:</span> R$ {transaction.valor_juros.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </div>
+                      )}
+
+                      <div className="flex justify-end">
+                        <ActionsCell
+                          transaction={transaction}
+                          onTransactionUpdated={onTransactionUpdated}
+                          onMarkAsPaidRequest={handleMarkAsPaidRequest}
+                          onAttachReceipt={handleAttachReceipt}
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-
-              {transaction.valor_juros && transaction.valor_juros > 0 && (
-                <div className="text-sm text-gray-600 mb-3">
-                  <span className="font-medium">Juros:</span> R$ {transaction.valor_juros.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </div>
-              )}
-
-              <div className="flex justify-end">
-                <ActionsCell
-                  transaction={transaction}
-                  onTransactionUpdated={onTransactionUpdated}
-                  onMarkAsPaidRequest={handleMarkAsPaidRequest}
-                  onAttachReceipt={handleAttachReceipt}
-                />
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
