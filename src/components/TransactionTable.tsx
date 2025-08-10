@@ -277,6 +277,8 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
                   <ActionsCell
                     transaction={transaction}
                     onTransactionUpdated={onTransactionUpdated}
+                    onMarkAsPaidRequest={handleMarkAsPaidRequest}
+                    onAttachReceipt={handleAttachReceipt}
                   />
                 </td>
               </tr>
@@ -336,6 +338,8 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
                 <ActionsCell
                   transaction={transaction}
                   onTransactionUpdated={onTransactionUpdated}
+                  onMarkAsPaidRequest={handleMarkAsPaidRequest}
+                  onAttachReceipt={handleAttachReceipt}
                 />
               </div>
             </div>

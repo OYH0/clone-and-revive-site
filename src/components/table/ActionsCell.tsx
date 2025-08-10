@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Eye, Edit, Trash2, Paperclip } from 'lucide-react';
+import { Eye, Edit, Trash2, Paperclip, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import EditTransactionModal from '@/components/EditTransactionModal';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
@@ -10,9 +10,11 @@ import { useAdminAccess } from '@/hooks/useAdminAccess';
 interface ActionsCellProps {
   transaction: Transaction;
   onTransactionUpdated: () => void;
+  onMarkAsPaidRequest?: (transaction: Transaction) => void;
+  onAttachReceipt?: (transaction: Transaction) => void;
 }
 
-const ActionsCell: React.FC<ActionsCellProps> = ({ transaction, onTransactionUpdated }) => {
+const ActionsCell: React.FC<ActionsCellProps> = ({ transaction, onTransactionUpdated, onMarkAsPaidRequest, onAttachReceipt }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
@@ -57,10 +59,23 @@ const ActionsCell: React.FC<ActionsCellProps> = ({ transaction, onTransactionUpd
             variant="ghost" 
             size="sm" 
             className="h-8 w-8 p-0" 
-            title="Anexar"
+            onClick={() => onAttachReceipt?.(transaction)}
+            title="Anexar Comprovante"
           >
             <Paperclip className="h-4 w-4" />
           </Button>
+          
+          {transaction.status !== 'PAGO' && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 w-8 p-0" 
+              onClick={() => onMarkAsPaidRequest?.(transaction)}
+              title="Confirmar Pagamento"
+            >
+              <Check className="h-4 w-4" />
+            </Button>
+          )}
         </>
       )}
 
