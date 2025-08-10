@@ -1,11 +1,5 @@
 import React, { useState } from 'react';
-import { MoreHorizontal, Eye, Edit, Trash2, Clock } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Eye, Edit, Trash2, Paperclip } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import EditTransactionModal from '@/components/EditTransactionModal';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
@@ -26,33 +20,49 @@ const ActionsCell: React.FC<ActionsCellProps> = ({ transaction, onTransactionUpd
   const { isAdmin } = useAdminAccess();
 
   return (
-    <div className="flex items-center justify-center">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Abrir menu</span>
-            <MoreHorizontal className="h-4 w-4" />
+    <div className="flex items-center justify-center gap-1">
+      <Button 
+        variant="ghost" 
+        size="sm" 
+        className="h-8 w-8 p-0" 
+        onClick={() => setIsReceiptModalOpen(true)}
+        title="Ver Comprovante"
+      >
+        <Eye className="h-4 w-4" />
+      </Button>
+      
+      {isAdmin && (
+        <>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-8 w-8 p-0" 
+            onClick={() => setIsEditModalOpen(true)}
+            title="Editar"
+          >
+            <Edit className="h-4 w-4" />
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => setIsReceiptModalOpen(true)}>
-            <Eye className="mr-2 h-4 w-4" />
-            Ver Comprovante
-          </DropdownMenuItem>
-          {isAdmin && (
-            <>
-              <DropdownMenuItem onClick={() => setIsEditModalOpen(true)}>
-                <Edit className="mr-2 h-4 w-4" />
-                Editar
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setIsDeleteModalOpen(true)}>
-                <Trash2 className="mr-2 h-4 w-4" />
-                Excluir
-              </DropdownMenuItem>
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+          
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-8 w-8 p-0" 
+            onClick={() => setIsDeleteModalOpen(true)}
+            title="Excluir"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+          
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-8 w-8 p-0" 
+            title="Anexar"
+          >
+            <Paperclip className="h-4 w-4" />
+          </Button>
+        </>
+      )}
 
       {isAdmin && (
         <EditTransactionModal
