@@ -1,25 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { Eye, Edit, Trash2, Paperclip, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import EditTransactionModal from '@/components/EditTransactionModal';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import ViewReceiptModal from '@/components/ViewReceiptModal';
 import { Transaction } from '@/types/transaction';
-import { useAdminAccess } from '@/hooks/useAdminAccess';
 
 interface ActionsCellProps {
   transaction: Transaction;
   onTransactionUpdated: () => void;
   onMarkAsPaidRequest?: (transaction: Transaction) => void;
   onAttachReceipt?: (transaction: Transaction) => void;
+  isAdmin: boolean;
 }
 
-const ActionsCell: React.FC<ActionsCellProps> = ({ transaction, onTransactionUpdated, onMarkAsPaidRequest, onAttachReceipt }) => {
+const ActionsCell: React.FC<ActionsCellProps> = memo(({ transaction, onTransactionUpdated, onMarkAsPaidRequest, onAttachReceipt, isAdmin }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
-  
-  const { isAdmin } = useAdminAccess();
 
   return (
     <div className="flex items-center justify-center gap-1">
@@ -107,6 +105,8 @@ const ActionsCell: React.FC<ActionsCellProps> = ({ transaction, onTransactionUpd
 
     </div>
   );
-};
+});
+
+ActionsCell.displayName = 'ActionsCell';
 
 export default ActionsCell;
