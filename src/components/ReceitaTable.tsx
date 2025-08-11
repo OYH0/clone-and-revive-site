@@ -8,6 +8,7 @@ import { Receita, useDeleteReceita } from '@/hooks/useReceitas';
 import { useAdminAccess } from '@/hooks/useAdminAccess';
 import { useAuth } from '@/contexts/AuthContext';
 import EditReceitaModal from '@/components/EditReceitaModal';
+import { prettyLabel } from '@/utils/labelUtils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -164,7 +165,7 @@ const ReceitaTable: React.FC<ReceitaTableProps> = ({ receitas }) => {
                           </TableCell>
                           <TableCell>
                             <Badge className={`${getCategoryBadge(receita.categoria)} text-white`}>
-                              {receita.categoria}
+                              {prettyLabel(receita.categoria)}
                             </Badge>
                           </TableCell>
                           <TableCell className="font-medium">

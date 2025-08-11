@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { prettyLabel } from '@/utils/labelUtils';
 
 interface ReceitasFilterProps {
   searchTerm: string;
@@ -97,11 +98,11 @@ const ReceitasFilter: React.FC<ReceitasFilterProps> = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas as categorias</SelectItem>
-                <SelectItem value="VENDAS">Vendas</SelectItem>
-                <SelectItem value="VENDAS_DIARIAS">Vendas Diárias</SelectItem>
-                <SelectItem value="OUTROS">Outros</SelectItem>
-                <SelectItem value="EM_COFRE">Em Cofre</SelectItem>
-                <SelectItem value="EM_CONTA">Em Conta</SelectItem>
+                <SelectItem value="VENDAS">{prettyLabel('VENDAS')}</SelectItem>
+                <SelectItem value="VENDAS_DIARIAS">{prettyLabel('VENDAS_DIARIAS')}</SelectItem>
+                <SelectItem value="OUTROS">{prettyLabel('OUTROS')}</SelectItem>
+                <SelectItem value="EM_COFRE">{prettyLabel('EM_COFRE')}</SelectItem>
+                <SelectItem value="EM_CONTA">{prettyLabel('EM_CONTA')}</SelectItem>
                 <SelectItem value="PAGAMENTO_DESPESA">Pagamento de Despesa</SelectItem>
               </SelectContent>
             </Select>
