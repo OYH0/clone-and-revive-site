@@ -245,36 +245,17 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
     return new Date(b).getTime() - new Date(a).getTime();
   });
 
-  const calculateDailyTotal = (transactions: Transaction[]) => {
-    return transactions.reduce((total, transaction) => 
-      total + (transaction.valor_total || transaction.valor), 0
-    );
-  };
 
   return (
     <>
       <div className="overflow-x-auto">
         {/* Versão desktop da tabela */}
         <div className="hidden lg:block">
-          {sortedDates.map((date) => {
-            const dateTransactions = groups[date];
-            const dailyTotal = calculateDailyTotal(dateTransactions);
-            const isToday = date !== 'pending';
+           {sortedDates.map((date) => {
+             const dateTransactions = groups[date];
             
             return (
               <div key={date} className="mb-6">
-                {/* Data Header */}
-                <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-l-4 border-primary px-6 py-4 mb-3 rounded-2xl shadow-sm">
-                  <div className="flex justify-between items-center">
-                    <h3 className="font-bold text-lg text-gray-800">
-                      {date === 'pending' ? 'Pendentes' : formatDate(date)}
-                    </h3>
-                    <div className="px-4 py-2 rounded-full font-bold text-sm shadow-md bg-red-500 text-white">
-                      -{dailyTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                    </div>
-                  </div>
-                </div>
-                
                 <div className="rounded-xl border bg-white overflow-hidden">
                   <Table>
                     <TableHeader>
@@ -330,25 +311,13 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
           })}
         </div>
 
-        {/* Versão mobile - Cards */}
-        <div className="lg:hidden space-y-6">
-          {sortedDates.map((date) => {
-            const dateTransactions = groups[date];
-            const dailyTotal = calculateDailyTotal(dateTransactions);
-            
-            return (
-              <div key={date}>
-                {/* Data Header Mobile */}
-                <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-l-4 border-primary px-6 py-4 mb-3 rounded-2xl shadow-sm">
-                  <div className="flex justify-between items-center">
-                    <h3 className="font-bold text-lg text-gray-800">
-                      {date === 'pending' ? 'Pendentes' : formatDate(date)}
-                    </h3>
-                    <div className="px-4 py-2 rounded-full font-bold text-sm shadow-md bg-red-500 text-white">
-                      -{dailyTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                    </div>
-                  </div>
-                </div>
+         {/* Versão mobile - Cards */}
+         <div className="lg:hidden space-y-6">
+           {sortedDates.map((date) => {
+             const dateTransactions = groups[date];
+             
+             return (
+               <div key={date} className="mb-6">
                 
                 <div className="space-y-4">
                   {dateTransactions.map((transaction) => (

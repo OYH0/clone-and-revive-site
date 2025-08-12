@@ -104,35 +104,15 @@ const ReceitaTable: React.FC<ReceitaTableProps> = ({ receitas }) => {
     return new Date(b).getTime() - new Date(a).getTime();
   });
 
-  const calculateDailyTotal = (receitas: Receita[]) => {
-    return receitas.reduce((total, receita) => total + receita.valor, 0);
-  };
 
   return (
     <>
       <div className="space-y-6">
-        {sortedDates.map((date) => {
-          const dateReceitas = groups[date];
-          const dailyTotal = calculateDailyTotal(dateReceitas);
+         {sortedDates.map((date) => {
+           const dateReceitas = groups[date];
           
           return (
-            <div key={date}>
-              {/* Data Header */}
-              <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-l-4 border-primary px-6 py-4 mb-3 rounded-2xl shadow-sm">
-                <div className="flex justify-between items-center">
-                  <h3 className="font-bold text-lg text-gray-800">
-                    {date === 'pending' ? 'Pendentes' : formatDate(date)}
-                  </h3>
-                  <div className={`px-4 py-2 rounded-full font-bold text-sm shadow-md ${
-                    dailyTotal >= 0 
-                      ? 'bg-green-500 text-white' 
-                      : 'bg-red-500 text-white'
-                  }`}>
-                    {dailyTotal >= 0 ? '+' : ''}{dailyTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                  </div>
-                </div>
-              </div>
-              
+            <div key={date} className="mb-6">
               <div className="rounded-xl border bg-white overflow-hidden">
                 <Table>
                   <TableHeader>
