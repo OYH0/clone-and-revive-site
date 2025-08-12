@@ -188,6 +188,37 @@ export const useDeleteDespesa = () => {
       if (!user) throw new Error('Usuário não autenticado');
       
       console.log('Deleting despesa:', id);
+      
+      // Primeiro, buscar a despesa para verificar se tem receita negativa associada
+      const { data: despesa, error: fetchError } = await supabase
+        .from('despesas')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching despesa for deletion:', fetchError);
+        throw fetchError;
+      }
+
+      // Se a despesa foi paga, remover a receita negativa correspondente
+      if (despesa.status === 'PAGO') {
+        const { error: receitaError } = await supabase
+          .from('receitas')
+          .delete()
+          .ilike('descricao', `Pagamento: ${despesa.descricao}`)
+          .eq('empresa', despesa.empresa)
+          .lt('valor', 0);
+
+        if (receitaError) {
+          console.error('Error deleting negative receipt:', receitaError);
+          // Continue even if the receipt deletion fails
+        } else {
+          console.log('Negative receipt entry deleted successfully');
+        }
+      }
+
+      // Deletar a despesa
       const { error } = await supabase
         .from('despesas')
         .delete()
@@ -202,6 +233,7 @@ export const useDeleteDespesa = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['despesas'] });
+      queryClient.invalidateQueries({ queryKey: ['receitas'] }); // Invalidar também receitas
       toast({
         title: "Sucesso",
         description: "Despesa excluída com sucesso!",
