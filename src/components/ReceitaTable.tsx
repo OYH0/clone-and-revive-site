@@ -69,24 +69,8 @@ const ReceitaTable: React.FC<ReceitaTableProps> = ({ receitas }) => {
     return date.toLocaleDateString('pt-BR');
   };
 
-  // Group receitas by received date for bank statement format
-  const groupedReceitas = () => {
-    const groups: { [date: string]: Receita[] } = {};
-    
-    receitas.forEach(receita => {
-      // Use received date if available, otherwise group as "Pendentes"
-      const groupKey = receita.data_recebimento 
-        ? receita.data_recebimento 
-        : 'pending';
-      
-      if (!groups[groupKey]) {
-        groups[groupKey] = [];
-      }
-      groups[groupKey].push(receita);
-    });
-    
-    return groups;
-  };
+
+
 
   if (receitas.length === 0) {
     return (
@@ -97,110 +81,92 @@ const ReceitaTable: React.FC<ReceitaTableProps> = ({ receitas }) => {
     );
   }
 
-  const groups = groupedReceitas();
-  const sortedDates = Object.keys(groups).sort((a, b) => {
-    if (a === 'pending') return 1;
-    if (b === 'pending') return -1;
-    return new Date(b).getTime() - new Date(a).getTime();
-  });
-
-
   return (
     <>
-      <div className="space-y-6">
-         {sortedDates.map((date) => {
-           const dateReceitas = groups[date];
-          
-          return (
-            <div key={date} className="mb-6">
-              <div className="rounded-xl border bg-white overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Empresa</TableHead>
-                      <TableHead>Descrição</TableHead>
-                      <TableHead>Categoria</TableHead>
-                      <TableHead>Valor</TableHead>
-                      <TableHead>Recebimento</TableHead>
-                      <TableHead>Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {dateReceitas.map((receita) => {
-                      const canEdit = canEditReceita(receita);
+      <div className="rounded-xl border bg-white overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Data</TableHead>
+              <TableHead>Empresa</TableHead>
+              <TableHead>Descrição</TableHead>
+              <TableHead>Categoria</TableHead>
+              <TableHead>Valor</TableHead>
+              <TableHead>Recebimento</TableHead>
+              <TableHead>Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {receitas.map((receita) => {
+              const canEdit = canEditReceita(receita);
+              
+              return (
+                <TableRow key={receita.id}>
+                  <TableCell>
+                    {formatDate(receita.data)}
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={`${getEmpresaBadge(receita.empresa)} text-white`}>
+                      {receita.empresa}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="max-w-xs truncate">
+                    {receita.descricao}
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={`${getCategoryBadge(receita.categoria)} text-white`}>
+                      {prettyLabel(receita.categoria)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    R$ {receita.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </TableCell>
+                  <TableCell>
+                    {receita.data_recebimento ? (
+                      <Badge className="bg-green-500 text-white">
+                        {formatDate(receita.data_recebimento)}
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-yellow-500 text-white">Pendente</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      {canEdit ? (
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => setEditingReceita(receita)}
+                        >
+                          <Edit size={16} />
+                        </Button>
+                      ) : (
+                        <Button variant="ghost" size="sm" disabled className="opacity-50">
+                          <Lock size={16} className="text-gray-400" />
+                        </Button>
+                      )}
                       
-                      return (
-                        <TableRow key={receita.id}>
-                          <TableCell>
-                            {formatDate(receita.data)}
-                          </TableCell>
-                          <TableCell>
-                            <Badge className={`${getEmpresaBadge(receita.empresa)} text-white`}>
-                              {receita.empresa}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="max-w-xs truncate">
-                            {receita.descricao}
-                          </TableCell>
-                          <TableCell>
-                            <Badge className={`${getCategoryBadge(receita.categoria)} text-white`}>
-                              {prettyLabel(receita.categoria)}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            R$ {receita.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                          </TableCell>
-                          <TableCell>
-                            {receita.data_recebimento ? (
-                              <Badge className="bg-green-500 text-white">
-                                {formatDate(receita.data_recebimento)}
-                              </Badge>
-                            ) : (
-                              <Badge className="bg-yellow-500 text-white">Pendente</Badge>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex gap-2">
-                              {canEdit ? (
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm"
-                                  onClick={() => setEditingReceita(receita)}
-                                >
-                                  <Edit size={16} />
-                                </Button>
-                              ) : (
-                                <Button variant="ghost" size="sm" disabled className="opacity-50">
-                                  <Lock size={16} className="text-gray-400" />
-                                </Button>
-                              )}
-                              
-                              {canEdit ? (
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm"
-                                  onClick={() => setDeleteId(receita.id)}
-                                  className="text-red-500 hover:text-red-700"
-                                >
-                                  <Trash2 size={16} />
-                                </Button>
-                              ) : (
-                                <Button variant="ghost" size="sm" disabled className="opacity-50">
-                                  <Lock size={16} className="text-gray-400" />
-                                </Button>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
-          );
-        })}
+                      {canEdit ? (
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => setDeleteId(receita.id)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <Trash2 size={16} />
+                        </Button>
+                      ) : (
+                        <Button variant="ghost" size="sm" disabled className="opacity-50">
+                          <Lock size={16} className="text-gray-400" />
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
       </div>
 
       {/* Edit Modal */}
