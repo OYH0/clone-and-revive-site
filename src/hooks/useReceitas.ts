@@ -63,14 +63,12 @@ export const useReceitas = () => {
     const receitasCofre = receitas.filter(r => 
       r.categoria === 'EM_COFRE' || 
       r.categoria === 'PAGAMENTO_DESPESA_EM_COFRE' ||
-      (r.descricao?.startsWith('Pagamento:') && r.categoria === 'EM_COFRE') ||
-      (r.descricao?.startsWith('Pagamento de despesa:') && r.categoria === 'EM_COFRE')
+      r.categoria?.includes('EM_COFRE')
     );
     const receitasConta = receitas.filter(r => 
       r.categoria === 'EM_CONTA' || 
       r.categoria === 'PAGAMENTO_DESPESA_EM_CONTA' ||
-      (r.descricao?.startsWith('Pagamento:') && r.categoria === 'EM_CONTA') ||
-      (r.descricao?.startsWith('Pagamento de despesa:') && r.categoria === 'EM_CONTA')
+      r.categoria?.includes('EM_CONTA')
     );
     
     // Calcular totais das receitas normais (excluindo cofre e conta)
