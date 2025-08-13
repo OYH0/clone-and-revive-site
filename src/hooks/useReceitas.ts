@@ -51,7 +51,9 @@ export const useReceitas = () => {
     // Filtrar receitas para excluir as de pagamento de despesas (receitas negativas criadas automaticamente)
     const receitasFiltradas = receitas.filter(r => 
       !r.categoria?.startsWith('PAGAMENTO_DESPESA_') && 
-      r.categoria !== 'PAGAMENTO_DESPESA'
+      r.categoria !== 'PAGAMENTO_DESPESA' &&
+      !r.descricao?.startsWith('Pagamento de despesa:') &&
+      !r.descricao?.startsWith('Pagamento:')
     );
     
     // Separar receitas por categoria (usando receitas filtradas)
