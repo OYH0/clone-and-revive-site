@@ -56,10 +56,22 @@ export const useReceitas = () => {
       !r.descricao?.startsWith('Pagamento:')
     );
     
-    // Separar receitas por categoria (usando receitas filtradas)
+    // Separar receitas por categoria (usando receitas filtradas para exibição)
     const receitasNormais = receitasFiltradas.filter(r => r.categoria !== 'EM_COFRE' && r.categoria !== 'EM_CONTA');
-    const receitasCofre = receitas.filter(r => r.categoria === 'EM_COFRE' || r.categoria === 'PAGAMENTO_DESPESA_EM_COFRE');
-    const receitasConta = receitas.filter(r => r.categoria === 'EM_CONTA' || r.categoria === 'PAGAMENTO_DESPESA_EM_CONTA');
+    
+    // Para os cálculos de cofre e conta, incluir TODAS as receitas (incluindo pagamentos de despesas)
+    const receitasCofre = receitas.filter(r => 
+      r.categoria === 'EM_COFRE' || 
+      r.categoria === 'PAGAMENTO_DESPESA_EM_COFRE' ||
+      (r.descricao?.startsWith('Pagamento:') && r.categoria === 'EM_COFRE') ||
+      (r.descricao?.startsWith('Pagamento de despesa:') && r.categoria === 'EM_COFRE')
+    );
+    const receitasConta = receitas.filter(r => 
+      r.categoria === 'EM_CONTA' || 
+      r.categoria === 'PAGAMENTO_DESPESA_EM_CONTA' ||
+      (r.descricao?.startsWith('Pagamento:') && r.categoria === 'EM_CONTA') ||
+      (r.descricao?.startsWith('Pagamento de despesa:') && r.categoria === 'EM_CONTA')
+    );
     
     // Calcular totais das receitas normais (excluindo cofre e conta)
     const totalReceitas = receitasNormais.reduce((sum, r) => sum + (r.valor || 0), 0);
@@ -70,7 +82,7 @@ export const useReceitas = () => {
       .filter(r => !r.data_recebimento)
       .reduce((sum, r) => sum + (r.valor || 0), 0);
     
-    // Calcular totais de cofre e conta (incluindo pagamentos de despesas)
+    // Calcular totais de cofre e conta (incluindo TODOS os pagamentos de despesas)
     const totalCofre = receitasCofre.reduce((sum, r) => sum + (r.valor || 0), 0);
     const totalConta = receitasConta.reduce((sum, r) => sum + (r.valor || 0), 0);
 
