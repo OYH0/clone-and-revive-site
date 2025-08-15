@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -48,30 +49,59 @@ export const useReceitas = () => {
 
     const receitas = query.data;
     
-    // Filtrar receitas para excluir as de pagamento de despesas (receitas negativas criadas automaticamente)
-    const receitasFiltradas = receitas.filter(r => 
-      !r.categoria?.startsWith('PAGAMENTO_DESPESA_') && 
-      r.categoria !== 'PAGAMENTO_DESPESA' &&
-      !r.descricao?.startsWith('Pagamento de despesa:') &&
-      !r.descricao?.startsWith('Pagamento:')
-    );
+    console.log('=== PROCESSAMENTO DE RECEITAS ===');
+    console.log('Total de receitas:', receitas.length);
+    
+    // Filtrar receitas para exibição (excluir pagamentos de despesas)
+    const receitasFiltradas = receitas.filter(r => {
+      const isPagamentoDespesa = r.categoria?.startsWith('PAGAMENTO_DESPESA_') || 
+                                r.categoria === 'PAGAMENTO_DESPESA' ||
+                                r.descricao?.startsWith('Pagamento de despesa:') ||
+                                r.descricao?.startsWith('Pagamento:');
+      
+      if (isPagamentoDespesa) {
+        console.log('Receita filtrada (pagamento de despesa):', r.descricao, r.categoria, r.valor);
+      }
+      
+      return !isPagamentoDespesa;
+    });
+    
+    console.log('Receitas após filtro:', receitasFiltradas.length);
     
     // Separar receitas por categoria (usando receitas filtradas para exibição)
-    const receitasNormais = receitasFiltradas.filter(r => r.categoria !== 'EM_COFRE' && r.categoria !== 'EM_CONTA');
-    
-    // Para os cálculos de cofre e conta, incluir TODAS as receitas (incluindo pagamentos de despesas)
-    const receitasCofre = receitas.filter(r => 
-      r.categoria === 'EM_COFRE' || 
-      r.categoria === 'PAGAMENTO_DESPESA_EM_COFRE' ||
-      r.categoria?.includes('EM_COFRE')
-    );
-    const receitasConta = receitas.filter(r => 
-      r.categoria === 'EM_CONTA' || 
-      r.categoria === 'PAGAMENTO_DESPESA_EM_CONTA' ||
-      r.categoria?.includes('EM_CONTA')
+    const receitasNormais = receitasFiltradas.filter(r => 
+      r.categoria !== 'EM_COFRE' && 
+      r.categoria !== 'EM_CONTA' &&
+      !r.categoria?.includes('EM_COFRE') &&
+      !r.categoria?.includes('EM_CONTA')
     );
     
-    // Calcular totais das receitas normais (excluindo cofre e conta)
+    // Para cálculos de cofre e conta, incluir TODAS as receitas (incluindo pagamentos)
+    const receitasCofre = receitas.filter(r => {
+      const isCofre = r.categoria === 'EM_COFRE' || 
+                     r.categoria === 'PAGAMENTO_DESPESA_EM_COFRE' ||
+                     r.categoria?.includes('EM_COFRE');
+      
+      if (isCofre) {
+        console.log('Receita cofre encontrada:', r.descricao, r.categoria, r.valor);
+      }
+      
+      return isCofre;
+    });
+    
+    const receitasConta = receitas.filter(r => {
+      const isConta = r.categoria === 'EM_CONTA' || 
+                     r.categoria === 'PAGAMENTO_DESPESA_EM_CONTA' ||
+                     r.categoria?.includes('EM_CONTA');
+      
+      if (isConta) {
+        console.log('Receita conta encontrada:', r.descricao, r.categoria, r.valor);
+      }
+      
+      return isConta;
+    });
+    
+    // Calcular totais das receitas normais
     const totalReceitas = receitasNormais.reduce((sum, r) => sum + (r.valor || 0), 0);
     const totalRecebidas = receitasNormais
       .filter(r => r.data_recebimento)
@@ -80,9 +110,16 @@ export const useReceitas = () => {
       .filter(r => !r.data_recebimento)
       .reduce((sum, r) => sum + (r.valor || 0), 0);
     
-    // Calcular totais de cofre e conta (incluindo TODOS os pagamentos de despesas)
+    // Calcular totais de cofre e conta (incluindo valores negativos de pagamentos)
     const totalCofre = receitasCofre.reduce((sum, r) => sum + (r.valor || 0), 0);
     const totalConta = receitasConta.reduce((sum, r) => sum + (r.valor || 0), 0);
+
+    console.log('=== TOTAIS CALCULADOS ===');
+    console.log('Total receitas normais:', totalReceitas);
+    console.log('Total cofre (incluindo débitos):', totalCofre);
+    console.log('Total conta (incluindo débitos):', totalConta);
+    console.log('Receitas cofre encontradas:', receitasCofre.length);
+    console.log('Receitas conta encontradas:', receitasConta.length);
 
     return {
       receitas: receitasFiltradas, // Retornar apenas receitas filtradas (sem pagamentos de despesas)
