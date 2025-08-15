@@ -43,6 +43,16 @@ const ReceitasPage = () => {
   // Filtrar receitas com base nos outros filtros
   const filteredReceitas = useMemo(() => {
     return currentMonthReceitas.filter(receita => {
+      // Excluir receitas de pagamento de despesas da exibição
+      const isPagamentoDespesa = receita.categoria?.startsWith('PAGAMENTO_DESPESA_') || 
+                                receita.categoria === 'PAGAMENTO_DESPESA' ||
+                                receita.descricao?.startsWith('Pagamento de despesa:') ||
+                                receita.descricao?.startsWith('Pagamento:');
+      
+      if (isPagamentoDespesa) {
+        return false;
+      }
+
       const matchesSearch = receita.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            receita.empresa.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesEmpresa = filterEmpresa === 'all' || receita.empresa === filterEmpresa;
@@ -63,13 +73,9 @@ const ReceitasPage = () => {
     .filter(r => r.data_recebimento && r.categoria !== 'EM_COFRE' && r.categoria !== 'EM_CONTA')
     .reduce((sum, receita) => sum + receita.valor, 0);
   
-  // Novos cálculos para cofre e conta
-  const totalEmCofre = filteredReceitas
-    .filter(r => r.categoria === 'EM_COFRE')
-    .reduce((sum, receita) => sum + receita.valor, 0);
-  const totalEmConta = filteredReceitas
-    .filter(r => r.categoria === 'EM_CONTA')
-    .reduce((sum, receita) => sum + receita.valor, 0);
+  // Usar os totais calculados pelo useReceitas (que incluem pagamentos de despesas)
+  const totalEmCofre = stats?.totalCofre || 0;
+  const totalEmConta = stats?.totalConta || 0;
 
   // Handle filter empresa change with Camerino auth check
   const handleFilterEmpresaChange = (value: string) => {
