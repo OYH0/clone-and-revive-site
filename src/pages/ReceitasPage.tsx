@@ -73,9 +73,22 @@ const ReceitasPage = () => {
     .filter(r => r.data_recebimento && r.categoria !== 'EM_COFRE' && r.categoria !== 'EM_CONTA')
     .reduce((sum, receita) => sum + receita.valor, 0);
   
-  // Usar os totais calculados pelo useReceitas (que incluem pagamentos de despesas)
-  const totalEmCofre = stats?.totalCofre || 0;
-  const totalEmConta = stats?.totalConta || 0;
+  // Calcular totais baseados nas receitas filtradas (incluindo pagamentos de despesas)
+  const filteredReceitasForCalculation = useMemo(() => {
+    return currentMonthReceitas.filter(receita => {
+      const matchesEmpresa = filterEmpresa === 'all' || receita.empresa === filterEmpresa;
+      const matchesCategoria = filterCategoria === 'all' || receita.categoria === filterCategoria;
+      
+      return matchesEmpresa && matchesCategoria;
+    });
+  }, [currentMonthReceitas, filterEmpresa, filterCategoria]);
+
+  const totalEmCofre = filteredReceitasForCalculation
+    .filter(r => r.categoria === 'EM_COFRE')
+    .reduce((sum, receita) => sum + receita.valor, 0);
+  const totalEmConta = filteredReceitasForCalculation
+    .filter(r => r.categoria === 'EM_CONTA')
+    .reduce((sum, receita) => sum + receita.valor, 0);
 
   // Handle filter empresa change with Camerino auth check
   const handleFilterEmpresaChange = (value: string) => {
