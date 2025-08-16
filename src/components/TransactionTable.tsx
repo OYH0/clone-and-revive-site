@@ -15,7 +15,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminAccess } from '@/hooks/useAdminAccess';
-import { useQueryClient } from '@tanstack/react-query';
 
 interface TransactionTableProps {
   transactions: Transaction[];
@@ -35,7 +34,6 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
   const { toast } = useToast();
   const { user } = useAuth();
   const { isAdmin } = useAdminAccess();
-  const queryClient = useQueryClient();
 
   // Função para formatar data corretamente
   const formatDate = (dateString: string) => {
@@ -118,7 +116,6 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
       const categoria = paymentSource === 'cofre' ? 'EM_COFRE' : 'EM_CONTA';
       
       // Criar uma entrada negativa nas receitas para subtrair o valor
-      // Usar uma categoria especial para não aparecer na lista normal
       const { error: receitaError } = await supabase
         .from('receitas')
         .insert({
@@ -126,7 +123,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
           valor: -valorPago,
           descricao: `Pagamento: ${transaction.description}`,
           empresa: transaction.company,
-          categoria: `PAGAMENTO_DESPESA_${categoria}`, // Categoria especial
+          categoria: categoria,
           data_recebimento: today,
           user_id: user.id
         });
@@ -146,8 +143,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
         description: `Despesa marcada como paga em ${formattedDate} e valor deduzido do ${sourceText}!`,
       });
 
-        onTransactionUpdated();
-        queryClient.invalidateQueries({ queryKey: ['receitas'] }); // Invalidar receitas após marcar como pago
+      onTransactionUpdated();
     } catch (error) {
       console.error('Erro ao marcar como paga:', error);
       toast({

@@ -43,16 +43,6 @@ const ReceitasPage = () => {
   // Filtrar receitas com base nos outros filtros
   const filteredReceitas = useMemo(() => {
     return currentMonthReceitas.filter(receita => {
-      // Excluir receitas de pagamento de despesas da exibição
-      const isPagamentoDespesa = receita.categoria?.startsWith('PAGAMENTO_DESPESA_') || 
-                                receita.categoria === 'PAGAMENTO_DESPESA' ||
-                                receita.descricao?.startsWith('Pagamento de despesa:') ||
-                                receita.descricao?.startsWith('Pagamento:');
-      
-      if (isPagamentoDespesa) {
-        return false;
-      }
-
       const matchesSearch = receita.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            receita.empresa.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesEmpresa = filterEmpresa === 'all' || receita.empresa === filterEmpresa;
@@ -73,20 +63,11 @@ const ReceitasPage = () => {
     .filter(r => r.data_recebimento && r.categoria !== 'EM_COFRE' && r.categoria !== 'EM_CONTA')
     .reduce((sum, receita) => sum + receita.valor, 0);
   
-  // Calcular totais baseados nas receitas filtradas (incluindo pagamentos de despesas)
-  const filteredReceitasForCalculation = useMemo(() => {
-    return currentMonthReceitas.filter(receita => {
-      const matchesEmpresa = filterEmpresa === 'all' || receita.empresa === filterEmpresa;
-      const matchesCategoria = filterCategoria === 'all' || receita.categoria === filterCategoria;
-      
-      return matchesEmpresa && matchesCategoria;
-    });
-  }, [currentMonthReceitas, filterEmpresa, filterCategoria]);
-
-  const totalEmCofre = filteredReceitasForCalculation
+  // Novos cálculos para cofre e conta
+  const totalEmCofre = filteredReceitas
     .filter(r => r.categoria === 'EM_COFRE')
     .reduce((sum, receita) => sum + receita.valor, 0);
-  const totalEmConta = filteredReceitasForCalculation
+  const totalEmConta = filteredReceitas
     .filter(r => r.categoria === 'EM_CONTA')
     .reduce((sum, receita) => sum + receita.valor, 0);
 
