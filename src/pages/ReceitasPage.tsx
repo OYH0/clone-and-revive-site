@@ -52,18 +52,20 @@ const ReceitasPage = () => {
     });
   }, [currentMonthReceitas, searchTerm, filterEmpresa, filterCategoria]);
 
-  // Calcular estatísticas baseadas nas receitas filtradas
-  const totalReceitas = filteredReceitas
-    .filter(r => r.categoria !== 'EM_COFRE' && r.categoria !== 'EM_CONTA')
-    .reduce((sum, receita) => sum + receita.valor, 0);
-  const receitasRecebidas = filteredReceitas
-    .filter(r => r.data_recebimento && r.categoria !== 'EM_COFRE' && r.categoria !== 'EM_CONTA')
-    .length;
-  const valorRecebido = filteredReceitas
-    .filter(r => r.data_recebimento && r.categoria !== 'EM_COFRE' && r.categoria !== 'EM_CONTA')
+  // Calcular estatísticas baseadas nas receitas exibidas (filtradas mas excluindo pagamentos de despesas)
+  const receitasExibidas = filteredReceitas.filter(r => 
+    r.categoria !== 'EM_COFRE' && 
+    r.categoria !== 'EM_CONTA' && 
+    r.descricao !== 'PAGAMENTO DE DESPESA'
+  );
+  
+  const totalReceitas = receitasExibidas.reduce((sum, receita) => sum + receita.valor, 0);
+  const receitasRecebidas = receitasExibidas.filter(r => r.data_recebimento).length;
+  const valorRecebido = receitasExibidas
+    .filter(r => r.data_recebimento)
     .reduce((sum, receita) => sum + receita.valor, 0);
   
-  // Novos cálculos para cofre e conta
+  // Calcular cofre e conta usando TODAS as receitas filtradas (incluindo pagamentos de despesas)
   const totalEmCofre = filteredReceitas
     .filter(r => r.categoria === 'EM_COFRE')
     .reduce((sum, receita) => sum + receita.valor, 0);
@@ -162,7 +164,7 @@ const ReceitasPage = () => {
                 <div className="text-xl lg:text-3xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
                   R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">{filteredReceitas.length} receitas encontradas</p>
+                <p className="text-xs text-gray-500 mt-1">{receitasExibidas.length} receitas encontradas</p>
               </CardContent>
             </Card>
 
@@ -219,7 +221,7 @@ const ReceitasPage = () => {
                 <div>
                   <CardTitle className="text-xl text-gray-800">Lista de Receitas</CardTitle>
                   <CardDescription className="text-gray-600">
-                    {filteredReceitas.length} receita(s) encontrada(s) - Mês atual e recebimentos recentes
+                    {receitasExibidas.length} receita(s) encontrada(s) - Mês atual e recebimentos recentes
                   </CardDescription>
                 </div>
                 <Button
@@ -233,7 +235,7 @@ const ReceitasPage = () => {
               </div>
             </CardHeader>
             <CardContent className="p-6">
-              <ReceitaTable receitas={filteredReceitas} />
+              <ReceitaTable receitas={receitasExibidas} />
             </CardContent>
           </Card>
         </div>

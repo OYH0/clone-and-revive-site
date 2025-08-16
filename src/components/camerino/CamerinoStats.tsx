@@ -23,10 +23,15 @@ const CamerinoStats: React.FC<CamerinoStatsProps> = ({ despesas, receitas, selec
     title: ''
   });
 
-  const totalDespesas = despesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
-  const totalReceitas = receitas.reduce((sum, r) => sum + r.valor, 0);
-  const lucroLiquido = totalReceitas - totalDespesas;
-  const margemLucro = totalReceitas > 0 ? (lucroLiquido / totalReceitas) * 100 : 0;
+  // Usar dados totais (não filtrados por período) para Receita Total e Despesas Totais
+  const totalDespesas = allDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
+  const totalReceitas = allReceitas.reduce((sum, r) => sum + r.valor, 0);
+  
+  // Usar dados do período para calcular o lucro líquido
+  const despesasPeriodo = despesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
+  const receitasPeriodo = receitas.reduce((sum, r) => sum + r.valor, 0);
+  const lucroLiquido = receitasPeriodo - despesasPeriodo;
+  const margemLucro = receitasPeriodo > 0 ? (lucroLiquido / receitasPeriodo) * 100 : 0;
 
   const openModal = (type: 'receitas' | 'despesas', title: string) => {
     setModalState({ isOpen: true, type, title });
@@ -49,7 +54,7 @@ const CamerinoStats: React.FC<CamerinoStatsProps> = ({ despesas, receitas, selec
               R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
             <div className="flex items-center justify-between">
-              <p className="text-xs text-gray-500">Receitas do Camerino</p>
+              <p className="text-xs text-gray-500">Total acumulado</p>
               <Button size="sm" variant="outline" onClick={() => openModal('receitas', 'Receitas')} className="h-6 px-2 text-xs">
                 <Eye className="h-3 w-3 mr-1" />Ver
               </Button>
@@ -67,7 +72,7 @@ const CamerinoStats: React.FC<CamerinoStatsProps> = ({ despesas, receitas, selec
               R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
             <div className="flex items-center justify-between">
-              <p className="text-xs text-gray-500">Gastos operacionais</p>
+              <p className="text-xs text-gray-500">Total acumulado</p>
               <Button size="sm" variant="outline" onClick={() => openModal('despesas', 'Despesas')} className="h-6 px-2 text-xs">
                 <Eye className="h-3 w-3 mr-1" />Ver
               </Button>
@@ -93,7 +98,7 @@ const CamerinoStats: React.FC<CamerinoStatsProps> = ({ despesas, receitas, selec
         isOpen={modalState.isOpen}
         onClose={closeModal}
         type={modalState.type}
-        transactions={modalState.type === 'receitas' ? receitas : despesas}
+        transactions={modalState.type === 'receitas' ? allReceitas : allDespesas}
         empresa="Camerino"
         title={modalState.title}
       />
