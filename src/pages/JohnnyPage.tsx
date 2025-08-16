@@ -43,18 +43,29 @@ const JohnnyPage = () => {
 
   // Aplicar filtro de período
   const { filteredDespesas, filteredReceitas } = useMemo(() => {
-    return {
+    console.log('=== JOHNNY DEBUG ===');
+    console.log('Despesas Johnny antes do filtro de período:', johnnyDespesas.length);
+    console.log('Receitas Johnny antes do filtro de período:', johnnyReceitas.length);
+    console.log('Período selecionado:', selectedPeriod);
+    console.log('Mês customizado:', customMonth, 'Ano customizado:', customYear);
+    
+    const filtered = {
       filteredDespesas: filterDataByPeriod(johnnyDespesas, selectedPeriod, customMonth, customYear),
       filteredReceitas: filterDataByPeriod(johnnyReceitas, selectedPeriod, customMonth, customYear)
     };
+    
+    console.log('Despesas Johnny após filtro de período:', filtered.filteredDespesas.length);
+    console.log('Receitas Johnny após filtro de período:', filtered.filteredReceitas.length);
+    
+    // Debug dos totais
+    const totalDespesasJohnny = filtered.filteredDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
+    const totalReceitasJohnny = filtered.filteredReceitas.reduce((sum, r) => sum + (r.valor || 0), 0);
+    
+    console.log('Total Despesas Johnny:', totalDespesasJohnny.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
+    console.log('Total Receitas Johnny:', totalReceitasJohnny.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
+    
+    return filtered;
   }, [johnnyDespesas, johnnyReceitas, selectedPeriod, customMonth, customYear]);
-
-  console.log('Johnny - Despesas filtradas:', filteredDespesas.length);
-  console.log('Johnny - Despesas por categoria:', filteredDespesas.reduce((acc, d) => {
-    const cat = d.categoria || 'SEM_CATEGORIA';
-    acc[cat] = (acc[cat] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>));
 
   const handleCustomDateChange = (month: number, year: number) => {
     setCustomMonth(month);

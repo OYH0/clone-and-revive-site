@@ -23,22 +23,18 @@ const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas, selectedP
     title: ''
   });
 
-  // Usar dados totais (não filtrados por período) para Receita Total e Despesas Totais
-  const totalDespesas = allDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
-  const totalReceitas = allReceitas.reduce((sum, r) => sum + r.valor, 0);
-  
-  // Usar dados do período para calcular o lucro líquido
-  const despesasPeriodo = despesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
-  const receitasPeriodo = receitas.reduce((sum, r) => sum + r.valor, 0);
-  const lucroLiquido = receitasPeriodo - despesasPeriodo;
-  const margemLucro = receitasPeriodo > 0 ? (lucroLiquido / receitasPeriodo) * 100 : 0;
+  // Usar dados filtrados por período para todos os cálculos
+  const totalDespesas = despesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
+  const totalReceitas = receitas.reduce((sum, r) => sum + r.valor, 0);
+  const lucroLiquido = totalReceitas - totalDespesas;
+  const margemLucro = totalReceitas > 0 ? (lucroLiquido / totalReceitas) * 100 : 0;
 
-  // CMV baseado no período para análise atual
+  // CMV baseado no período selecionado
   const cmvTotal = despesas
     .filter(d => d.categoria?.toUpperCase().includes('INSUMOS'))
     .reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
   
-  const percentualCMV = receitasPeriodo > 0 ? (cmvTotal / receitasPeriodo) * 100 : 0;
+  const percentualCMV = totalReceitas > 0 ? (cmvTotal / totalReceitas) * 100 : 0;
 
   // Função para obter cor do CMV baseado na porcentagem
   const getCMVColor = (percentage: number) => {
@@ -70,7 +66,12 @@ const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas, selectedP
               R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
             <div className="flex items-center justify-between">
-              <p className="text-xs text-gray-500">Total acumulado</p>
+              <p className="text-xs text-gray-500">
+                {selectedPeriod === 'month' ? 'Este mês' : 
+                 selectedPeriod === 'year' ? 'Este ano' :
+                 selectedPeriod === 'week' ? 'Esta semana' :
+                 selectedPeriod === 'today' ? 'Hoje' : 'Período selecionado'}
+              </p>
               <Button 
                 size="sm" 
                 variant="outline" 
@@ -96,7 +97,12 @@ const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas, selectedP
               R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
             <div className="flex items-center justify-between">
-              <p className="text-xs text-gray-500">Total acumulado</p>
+              <p className="text-xs text-gray-500">
+                {selectedPeriod === 'month' ? 'Este mês' : 
+                 selectedPeriod === 'year' ? 'Este ano' :
+                 selectedPeriod === 'week' ? 'Esta semana' :
+                 selectedPeriod === 'today' ? 'Hoje' : 'Período selecionado'}
+              </p>
               <Button 
                 size="sm" 
                 variant="outline" 
@@ -150,7 +156,7 @@ const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas, selectedP
         isOpen={modalState.isOpen}
         onClose={closeModal}
         type={modalState.type}
-        transactions={modalState.type === 'receitas' ? allReceitas : allDespesas}
+        transactions={modalState.type === 'receitas' ? receitas : despesas}
         empresa="Johnny Rockets"
         title={modalState.title}
       />
