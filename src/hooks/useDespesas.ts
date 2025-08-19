@@ -218,14 +218,23 @@ export const useDeleteDespesa = () => {
         
         const categoria = despesa.origem_pagamento === 'cofre' ? 'EM_COFRE' : 'EM_CONTA';
         const valorPago = despesa.valor_total || despesa.valor;
+        const descricaoReceita = `Pagamento de despesa: ${despesa.descricao}`;
         
-        // Buscar e deletar receitas relacionadas (tanto positivas quanto negativas)
+        console.log('Searching for receita with:', {
+          empresa: despesa.empresa,
+          categoria,
+          descricao: descricaoReceita,
+          valor: -valorPago
+        });
+        
+        // Buscar e deletar receitas relacionadas com match exato
         const { error: deleteReceitaError } = await supabase
           .from('receitas')
           .delete()
           .eq('empresa', despesa.empresa)
           .eq('categoria', categoria)
-          .or(`descricao.ilike.%Pagamento de despesa: ${despesa.descricao}%,descricao.ilike.%Pagamento: ${despesa.descricao}%`)
+          .eq('descricao', descricaoReceita)
+          .eq('valor', -valorPago)
           .eq('user_id', user.id);
 
         if (deleteReceitaError) {
