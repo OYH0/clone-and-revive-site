@@ -67,6 +67,11 @@ export const useReceitas = () => {
     // Usar os totais calculados considerando despesas pagas
     const totalCofre = totaisCofreConta?.totalCofre || 0;
     const totalConta = totaisCofreConta?.totalConta || 0;
+    
+    console.log('=== DEBUG useReceitas ===');
+    console.log('totaisCofreConta recebido:', totaisCofreConta);
+    console.log('Total Cofre final:', totalCofre);
+    console.log('Total Conta final:', totalConta);
 
     return {
       receitas,

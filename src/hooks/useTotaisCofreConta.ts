@@ -12,6 +12,8 @@ export const useTotaisCofreConta = (): { data: TotaisCofreConta | null; isLoadin
   const query = useQuery({
     queryKey: ['totais-cofre-conta'],
     queryFn: async () => {
+      console.log('=== DEBUG useTotaisCofreConta ===');
+      
       // Buscar receitas EM_COFRE e EM_CONTA
       const { data: receitas, error: receitasError } = await supabase
         .from('receitas')
@@ -19,6 +21,8 @@ export const useTotaisCofreConta = (): { data: TotaisCofreConta | null; isLoadin
         .in('categoria', ['EM_COFRE', 'EM_CONTA']);
 
       if (receitasError) throw receitasError;
+      
+      console.log('Receitas cofre/conta encontradas:', receitas);
 
       // Buscar despesas pagas em cofre e conta
       const { data: despesas, error: despesasError } = await supabase
@@ -28,6 +32,8 @@ export const useTotaisCofreConta = (): { data: TotaisCofreConta | null; isLoadin
         .in('origem_pagamento', ['cofre', 'conta']);
 
       if (despesasError) throw despesasError;
+      
+      console.log('Despesas pagas cofre/conta encontradas:', despesas);
 
       return { receitas: receitas || [], despesas: despesas || [] };
     },
@@ -57,6 +63,10 @@ export const useTotaisCofreConta = (): { data: TotaisCofreConta | null; isLoadin
     // Calcular saldos finais
     const totalCofre = totalReceitasCofre - totalDespesasCofre;
     const totalConta = totalReceitasConta - totalDespesasConta;
+
+    console.log('=== CÁLCULOS TOTAIS ===');
+    console.log('Receitas Cofre:', totalReceitasCofre, 'Despesas Cofre:', totalDespesasCofre, 'Total Cofre:', totalCofre);
+    console.log('Receitas Conta:', totalReceitasConta, 'Despesas Conta:', totalDespesasConta, 'Total Conta:', totalConta);
 
     return {
       totalCofre,
