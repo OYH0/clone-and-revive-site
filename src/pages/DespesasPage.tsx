@@ -6,6 +6,7 @@ import TransactionTable from '@/components/TransactionTable';
 import AddTransactionModal from '@/components/AddTransactionModal';
 import TransactionHistoryModal from '@/components/TransactionHistoryModal';
 import DespesasFilterSimple from '@/components/DespesasFilterSimple';
+import DespesasStats from '@/components/DespesasStats';
 import CamerinoPasswordProtection from '@/components/CamerinoPasswordProtection';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -195,80 +196,16 @@ const DespesasPage = () => {
           />
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-6 mb-8">
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">Total de Despesas</CardTitle>
-                <div className="p-2 bg-gradient-to-r from-red-100 to-red-200 rounded-xl">
-                  <TrendingDown className="h-4 w-4 text-red-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-lg lg:text-2xl font-bold bg-gradient-to-r from-red-600 to-red-700 bg-clip-text text-transparent">
-                  R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">{filteredTransactions.length} despesas</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">Total em Juros</CardTitle>
-                <div className="p-2 bg-gradient-to-r from-orange-100 to-orange-200 rounded-xl">
-                  <DollarSign className="h-4 w-4 text-orange-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-lg lg:text-2xl font-bold text-orange-600">
-                  R$ {totalJuros.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">Juros acumulados</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">Valor Pago</CardTitle>
-                <div className="p-2 bg-gradient-to-r from-green-100 to-green-200 rounded-xl">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-lg lg:text-2xl font-bold text-gray-800">
-                  R$ {valorPago.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">{despesasPagas.length} pagas</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">Pendentes</CardTitle>
-                <div className="p-2 bg-gradient-to-r from-yellow-100 to-yellow-200 rounded-xl">
-                  <Clock className="h-4 w-4 text-yellow-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-lg lg:text-2xl font-bold text-gray-800">{despesasPendentes.length}</div>
-                <p className="text-xs text-gray-500 mt-1">Aguardando</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">Atrasadas</CardTitle>
-                <div className="p-2 bg-gradient-to-r from-red-100 to-red-200 rounded-xl">
-                  <AlertTriangle className="h-4 w-4 text-red-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-lg lg:text-2xl font-bold text-red-600">
-                  {despesasAtrasadas.length}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">Vencidas</p>
-              </CardContent>
-            </Card>
-          </div>
+          <DespesasStats
+            totalDespesas={totalDespesas}
+            valorPago={valorPago}
+            valorPendente={valorPendente}
+            valorAtrasado={valorAtrasado}
+            despesasPagasCount={despesasPagas.length}
+            despesasPendentesCount={despesasPendentes.length}
+            despesasAtrasadasCount={despesasAtrasadas.length}
+            filteredTransactionsCount={filteredTransactions.length}
+          />
 
           {/* Main Content Card */}
           <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
