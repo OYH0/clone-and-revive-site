@@ -52,16 +52,20 @@ const ReceitasPage = () => {
     });
   }, [currentMonthReceitas, searchTerm, filterEmpresa, filterCategoria]);
 
-  // Calcular estatísticas baseadas nas receitas exibidas (filtradas mas excluindo pagamentos de despesas)
+  // Calcular estatísticas baseadas nas receitas exibidas (excluindo apenas pagamentos de despesas)
   const receitasExibidas = filteredReceitas.filter(r => 
-    r.categoria !== 'EM_COFRE' && 
-    r.categoria !== 'EM_CONTA' && 
     r.descricao !== 'PAGAMENTO DE DESPESA'
   );
   
-  const totalReceitas = receitasExibidas.reduce((sum, receita) => sum + receita.valor, 0);
-  const receitasRecebidas = receitasExibidas.filter(r => r.data_recebimento).length;
-  const valorRecebido = receitasExibidas
+  // Calcular totais apenas das receitas de vendas (para estatísticas)
+  const receitasVendas = receitasExibidas.filter(r => 
+    r.categoria !== 'EM_COFRE' && 
+    r.categoria !== 'EM_CONTA'
+  );
+  
+  const totalReceitas = receitasVendas.reduce((sum, receita) => sum + receita.valor, 0);
+  const receitasRecebidas = receitasVendas.filter(r => r.data_recebimento).length;
+  const valorRecebido = receitasVendas
     .filter(r => r.data_recebimento)
     .reduce((sum, receita) => sum + receita.valor, 0);
   
@@ -164,7 +168,7 @@ const ReceitasPage = () => {
                 <div className="text-xl lg:text-3xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
                   R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">{receitasExibidas.length} receitas encontradas</p>
+                <p className="text-xs text-gray-500 mt-1">{receitasVendas.length} receitas encontradas</p>
               </CardContent>
             </Card>
 
