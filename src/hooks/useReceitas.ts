@@ -72,6 +72,11 @@ export const useReceitas = () => {
     console.log('totaisCofreConta recebido:', totaisCofreConta);
     console.log('Total Cofre final:', totalCofre);
     console.log('Total Conta final:', totalConta);
+    
+    // Debug: Recarregar quando não tiver dados
+    if (!totaisCofreConta) {
+      console.log('Recarregando totaisCofreConta...');
+    }
 
     return {
       receitas,
