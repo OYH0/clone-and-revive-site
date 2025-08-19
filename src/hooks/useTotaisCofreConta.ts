@@ -12,34 +12,64 @@ export const useTotaisCofreConta = (): { data: TotaisCofreConta | null; isLoadin
   const query = useQuery({
     queryKey: ['totais-cofre-conta'],
     queryFn: async () => {
-      console.log('=== DEBUG useTotaisCofreConta ===');
+      console.log('=== CALCULANDO TOTAIS COFRE E CONTA ===');
       
-      // Buscar receitas EM_COFRE e EM_CONTA
-      const { data: receitas, error: receitasError } = await supabase
+      // 1. Buscar TODAS as receitas EM_COFRE e EM_CONTA (somam ao total)
+      const { data: receitasCofre, error: receitasCofreError } = await supabase
         .from('receitas')
-        .select('categoria, valor')
-        .in('categoria', ['EM_COFRE', 'EM_CONTA']);
+        .select('valor')
+        .eq('categoria', 'EM_COFRE');
 
-      if (receitasError) throw receitasError;
-      
-      console.log('Receitas cofre/conta encontradas:', receitas);
+      if (receitasCofreError) {
+        console.error('Erro ao buscar receitas cofre:', receitasCofreError);
+        throw receitasCofreError;
+      }
 
-      // Buscar despesas pagas em cofre e conta
-      const { data: despesas, error: despesasError } = await supabase
-        .from('despesas')
-        .select('origem_pagamento, valor_total, valor, status, empresa, descricao')
-        .eq('status', 'PAGO')
-        .in('origem_pagamento', ['cofre', 'conta']);
+      const { data: receitasConta, error: receitasContaError } = await supabase
+        .from('receitas')
+        .select('valor')
+        .eq('categoria', 'EM_CONTA');
 
-      if (despesasError) {
-        console.error('Erro ao buscar despesas:', despesasError);
-        throw despesasError;
+      if (receitasContaError) {
+        console.error('Erro ao buscar receitas conta:', receitasContaError);
+        throw receitasContaError;
       }
       
-      console.log('Despesas pagas cofre/conta encontradas:', despesas);
-      console.log('Total de despesas encontradas:', despesas?.length || 0);
+      // 2. Buscar TODAS as despesas pagas em cofre (subtraem do total)
+      const { data: despesasCofre, error: despesasCofreError } = await supabase
+        .from('despesas')
+        .select('valor_total, valor')
+        .eq('status', 'PAGO')
+        .eq('origem_pagamento', 'cofre');
 
-      return { receitas: receitas || [], despesas: despesas || [] };
+      if (despesasCofreError) {
+        console.error('Erro ao buscar despesas cofre:', despesasCofreError);
+        throw despesasCofreError;
+      }
+
+      // 3. Buscar TODAS as despesas pagas em conta (subtraem do total)
+      const { data: despesasConta, error: despesasContaError } = await supabase
+        .from('despesas')
+        .select('valor_total, valor')
+        .eq('status', 'PAGO')
+        .eq('origem_pagamento', 'conta');
+
+      if (despesasContaError) {
+        console.error('Erro ao buscar despesas conta:', despesasContaError);
+        throw despesasContaError;
+      }
+
+      console.log('Receitas Cofre encontradas:', receitasCofre?.length || 0);
+      console.log('Receitas Conta encontradas:', receitasConta?.length || 0);
+      console.log('Despesas Cofre encontradas:', despesasCofre?.length || 0);
+      console.log('Despesas Conta encontradas:', despesasConta?.length || 0);
+
+      return { 
+        receitasCofre: receitasCofre || [], 
+        receitasConta: receitasConta || [],
+        despesasCofre: despesasCofre || [],
+        despesasConta: despesasConta || []
+      };
     },
     staleTime: 1 * 60 * 1000, // 1 minute
     gcTime: 5 * 60 * 1000, // 5 minutes
@@ -48,29 +78,23 @@ export const useTotaisCofreConta = (): { data: TotaisCofreConta | null; isLoadin
   const processedData = useMemo(() => {
     if (!query.data) return null;
 
-    const { receitas, despesas } = query.data;
+    const { receitasCofre, receitasConta, despesasCofre, despesasConta } = query.data;
 
-    // Calcular totais das receitas
-    const receitasCofre = receitas.filter(r => r.categoria === 'EM_COFRE');
-    const receitasConta = receitas.filter(r => r.categoria === 'EM_CONTA');
-    
+    // Calcular totais das receitas (SOMAM)
     const totalReceitasCofre = receitasCofre.reduce((sum, r) => sum + (r.valor || 0), 0);
     const totalReceitasConta = receitasConta.reduce((sum, r) => sum + (r.valor || 0), 0);
 
-    // Calcular totais das despesas pagas
-    const despesasCofre = despesas.filter(d => d.origem_pagamento === 'cofre');
-    const despesasConta = despesas.filter(d => d.origem_pagamento === 'conta');
-    
+    // Calcular totais das despesas pagas (SUBTRAEM)
     const totalDespesasCofre = despesasCofre.reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
     const totalDespesasConta = despesasConta.reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
 
-    // Calcular saldos finais
+    // Calcular saldos finais: Receitas MENOS Despesas
     const totalCofre = totalReceitasCofre - totalDespesasCofre;
     const totalConta = totalReceitasConta - totalDespesasConta;
 
-    console.log('=== CÁLCULOS TOTAIS ===');
-    console.log('Receitas Cofre:', totalReceitasCofre, 'Despesas Cofre:', totalDespesasCofre, 'Total Cofre:', totalCofre);
-    console.log('Receitas Conta:', totalReceitasConta, 'Despesas Conta:', totalDespesasConta, 'Total Conta:', totalConta);
+    console.log('=== CÁLCULOS FINAIS ===');
+    console.log('COFRE - Receitas:', totalReceitasCofre, 'Despesas:', totalDespesasCofre, 'TOTAL:', totalCofre);
+    console.log('CONTA - Receitas:', totalReceitasConta, 'Despesas:', totalDespesasConta, 'TOTAL:', totalConta);
 
     return {
       totalCofre,
