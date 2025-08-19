@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Plus, TrendingDown, DollarSign, CheckCircle, Clock, AlertTriangle, Shield } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import TransactionTable from '@/components/TransactionTable';
@@ -33,7 +33,27 @@ const DespesasPage = () => {
   const { isAdmin } = useAdminAccess();
   const { isAuthenticated, authenticate } = useCamerinoAuth();
 
-  // Converter Despesa para Transaction - sem useMemo ainda
+  // Early returns após todos os hooks básicos
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-red-50 to-red-100">
+        <Sidebar />
+        <div className="flex-1 p-8 flex items-center justify-center">
+          <p className="text-lg text-gray-600">Carregando despesas...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Verificar se precisa autenticar para Camerino
+  const needsCamerinoAuth = filterEmpresa === 'Camerino' && !isAuthenticated;
+  if (needsCamerinoAuth) {
+    return (
+      <CamerinoPasswordProtection onPasswordCorrect={authenticate} />
+    );
+  }
+
+  // Converter Despesa para Transaction - cálculo direto sem useMemo
   const allTransactions: Transaction[] = despesas.map(despesa => ({
     id: despesa.id,
     date: despesa.data,
@@ -51,43 +71,34 @@ const DespesasPage = () => {
     origem_pagamento: despesa.origem_pagamento
   }));
 
-  // Aplicar filtro do mês atual
+  // Aplicar filtro do mês atual - cálculo direto sem useMemo
   const shouldExcludeCamerino = filterEmpresa === 'all';
-  const currentMonthTransactions = useMemo(() => {
-    console.log('=== DEBUG FILTRO MÊS ATUAL ===');
-    console.log('Total de despesas antes do filtro:', allTransactions.length);
-    console.log('Filtros de data - De:', dateFrom, 'Até:', dateTo);
-    console.log('Filtro empresa:', filterEmpresa);
-    console.log('Deve excluir Camerino?', shouldExcludeCamerino);
-    console.log('Usando filtros manuais?', !!(dateFrom || dateTo));
-    
-    const filtered = filterDespesasCurrentMonth(allTransactions, dateFrom, dateTo, shouldExcludeCamerino);
-    
-    console.log('Despesas após filtro do mês atual:', filtered.length);
-    console.log('Total dos valores filtrados:', filtered.reduce((sum, t) => sum + (t.valor_total || t.valor), 0));
-    
-    return filtered;
-  }, [allTransactions, dateFrom, dateTo, shouldExcludeCamerino]);
+  console.log('=== DEBUG FILTRO MÊS ATUAL ===');
+  console.log('Total de despesas antes do filtro:', allTransactions.length);
+  console.log('Filtros de data - De:', dateFrom, 'Até:', dateTo);
+  console.log('Filtro empresa:', filterEmpresa);
+  console.log('Deve excluir Camerino?', shouldExcludeCamerino);
+  console.log('Usando filtros manuais?', !!(dateFrom || dateTo));
+  
+  const currentMonthTransactions = filterDespesasCurrentMonth(allTransactions, dateFrom, dateTo, shouldExcludeCamerino);
+  
+  console.log('Despesas após filtro do mês atual:', currentMonthTransactions.length);
+  console.log('Total dos valores filtrados:', currentMonthTransactions.reduce((sum, t) => sum + (t.valor_total || t.valor), 0));
 
-  // Filtrar despesas com base nos outros filtros
-  const filteredTransactions = useMemo(() => {
-    return currentMonthTransactions.filter(transaction => {
-      const status = getTransactionStatus(transaction);
-      
-      const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           transaction.company.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesEmpresa = filterEmpresa === 'all' || transaction.company === filterEmpresa;
-      const matchesCategoria = filterCategoria === 'all' || transaction.category === filterCategoria;
-      const matchesStatus = filterStatus === 'all' || status === filterStatus;
-      
-      return matchesSearch && matchesEmpresa && matchesCategoria && matchesStatus;
-    });
-  }, [currentMonthTransactions, searchTerm, filterEmpresa, filterCategoria, filterStatus]);
+  // Filtrar despesas com base nos outros filtros - cálculo direto sem useMemo
+  const filteredTransactions = currentMonthTransactions.filter(transaction => {
+    const status = getTransactionStatus(transaction);
+    
+    const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         transaction.company.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesEmpresa = filterEmpresa === 'all' || transaction.company === filterEmpresa;
+    const matchesCategoria = filterCategoria === 'all' || transaction.category === filterCategoria;
+    const matchesStatus = filterStatus === 'all' || status === filterStatus;
+    
+    return matchesSearch && matchesEmpresa && matchesCategoria && matchesStatus;
+  });
 
-  // Verificar se precisa autenticar para Camerino
-  const needsCamerinoAuth = filterEmpresa === 'Camerino' && !isAuthenticated;
-
-  // Calcular estatísticas usando valor_total
+  // Calcular estatísticas usando valor_total - cálculo direto
   const totalDespesas = filteredTransactions.reduce((sum, transaction) => sum + (transaction.valor_total || transaction.valor), 0);
   const totalJuros = filteredTransactions.reduce((sum, transaction) => sum + (transaction.valor_juros || 0), 0);
   const despesasPagas = filteredTransactions.filter(t => getTransactionStatus(t) === 'PAGO');
@@ -119,24 +130,6 @@ const DespesasPage = () => {
   const handleFilterEmpresaChange = (value: string) => {
     setFilterEmpresa(value);
   };
-
-  // Early returns após todos os hooks
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-red-50 to-red-100">
-        <Sidebar />
-        <div className="flex-1 p-8 flex items-center justify-center">
-          <p className="text-lg text-gray-600">Carregando despesas...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (needsCamerinoAuth) {
-    return (
-      <CamerinoPasswordProtection onPasswordCorrect={authenticate} />
-    );
-  }
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-red-50 to-red-100">
