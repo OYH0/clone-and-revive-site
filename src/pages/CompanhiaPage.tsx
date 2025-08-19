@@ -42,20 +42,32 @@ const CompanhiaPage = () => {
            empresa.includes('churrasco');
   }) || [];
 
-  // Aplicar filtro de período APENAS para exibição dos cards de estatísticas
+  // Aplicar filtro de período usando a mesma lógica da aba de receitas
   const { filteredDespesas, filteredReceitas } = useMemo(() => {
-    return {
-      filteredDespesas: filterDataByPeriod(companhiaDespesas, selectedPeriod, customMonth, customYear),
-      filteredReceitas: filterDataByPeriod(companhiaReceitas, selectedPeriod, customMonth, customYear)
-    };
+    // Se for "month" (mês atual), usar a mesma lógica da ReceitasPage
+    if (selectedPeriod === 'month') {
+      console.log('=== COMPANHIA - Usando filtro mês atual igual ReceitasPage ===');
+      const currentMonthDespesas = filterDataByPeriod(companhiaDespesas, selectedPeriod, customMonth, customYear);
+      const currentMonthReceitas = filterDataByPeriod(companhiaReceitas, selectedPeriod, customMonth, customYear);
+      
+      return {
+        filteredDespesas: currentMonthDespesas,
+        filteredReceitas: currentMonthReceitas
+      };
+    } else {
+      // Para outros períodos, usar filterDataByPeriod normal
+      return {
+        filteredDespesas: filterDataByPeriod(companhiaDespesas, selectedPeriod, customMonth, customYear),
+        filteredReceitas: filterDataByPeriod(companhiaReceitas, selectedPeriod, customMonth, customYear)
+      };
+    }
   }, [companhiaDespesas, companhiaReceitas, selectedPeriod, customMonth, customYear]);
 
+  console.log('=== COMPANHIA DEBUG ===');
+  console.log('Churrasco - Receitas filtradas:', filteredReceitas.length);
+  console.log('Churrasco - Total receitas período:', filteredReceitas.reduce((sum, r) => sum + r.valor, 0));
   console.log('Churrasco - Despesas filtradas:', filteredDespesas.length);
-  console.log('Churrasco - Despesas por categoria:', filteredDespesas.reduce((acc, d) => {
-    const cat = d.categoria || 'SEM_CATEGORIA';
-    acc[cat] = (acc[cat] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>));
+  console.log('Churrasco - Total despesas período:', filteredDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0));
 
   // Calcular estatísticas - usar nova lógica de lucro por período
   const totalDespesasPeriodo = filteredDespesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
