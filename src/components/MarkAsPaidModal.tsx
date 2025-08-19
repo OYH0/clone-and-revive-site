@@ -99,7 +99,7 @@ const MarkAsPaidModal: React.FC<MarkAsPaidModalProps> = ({
                 <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
                 <div className="text-sm text-yellow-800">
                   <p className="font-medium">Atenção:</p>
-                  <p>Esta ação marcará a despesa como paga e deduzirá o valor do {paymentSource === 'cofre' ? 'Total em Cofre' : 'Total em Conta'} na aba de receitas.</p>
+                  <p>Esta ação marcará a despesa como paga.</p>
                 </div>
               </div>
             </div>

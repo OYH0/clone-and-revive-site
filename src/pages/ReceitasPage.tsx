@@ -69,13 +69,6 @@ const ReceitasPage = () => {
     .filter(r => r.data_recebimento)
     .reduce((sum, receita) => sum + receita.valor, 0);
   
-  // Calcular cofre e conta usando TODAS as receitas filtradas (incluindo pagamentos de despesas)
-  const totalEmCofre = filteredReceitas
-    .filter(r => r.categoria === 'EM_COFRE')
-    .reduce((sum, receita) => sum + receita.valor, 0);
-  const totalEmConta = filteredReceitas
-    .filter(r => r.categoria === 'EM_CONTA')
-    .reduce((sum, receita) => sum + receita.valor, 0);
 
   // Handle filter empresa change with Camerino auth check
   const handleFilterEmpresaChange = (value: string) => {
@@ -156,7 +149,7 @@ const ReceitasPage = () => {
           />
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-8">
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                 <CardTitle className="text-sm font-medium text-gray-600">Total de Receitas</CardTitle>
@@ -187,35 +180,6 @@ const ReceitasPage = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">Total em Cofre</CardTitle>
-                <div className="p-2 bg-gradient-to-r from-yellow-100 to-yellow-200 rounded-xl">
-                  <Wallet className="h-4 w-4 text-yellow-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-xl lg:text-3xl font-bold text-gray-800">
-                  R$ {totalEmCofre.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">Disponível em cofre</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">Total em Conta</CardTitle>
-                <div className="p-2 bg-gradient-to-r from-purple-100 to-purple-200 rounded-xl">
-                  <Wallet className="h-4 w-4 text-purple-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-xl lg:text-3xl font-bold text-gray-800">
-                  R$ {totalEmConta.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">Disponível em conta</p>
-              </CardContent>
-            </Card>
           </div>
 
           {/* Main Content Card */}
