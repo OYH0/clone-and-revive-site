@@ -27,33 +27,13 @@ const DespesasPage = () => {
   const [dateTo, setDateTo] = useState('');
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   
+  // Todos os hooks devem ser chamados antes de qualquer early return
   const { data: despesas = [], isLoading, refetch } = useDespesas();
   const { user } = useAuth();
   const { isAdmin } = useAdminAccess();
   const { isAuthenticated, authenticate } = useCamerinoAuth();
 
-  // Verificar se precisa autenticar para Camerino
-  const needsCamerinoAuth = filterEmpresa === 'Camerino' && !isAuthenticated;
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-red-50 to-red-100">
-        <Sidebar />
-        <div className="flex-1 p-8 flex items-center justify-center">
-          <p className="text-lg text-gray-600">Carregando despesas...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Se precisar autenticar para Camerino, mostrar tela de senha
-  if (needsCamerinoAuth) {
-    return (
-      <CamerinoPasswordProtection onPasswordCorrect={authenticate} />
-    );
-  }
-
-  // Converter Despesa para Transaction
+  // Converter Despesa para Transaction - sem useMemo ainda
   const allTransactions: Transaction[] = despesas.map(despesa => ({
     id: despesa.id,
     date: despesa.data,
@@ -71,7 +51,7 @@ const DespesasPage = () => {
     origem_pagamento: despesa.origem_pagamento
   }));
 
-  // Aplicar filtro do mês atual - excluir Camerino apenas quando não há filtro de empresa específico
+  // Aplicar filtro do mês atual
   const shouldExcludeCamerino = filterEmpresa === 'all';
   const currentMonthTransactions = useMemo(() => {
     console.log('=== DEBUG FILTRO MÊS ATUAL ===');
@@ -104,6 +84,9 @@ const DespesasPage = () => {
     });
   }, [currentMonthTransactions, searchTerm, filterEmpresa, filterCategoria, filterStatus]);
 
+  // Verificar se precisa autenticar para Camerino
+  const needsCamerinoAuth = filterEmpresa === 'Camerino' && !isAuthenticated;
+
   // Calcular estatísticas usando valor_total
   const totalDespesas = filteredTransactions.reduce((sum, transaction) => sum + (transaction.valor_total || transaction.valor), 0);
   const totalJuros = filteredTransactions.reduce((sum, transaction) => sum + (transaction.valor_juros || 0), 0);
@@ -123,6 +106,7 @@ const DespesasPage = () => {
   console.log('Valor pendente:', valorPendente);
   console.log('Valor atrasado:', valorAtrasado);
 
+  // Funções - definidas após todos os hooks
   const handleTransactionAdded = () => {
     refetch();
     setIsModalOpen(false);
@@ -132,10 +116,27 @@ const DespesasPage = () => {
     refetch();
   };
 
-  // Handle filter empresa change with Camerino auth check
   const handleFilterEmpresaChange = (value: string) => {
     setFilterEmpresa(value);
   };
+
+  // Early returns após todos os hooks
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-red-50 to-red-100">
+        <Sidebar />
+        <div className="flex-1 p-8 flex items-center justify-center">
+          <p className="text-lg text-gray-600">Carregando despesas...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (needsCamerinoAuth) {
+    return (
+      <CamerinoPasswordProtection onPasswordCorrect={authenticate} />
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-red-50 to-red-100">
