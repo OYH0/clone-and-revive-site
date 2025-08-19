@@ -60,9 +60,13 @@ export const useTotaisCofreConta = (): { data: TotaisCofreConta | null; isLoadin
       }
 
       console.log('Receitas Cofre encontradas:', receitasCofre?.length || 0);
+      console.log('Dados receitas cofre:', receitasCofre);
       console.log('Receitas Conta encontradas:', receitasConta?.length || 0);
+      console.log('Dados receitas conta:', receitasConta);
       console.log('Despesas Cofre encontradas:', despesasCofre?.length || 0);
+      console.log('Dados despesas cofre:', despesasCofre);
       console.log('Despesas Conta encontradas:', despesasConta?.length || 0);
+      console.log('Dados despesas conta:', despesasConta);
 
       return { 
         receitasCofre: receitasCofre || [], 
@@ -71,8 +75,9 @@ export const useTotaisCofreConta = (): { data: TotaisCofreConta | null; isLoadin
         despesasConta: despesasConta || []
       };
     },
-    staleTime: 1 * 60 * 1000, // 1 minute
-    gcTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 0, // Força refetch sempre para debug
+    gcTime: 0, // Remove cache completamente
+    refetchOnMount: true,
   });
 
   const processedData = useMemo(() => {

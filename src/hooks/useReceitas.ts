@@ -75,7 +75,9 @@ export const useReceitas = () => {
     
     // Debug: Recarregar quando não tiver dados
     if (!totaisCofreConta) {
-      console.log('Recarregando totaisCofreConta...');
+      console.log('Dados de totaisCofreConta não disponíveis ainda...');
+    } else {
+      console.log('Dados de totaisCofreConta recebidos com sucesso!');
     }
 
     return {
