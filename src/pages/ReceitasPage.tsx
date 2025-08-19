@@ -64,10 +64,6 @@ const ReceitasPage = () => {
   );
   
   const totalReceitas = receitasVendas.reduce((sum, receita) => sum + receita.valor, 0);
-  const receitasRecebidas = receitasVendas.filter(r => r.data_recebimento).length;
-  const valorRecebido = receitasVendas
-    .filter(r => r.data_recebimento)
-    .reduce((sum, receita) => sum + receita.valor, 0);
   
 
   // Handle filter empresa change with Camerino auth check
@@ -149,7 +145,7 @@ const ReceitasPage = () => {
           />
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-8">
+          <div className="grid grid-cols-1 gap-4 lg:gap-6 mb-8">
             <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                 <CardTitle className="text-sm font-medium text-gray-600">Total de Receitas</CardTitle>
@@ -165,20 +161,6 @@ const ReceitasPage = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600">Valor Recebido</CardTitle>
-                <div className="p-2 bg-gradient-to-r from-blue-100 to-blue-200 rounded-xl">
-                  <DollarSign className="h-4 w-4 text-blue-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-xl lg:text-3xl font-bold text-gray-800">
-                  R$ {valorRecebido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">{receitasRecebidas} receitas recebidas</p>
-              </CardContent>
-            </Card>
 
           </div>
 
