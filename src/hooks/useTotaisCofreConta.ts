@@ -27,18 +27,22 @@ export const useTotaisCofreConta = (): { data: TotaisCofreConta | null; isLoadin
       // Buscar despesas pagas em cofre e conta
       const { data: despesas, error: despesasError } = await supabase
         .from('despesas')
-        .select('origem_pagamento, valor_total, valor')
+        .select('origem_pagamento, valor_total, valor, status, empresa, descricao')
         .eq('status', 'PAGO')
         .in('origem_pagamento', ['cofre', 'conta']);
 
-      if (despesasError) throw despesasError;
+      if (despesasError) {
+        console.error('Erro ao buscar despesas:', despesasError);
+        throw despesasError;
+      }
       
       console.log('Despesas pagas cofre/conta encontradas:', despesas);
+      console.log('Total de despesas encontradas:', despesas?.length || 0);
 
       return { receitas: receitas || [], despesas: despesas || [] };
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 0, // Força refetch imediato para debug
+    gcTime: 1 * 60 * 1000, // 1 minute for debug
   });
 
   const processedData = useMemo(() => {
