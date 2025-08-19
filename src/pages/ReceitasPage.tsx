@@ -52,12 +52,12 @@ const ReceitasPage = () => {
     });
   }, [currentMonthReceitas, searchTerm, filterEmpresa, filterCategoria]);
 
-  // Exibir todas as receitas EXCETO "PAGAMENTO DE DESPESA"
+  // Calcular estatísticas baseadas nas receitas exibidas (excluindo apenas pagamentos de despesas)
   const receitasExibidas = filteredReceitas.filter(r => 
     r.descricao !== 'PAGAMENTO DE DESPESA'
   );
   
-  // Calcular totais apenas das receitas de vendas (para estatísticas do card "Total de Receitas")
+  // Calcular totais apenas das receitas de vendas (para estatísticas)
   const receitasVendas = receitasExibidas.filter(r => 
     r.categoria !== 'EM_COFRE' && 
     r.categoria !== 'EM_CONTA'
