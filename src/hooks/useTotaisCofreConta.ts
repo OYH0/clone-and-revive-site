@@ -41,8 +41,8 @@ export const useTotaisCofreConta = (): { data: TotaisCofreConta | null; isLoadin
 
       return { receitas: receitas || [], despesas: despesas || [] };
     },
-    staleTime: 0, // Força refetch imediato para debug
-    gcTime: 0, // Remove cache completamente para debug
+    staleTime: 1 * 60 * 1000, // 1 minute
+    gcTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const processedData = useMemo(() => {

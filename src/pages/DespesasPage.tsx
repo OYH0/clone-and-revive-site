@@ -35,6 +35,24 @@ const DespesasPage = () => {
   // Verificar se precisa autenticar para Camerino
   const needsCamerinoAuth = filterEmpresa === 'Camerino' && !isAuthenticated;
 
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-red-50 to-red-100">
+        <Sidebar />
+        <div className="flex-1 p-8 flex items-center justify-center">
+          <p className="text-lg text-gray-600">Carregando despesas...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Se precisar autenticar para Camerino, mostrar tela de senha
+  if (needsCamerinoAuth) {
+    return (
+      <CamerinoPasswordProtection onPasswordCorrect={authenticate} />
+    );
+  }
+
   // Converter Despesa para Transaction
   const allTransactions: Transaction[] = despesas.map(despesa => ({
     id: despesa.id,
@@ -118,24 +136,6 @@ const DespesasPage = () => {
   const handleFilterEmpresaChange = (value: string) => {
     setFilterEmpresa(value);
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-red-50 to-red-100">
-        <Sidebar />
-        <div className="flex-1 p-8 flex items-center justify-center">
-          <p className="text-lg text-gray-600">Carregando despesas...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Se precisar autenticar para Camerino, mostrar tela de senha
-  if (needsCamerinoAuth) {
-    return (
-      <CamerinoPasswordProtection onPasswordCorrect={authenticate} />
-    );
-  }
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-red-50 to-red-100">
