@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUpdateSaldo } from '@/hooks/useSaldos';
 
 interface AddTransactionModalProps {
   isOpen: boolean;
@@ -31,11 +32,12 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     subcategoria: '',
     data_vencimento: '',
     valor_juros: '',
-    origem_pagamento: ''
+    origem_pagamento: 'conta' as 'conta' | 'cofre'
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
+  const updateSaldo = useUpdateSaldo();
 
   // Get categories based on selected company
   const getCategoriesForCompany = (empresa: string) => {
@@ -185,51 +187,15 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         user_id: user.id
       };
 
-      // Se foi marcado como pago na criação e tem origem de pagamento, deduzir do total correspondente
+      // Se foi marcado como pago na criação e tem origem de pagamento, subtrair do saldo correspondente
       if (formData.data && formData.origem_pagamento) {
         const valorTotal = parseFloat(formData.valor) + (formData.valor_juros ? parseFloat(formData.valor_juros) : 0);
         
-        try {
-          const { data: currentReceitas, error: fetchError } = await supabase
-            .from('receitas')
-            .select('*')
-            .eq('categoria', formData.origem_pagamento === 'cofre' ? 'EM_COFRE' : 'EM_CONTA');
-
-          if (fetchError) throw fetchError;
-
-          const currentTotal = currentReceitas?.reduce((sum, r) => sum + (r.valor || 0), 0) || 0;
-          const newTotal = currentTotal - valorTotal;
-
-          if (newTotal < 0) {
-            toast({
-              title: "Aviso",
-              description: `Saldo insuficiente ${formData.origem_pagamento === 'cofre' ? 'no cofre' : 'na conta'}. Atual: R$ ${currentTotal.toFixed(2)}`,
-              variant: "destructive"
-            });
-            return;
-          }
-
-          // Criar uma receita negativa para representar a dedução
-          await supabase
-            .from('receitas')
-            .insert([{
-              data: formData.data,
-              valor: -valorTotal,
-              data_recebimento: formData.data,
-              descricao: `Pagamento de despesa: ${formData.descricao || 'Sem descrição'}`,
-              empresa: formData.empresa,
-              categoria: formData.origem_pagamento === 'cofre' ? 'EM_COFRE' : 'EM_CONTA',
-              user_id: user.id
-            }]);
-        } catch (error) {
-          console.error('Error updating cofre/conta totals:', error);
-          toast({
-            title: "Erro",
-            description: "Erro ao atualizar totais de cofre/conta.",
-            variant: "destructive"
-          });
-          return;
-        }
+        // Update balance using the new saldos system
+        updateSaldo.mutate({
+          tipo: formData.origem_pagamento,
+          valor: -valorTotal // Negative to subtract from balance
+        });
       }
 
       console.log('Inserting despesa with data:', insertData);
@@ -274,7 +240,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         subcategoria: '',
         data_vencimento: '',
         valor_juros: '',
-        origem_pagamento: ''
+        origem_pagamento: 'conta'
       });
 
       onTransactionAdded();

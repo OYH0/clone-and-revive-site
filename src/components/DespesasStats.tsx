@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { DollarSign, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+import { DollarSign, CheckCircle, Clock, AlertTriangle, Wallet, Vault } from 'lucide-react';
+import { useSaldos } from '@/hooks/useSaldos';
 
 interface DespesasStatsProps {
   totalDespesas: number;
@@ -23,8 +24,13 @@ const DespesasStats: React.FC<DespesasStatsProps> = ({
   despesasAtrasadasCount,
   filteredTransactionsCount
 }) => {
+  const { data: saldos, isLoading: saldosLoading } = useSaldos();
+  
+  const saldoConta = saldos?.find(s => s.tipo === 'conta')?.valor || 0;
+  const saldoCofre = saldos?.find(s => s.tipo === 'cofre')?.valor || 0;
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
       <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/20">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-gradient-to-r from-red-100 to-red-200 rounded-2xl">
@@ -81,6 +87,36 @@ const DespesasStats: React.FC<DespesasStatsProps> = ({
               R$ {valorAtrasado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </p>
             <p className="text-xs text-gray-500">{despesasAtrasadasCount} despesas</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/20">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-gradient-to-r from-blue-100 to-blue-200 rounded-2xl">
+            <Wallet className="h-6 w-6 text-blue-600" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-gray-700">Total em Conta</h3>
+            <p className="text-2xl font-bold text-blue-600">
+              {saldosLoading ? 'Carregando...' : `R$ ${saldoConta.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+            </p>
+            <p className="text-xs text-gray-500">Saldo atual</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/20">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-gradient-to-r from-purple-100 to-purple-200 rounded-2xl">
+            <Vault className="h-6 w-6 text-purple-600" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-gray-700">Total em Cofre</h3>
+            <p className="text-2xl font-bold text-purple-600">
+              {saldosLoading ? 'Carregando...' : `R$ ${saldoCofre.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+            </p>
+            <p className="text-xs text-gray-500">Saldo atual</p>
           </div>
         </div>
       </div>

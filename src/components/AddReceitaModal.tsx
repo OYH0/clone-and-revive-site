@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreateReceita } from '@/hooks/useReceitas';
+import { useUpdateSaldo } from '@/hooks/useSaldos';
 
 interface AddReceitaModalProps {
   isOpen: boolean;
@@ -32,10 +33,12 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
     data_recebimento: '',
     descricao: '',
     empresa: '',
-    categoria: 'VENDAS'
+    categoria: 'VENDAS',
+    saldo_destino: 'conta' as 'conta' | 'cofre'
   });
 
   const createReceita = useCreateReceita();
+  const updateSaldo = useUpdateSaldo();
 
   // Set default empresa when modal opens
   useEffect(() => {
@@ -49,7 +52,7 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
     
     const receitaData = {
       data: formData.data,
-      valor: parseFloat(formData.valor), // Remove multiplication by 100
+      valor: parseFloat(formData.valor),
       data_recebimento: formData.data_recebimento || undefined,
       descricao: formData.descricao,
       empresa: formData.empresa,
@@ -58,13 +61,20 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
 
     createReceita.mutate(receitaData, {
       onSuccess: () => {
+        // Update saldo after successful receita creation
+        updateSaldo.mutate({
+          tipo: formData.saldo_destino,
+          valor: parseFloat(formData.valor)
+        });
+        
         setFormData({
           data: '',
           valor: '',
           data_recebimento: '',
           descricao: '',
           empresa: defaultEmpresa || '',
-          categoria: 'VENDAS'
+          categoria: 'VENDAS',
+          saldo_destino: 'conta'
         });
         onClose();
       }
@@ -123,6 +133,9 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="categoria">Categoria</Label>
               <Select onValueChange={(value) => setFormData({ ...formData, categoria: value })} value={formData.categoria}>
@@ -135,6 +148,18 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
                   <SelectItem value="OUTROS">Outros</SelectItem>
                   <SelectItem value="EM_COFRE">Em Cofre</SelectItem>
                   <SelectItem value="EM_CONTA">Em Conta</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="saldo_destino">Destino do Valor</Label>
+              <Select onValueChange={(value: 'conta' | 'cofre') => setFormData({ ...formData, saldo_destino: value })} value={formData.saldo_destino}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o destino" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="conta">Conta</SelectItem>
+                  <SelectItem value="cofre">Cofre</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -165,8 +190,8 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
             <Button type="button" variant="outline" onClick={onClose}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={createReceita.isPending}>
-              {createReceita.isPending ? 'Salvando...' : 'Salvar'}
+            <Button type="submit" disabled={createReceita.isPending || updateSaldo.isPending}>
+              {(createReceita.isPending || updateSaldo.isPending) ? 'Salvando...' : 'Salvar'}
             </Button>
           </DialogFooter>
         </form>
