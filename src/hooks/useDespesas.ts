@@ -188,6 +188,20 @@ export const useDeleteDespesa = () => {
       if (!user) throw new Error('Usuário não autenticado');
       
       console.log('Deleting despesa:', id);
+      
+      // Primeiro, buscar a despesa para verificar se ela está paga e obter informações
+      const { data: despesa, error: fetchError } = await supabase
+        .from('despesas')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching despesa:', fetchError);
+        throw fetchError;
+      }
+
+      // Deletar a despesa
       const { error } = await supabase
         .from('despesas')
         .delete()
@@ -197,11 +211,36 @@ export const useDeleteDespesa = () => {
         console.error('Error deleting despesa:', error);
         throw error;
       }
+
+      // Se a despesa estava paga e tem origem de pagamento, deletar a receita correspondente
+      if (despesa?.status === 'PAGO' && despesa?.origem_pagamento) {
+        console.log('Despesa was paid, deleting corresponding receita');
+        
+        const categoria = despesa.origem_pagamento === 'cofre' ? 'EM_COFRE' : 'EM_CONTA';
+        const valorPago = despesa.valor_total || despesa.valor;
+        
+        // Buscar e deletar receitas relacionadas (tanto positivas quanto negativas)
+        const { error: deleteReceitaError } = await supabase
+          .from('receitas')
+          .delete()
+          .eq('empresa', despesa.empresa)
+          .eq('categoria', categoria)
+          .or(`descricao.ilike.%Pagamento de despesa: ${despesa.descricao}%,descricao.ilike.%Pagamento: ${despesa.descricao}%`)
+          .eq('user_id', user.id);
+
+        if (deleteReceitaError) {
+          console.error('Error deleting related receita:', deleteReceitaError);
+          // Não falhar a operação se não conseguir deletar a receita
+        } else {
+          console.log('Related receita deleted successfully');
+        }
+      }
       
       console.log('Despesa deleted successfully');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['despesas'] });
+      queryClient.invalidateQueries({ queryKey: ['receitas'] });
       toast({
         title: "Sucesso",
         description: "Despesa excluída com sucesso!",
