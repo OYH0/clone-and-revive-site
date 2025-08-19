@@ -96,7 +96,8 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
       const updateData: any = {
         data: today, // Now this represents the payment date
         categoria: transaction.category === 'ATRASADOS' ? 'FIXAS' : transaction.category,
-        status: 'PAGO'
+        status: 'PAGO',
+        origem_pagamento: paymentSource
       };
 
       // Atualizar a despesa como paga
@@ -111,27 +112,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
         throw error;
       }
 
-      // Subtrair o valor do cofre ou conta correspondente
-      const valorPago = transaction.valor_total || transaction.valor;
-      const categoria = paymentSource === 'cofre' ? 'EM_COFRE' : 'EM_CONTA';
-      
-      // Criar uma entrada negativa nas receitas para subtrair o valor
-      const { error: receitaError } = await supabase
-        .from('receitas')
-        .insert({
-          data: today,
-          valor: -valorPago,
-          descricao: `Pagamento: ${transaction.description}`,
-          empresa: transaction.company,
-          categoria: categoria,
-          data_recebimento: today,
-          user_id: user.id
-        });
-
-      if (receitaError) {
-        console.error('Error creating negative receipt:', receitaError);
-        // Continue even if the receipt creation fails
-      }
+      // A lógica de desconto do cofre/conta é agora calculada automaticamente no hook useTotaisCofreConta
 
       console.log('Transaction updated successfully:', data);
 

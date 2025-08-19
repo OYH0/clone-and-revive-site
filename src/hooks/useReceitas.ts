@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMemo } from 'react';
+import { useTotaisCofreConta } from './useTotaisCofreConta';
 
 export interface Receita {
   id: number;
@@ -19,6 +20,7 @@ export interface Receita {
 
 export const useReceitas = () => {
   const { user } = useAuth();
+  const { data: totaisCofreConta } = useTotaisCofreConta();
   
   const query = useQuery({
     queryKey: ['receitas'],
@@ -62,9 +64,9 @@ export const useReceitas = () => {
       .filter(r => !r.data_recebimento)
       .reduce((sum, r) => sum + (r.valor || 0), 0);
     
-    // Calcular totais de cofre e conta
-    const totalCofre = receitasCofre.reduce((sum, r) => sum + (r.valor || 0), 0);
-    const totalConta = receitasConta.reduce((sum, r) => sum + (r.valor || 0), 0);
+    // Usar os totais calculados considerando despesas pagas
+    const totalCofre = totaisCofreConta?.totalCofre || 0;
+    const totalConta = totaisCofreConta?.totalConta || 0;
 
     return {
       receitas,
@@ -79,7 +81,7 @@ export const useReceitas = () => {
         pendentesCount: receitasNormais.filter(r => !r.data_recebimento).length,
       }
     };
-  }, [query.data]);
+  }, [query.data, totaisCofreConta]);
 
   return {
     ...query,
@@ -123,6 +125,7 @@ export const useCreateReceita = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['receitas'] });
+      queryClient.invalidateQueries({ queryKey: ['totais-cofre-conta'] });
       toast({
         title: "Sucesso",
         description: "Receita criada com sucesso!",
@@ -160,6 +163,7 @@ export const useUpdateReceita = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['receitas'] });
+      queryClient.invalidateQueries({ queryKey: ['totais-cofre-conta'] });
       toast({
         title: "Sucesso",
         description: "Receita atualizada com sucesso!",
@@ -194,6 +198,7 @@ export const useDeleteReceita = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['receitas'] });
+      queryClient.invalidateQueries({ queryKey: ['totais-cofre-conta'] });
       toast({
         title: "Sucesso",
         description: "Receita excluída com sucesso!",

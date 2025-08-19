@@ -118,6 +118,7 @@ export const useCreateDespesa = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['despesas'] });
+      queryClient.invalidateQueries({ queryKey: ['totais-cofre-conta'] });
       toast({
         title: "Sucesso",
         description: "Despesa criada com sucesso!",
@@ -162,6 +163,7 @@ export const useUpdateDespesa = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['despesas'] });
+      queryClient.invalidateQueries({ queryKey: ['totais-cofre-conta'] });
       toast({
         title: "Sucesso",
         description: "Despesa atualizada com sucesso!",
@@ -189,18 +191,6 @@ export const useDeleteDespesa = () => {
       
       console.log('Deleting despesa:', id);
       
-      // Primeiro, buscar a despesa para verificar se ela está paga e obter informações
-      const { data: despesa, error: fetchError } = await supabase
-        .from('despesas')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (fetchError) {
-        console.error('Error fetching despesa:', fetchError);
-        throw fetchError;
-      }
-
       // Deletar a despesa
       const { error } = await supabase
         .from('despesas')
@@ -211,45 +201,12 @@ export const useDeleteDespesa = () => {
         console.error('Error deleting despesa:', error);
         throw error;
       }
-
-      // Se a despesa estava paga e tem origem de pagamento, deletar a receita correspondente
-      if (despesa?.status === 'PAGO' && despesa?.origem_pagamento) {
-        console.log('Despesa was paid, deleting corresponding receita');
-        
-        const categoria = despesa.origem_pagamento === 'cofre' ? 'EM_COFRE' : 'EM_CONTA';
-        const valorPago = despesa.valor_total || despesa.valor;
-        const descricaoReceita = `Pagamento de despesa: ${despesa.descricao}`;
-        
-        console.log('Searching for receita with:', {
-          empresa: despesa.empresa,
-          categoria,
-          descricao: descricaoReceita,
-          valor: -valorPago
-        });
-        
-        // Buscar e deletar receitas relacionadas com match exato
-        const { error: deleteReceitaError } = await supabase
-          .from('receitas')
-          .delete()
-          .eq('empresa', despesa.empresa)
-          .eq('categoria', categoria)
-          .eq('descricao', descricaoReceita)
-          .eq('valor', -valorPago)
-          .eq('user_id', user.id);
-
-        if (deleteReceitaError) {
-          console.error('Error deleting related receita:', deleteReceitaError);
-          // Não falhar a operação se não conseguir deletar a receita
-        } else {
-          console.log('Related receita deleted successfully');
-        }
-      }
       
       console.log('Despesa deleted successfully');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['despesas'] });
-      queryClient.invalidateQueries({ queryKey: ['receitas'] });
+      queryClient.invalidateQueries({ queryKey: ['totais-cofre-conta'] });
       toast({
         title: "Sucesso",
         description: "Despesa excluída com sucesso!",
