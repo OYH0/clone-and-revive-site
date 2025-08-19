@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Plus, TrendingDown, DollarSign, CheckCircle, Clock, AlertTriangle, Shield } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import TransactionTable from '@/components/TransactionTable';
@@ -27,33 +27,15 @@ const DespesasPage = () => {
   const [dateTo, setDateTo] = useState('');
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   
-  // Todos os hooks devem ser chamados antes de qualquer early return
   const { data: despesas = [], isLoading, refetch } = useDespesas();
   const { user } = useAuth();
   const { isAdmin } = useAdminAccess();
   const { isAuthenticated, authenticate } = useCamerinoAuth();
 
-  // Early returns após todos os hooks básicos
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-red-50 to-red-100">
-        <Sidebar />
-        <div className="flex-1 p-8 flex items-center justify-center">
-          <p className="text-lg text-gray-600">Carregando despesas...</p>
-        </div>
-      </div>
-    );
-  }
-
   // Verificar se precisa autenticar para Camerino
   const needsCamerinoAuth = filterEmpresa === 'Camerino' && !isAuthenticated;
-  if (needsCamerinoAuth) {
-    return (
-      <CamerinoPasswordProtection onPasswordCorrect={authenticate} />
-    );
-  }
 
-  // Converter Despesa para Transaction - cálculo direto sem useMemo
+  // Converter Despesa para Transaction
   const allTransactions: Transaction[] = despesas.map(despesa => ({
     id: despesa.id,
     date: despesa.data,
@@ -71,34 +53,40 @@ const DespesasPage = () => {
     origem_pagamento: despesa.origem_pagamento
   }));
 
-  // Aplicar filtro do mês atual - cálculo direto sem useMemo
+  // Aplicar filtro do mês atual - excluir Camerino apenas quando não há filtro de empresa específico
   const shouldExcludeCamerino = filterEmpresa === 'all';
-  console.log('=== DEBUG FILTRO MÊS ATUAL ===');
-  console.log('Total de despesas antes do filtro:', allTransactions.length);
-  console.log('Filtros de data - De:', dateFrom, 'Até:', dateTo);
-  console.log('Filtro empresa:', filterEmpresa);
-  console.log('Deve excluir Camerino?', shouldExcludeCamerino);
-  console.log('Usando filtros manuais?', !!(dateFrom || dateTo));
-  
-  const currentMonthTransactions = filterDespesasCurrentMonth(allTransactions, dateFrom, dateTo, shouldExcludeCamerino);
-  
-  console.log('Despesas após filtro do mês atual:', currentMonthTransactions.length);
-  console.log('Total dos valores filtrados:', currentMonthTransactions.reduce((sum, t) => sum + (t.valor_total || t.valor), 0));
-
-  // Filtrar despesas com base nos outros filtros - cálculo direto sem useMemo
-  const filteredTransactions = currentMonthTransactions.filter(transaction => {
-    const status = getTransactionStatus(transaction);
+  const currentMonthTransactions = useMemo(() => {
+    console.log('=== DEBUG FILTRO MÊS ATUAL ===');
+    console.log('Total de despesas antes do filtro:', allTransactions.length);
+    console.log('Filtros de data - De:', dateFrom, 'Até:', dateTo);
+    console.log('Filtro empresa:', filterEmpresa);
+    console.log('Deve excluir Camerino?', shouldExcludeCamerino);
+    console.log('Usando filtros manuais?', !!(dateFrom || dateTo));
     
-    const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         transaction.company.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesEmpresa = filterEmpresa === 'all' || transaction.company === filterEmpresa;
-    const matchesCategoria = filterCategoria === 'all' || transaction.category === filterCategoria;
-    const matchesStatus = filterStatus === 'all' || status === filterStatus;
+    const filtered = filterDespesasCurrentMonth(allTransactions, dateFrom, dateTo, shouldExcludeCamerino);
     
-    return matchesSearch && matchesEmpresa && matchesCategoria && matchesStatus;
-  });
+    console.log('Despesas após filtro do mês atual:', filtered.length);
+    console.log('Total dos valores filtrados:', filtered.reduce((sum, t) => sum + (t.valor_total || t.valor), 0));
+    
+    return filtered;
+  }, [allTransactions, dateFrom, dateTo, shouldExcludeCamerino]);
 
-  // Calcular estatísticas usando valor_total - cálculo direto
+  // Filtrar despesas com base nos outros filtros
+  const filteredTransactions = useMemo(() => {
+    return currentMonthTransactions.filter(transaction => {
+      const status = getTransactionStatus(transaction);
+      
+      const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           transaction.company.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesEmpresa = filterEmpresa === 'all' || transaction.company === filterEmpresa;
+      const matchesCategoria = filterCategoria === 'all' || transaction.category === filterCategoria;
+      const matchesStatus = filterStatus === 'all' || status === filterStatus;
+      
+      return matchesSearch && matchesEmpresa && matchesCategoria && matchesStatus;
+    });
+  }, [currentMonthTransactions, searchTerm, filterEmpresa, filterCategoria, filterStatus]);
+
+  // Calcular estatísticas usando valor_total
   const totalDespesas = filteredTransactions.reduce((sum, transaction) => sum + (transaction.valor_total || transaction.valor), 0);
   const totalJuros = filteredTransactions.reduce((sum, transaction) => sum + (transaction.valor_juros || 0), 0);
   const despesasPagas = filteredTransactions.filter(t => getTransactionStatus(t) === 'PAGO');
@@ -117,7 +105,6 @@ const DespesasPage = () => {
   console.log('Valor pendente:', valorPendente);
   console.log('Valor atrasado:', valorAtrasado);
 
-  // Funções - definidas após todos os hooks
   const handleTransactionAdded = () => {
     refetch();
     setIsModalOpen(false);
@@ -127,9 +114,28 @@ const DespesasPage = () => {
     refetch();
   };
 
+  // Handle filter empresa change with Camerino auth check
   const handleFilterEmpresaChange = (value: string) => {
     setFilterEmpresa(value);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-red-50 to-red-100">
+        <Sidebar />
+        <div className="flex-1 p-8 flex items-center justify-center">
+          <p className="text-lg text-gray-600">Carregando despesas...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Se precisar autenticar para Camerino, mostrar tela de senha
+  if (needsCamerinoAuth) {
+    return (
+      <CamerinoPasswordProtection onPasswordCorrect={authenticate} />
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-red-50 to-red-100">

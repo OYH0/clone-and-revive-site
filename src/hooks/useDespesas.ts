@@ -118,7 +118,6 @@ export const useCreateDespesa = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['despesas'] });
-      queryClient.invalidateQueries({ queryKey: ['totais-cofre-conta'] });
       toast({
         title: "Sucesso",
         description: "Despesa criada com sucesso!",
@@ -163,7 +162,6 @@ export const useUpdateDespesa = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['despesas'] });
-      queryClient.invalidateQueries({ queryKey: ['totais-cofre-conta'] });
       toast({
         title: "Sucesso",
         description: "Despesa atualizada com sucesso!",
@@ -190,8 +188,6 @@ export const useDeleteDespesa = () => {
       if (!user) throw new Error('Usuário não autenticado');
       
       console.log('Deleting despesa:', id);
-      
-      // Deletar a despesa
       const { error } = await supabase
         .from('despesas')
         .delete()
@@ -206,7 +202,6 @@ export const useDeleteDespesa = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['despesas'] });
-      queryClient.invalidateQueries({ queryKey: ['totais-cofre-conta'] });
       toast({
         title: "Sucesso",
         description: "Despesa excluída com sucesso!",

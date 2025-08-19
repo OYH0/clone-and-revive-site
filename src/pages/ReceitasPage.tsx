@@ -52,25 +52,20 @@ const ReceitasPage = () => {
     });
   }, [currentMonthReceitas, searchTerm, filterEmpresa, filterCategoria]);
 
-  // Receitas para exibição na lista (excluindo pagamentos de despesas e valores negativos)
+  // Calcular estatísticas baseadas nas receitas exibidas (excluindo apenas pagamentos de despesas)
   const receitasExibidas = filteredReceitas.filter(r => 
-    r.descricao !== 'PAGAMENTO DE DESPESA' && r.valor >= 0
-  );
-  
-  // Receitas para cálculos (incluindo valores negativos, mas excluindo pagamentos de despesas)
-  const receitasParaCalculo = filteredReceitas.filter(r => 
     r.descricao !== 'PAGAMENTO DE DESPESA'
   );
   
-  // Calcular totais apenas das receitas de vendas (para estatísticas - incluindo valores negativos nos cálculos)
-  const receitasVendasCalculo = receitasParaCalculo.filter(r => 
+  // Calcular totais apenas das receitas de vendas (para estatísticas)
+  const receitasVendas = receitasExibidas.filter(r => 
     r.categoria !== 'EM_COFRE' && 
     r.categoria !== 'EM_CONTA'
   );
   
-  const totalReceitas = receitasVendasCalculo.reduce((sum, receita) => sum + receita.valor, 0);
-  const receitasRecebidas = receitasVendasCalculo.filter(r => r.data_recebimento).length;
-  const valorRecebido = receitasVendasCalculo
+  const totalReceitas = receitasVendas.reduce((sum, receita) => sum + receita.valor, 0);
+  const receitasRecebidas = receitasVendas.filter(r => r.data_recebimento).length;
+  const valorRecebido = receitasVendas
     .filter(r => r.data_recebimento)
     .reduce((sum, receita) => sum + receita.valor, 0);
   
@@ -173,7 +168,7 @@ const ReceitasPage = () => {
                 <div className="text-xl lg:text-3xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
                   R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">{receitasVendasCalculo.length} receitas encontradas</p>
+                <p className="text-xs text-gray-500 mt-1">{receitasVendas.length} receitas encontradas</p>
               </CardContent>
             </Card>
 
