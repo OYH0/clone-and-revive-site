@@ -23,9 +23,16 @@ const ImplementacaoStats: React.FC<ImplementacaoStatsProps> = ({ despesas, recei
     title: ''
   });
 
+  // Filtrar receitas para excluir valores que não são vendas reais
+  const receitasVendas = receitas.filter(r => 
+    r.categoria !== 'EM_COFRE' && 
+    r.categoria !== 'EM_CONTA' && 
+    !r.descricao?.toUpperCase().includes('PAGAMENTO DE DESPESA')
+  );
+  
   // Usar dados filtrados para análise específica da implementação
   const totalDespesas = despesas.reduce((sum, despesa) => sum + (despesa.valor_total || despesa.valor || 0), 0);
-  const totalReceitas = receitas.reduce((sum, receita) => sum + (receita.valor || 0), 0);
+  const totalReceitas = receitasVendas.reduce((sum, receita) => sum + (receita.valor || 0), 0);
   const valorRestante = totalReceitas - totalDespesas;
   const despesasPendentes = despesas.filter(d => d.status === 'Pendente').length;
 
@@ -50,7 +57,7 @@ const ImplementacaoStats: React.FC<ImplementacaoStatsProps> = ({ despesas, recei
             R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </div>
           <div className="flex items-center justify-between">
-            <p className="text-xs text-gray-500">{receitas.length} receitas encontradas</p>
+            <p className="text-xs text-gray-500">{receitasVendas.length} vendas encontradas</p>
             <Button 
               size="sm" 
               variant="outline" 
@@ -135,7 +142,7 @@ const ImplementacaoStats: React.FC<ImplementacaoStatsProps> = ({ despesas, recei
         isOpen={modalState.isOpen}
         onClose={closeModal}
         type={modalState.type}
-        transactions={modalState.type === 'receitas' ? receitas : despesas}
+        transactions={modalState.type === 'receitas' ? receitasVendas : despesas}
         empresa="Implementação"
         title={modalState.title}
       />

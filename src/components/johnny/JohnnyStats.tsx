@@ -23,9 +23,16 @@ const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas, selectedP
     title: ''
   });
 
+  // Filtrar receitas para excluir valores que não são vendas reais
+  const receitasVendas = receitas.filter(r => 
+    r.categoria !== 'EM_COFRE' && 
+    r.categoria !== 'EM_CONTA' && 
+    !r.descricao?.toUpperCase().includes('PAGAMENTO DE DESPESA')
+  );
+  
   // Usar dados filtrados por período para todos os cálculos
   const totalDespesas = despesas.reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
-  const totalReceitas = receitas.reduce((sum, r) => sum + r.valor, 0);
+  const totalReceitas = receitasVendas.reduce((sum, r) => sum + r.valor, 0);
   const lucroLiquido = totalReceitas - totalDespesas;
   const margemLucro = totalReceitas > 0 ? (lucroLiquido / totalReceitas) * 100 : 0;
 
@@ -156,7 +163,7 @@ const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas, selectedP
         isOpen={modalState.isOpen}
         onClose={closeModal}
         type={modalState.type}
-        transactions={modalState.type === 'receitas' ? receitas : despesas}
+        transactions={modalState.type === 'receitas' ? receitasVendas : despesas}
         empresa="Johnny Rockets"
         title={modalState.title}
       />
