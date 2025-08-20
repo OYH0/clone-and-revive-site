@@ -52,14 +52,14 @@ const ReceitasPage = () => {
     });
   }, [currentMonthReceitas, searchTerm, filterEmpresa, filterCategoria]);
 
-  // Calcular estatísticas baseadas nas receitas exibidas (excluindo apenas pagamentos de despesas e receitas de conta/cofre dos totais)
-  const receitasParaEstatisticas = filteredReceitas.filter(r => 
+  // Calcular estatísticas baseadas nas receitas exibidas (excluindo apenas pagamentos de despesas)
+  const receitasExibidas = filteredReceitas.filter(r => 
     r.descricao !== 'PAGAMENTO DE DESPESA' &&
-    ((r as any).destino === 'total' || !(r as any).destino) // Excluir receitas de conta/cofre apenas dos cálculos
+    ((r as any).destino === 'total' || !(r as any).destino) // Excluir receitas de conta/cofre
   );
   
   // Calcular totais apenas das receitas de vendas (para estatísticas)
-  const receitasVendas = receitasParaEstatisticas.filter(r => 
+  const receitasVendas = receitasExibidas.filter(r => 
     r.categoria !== 'EM_COFRE' && 
     r.categoria !== 'EM_CONTA'
   );
@@ -172,7 +172,7 @@ const ReceitasPage = () => {
                 <div>
                   <CardTitle className="text-xl text-gray-800">Lista de Receitas</CardTitle>
                   <CardDescription className="text-gray-600">
-                    {filteredReceitas.length} receita(s) encontrada(s) - Mês atual e recebimentos recentes
+                    {receitasExibidas.length} receita(s) encontrada(s) - Mês atual e recebimentos recentes
                   </CardDescription>
                 </div>
                 <Button
@@ -186,7 +186,7 @@ const ReceitasPage = () => {
               </div>
             </CardHeader>
             <CardContent className="p-6">
-              <ReceitaTable receitas={filteredReceitas} />
+              <ReceitaTable receitas={receitasExibidas} />
             </CardContent>
           </Card>
         </div>
