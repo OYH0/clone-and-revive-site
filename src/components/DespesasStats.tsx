@@ -1,6 +1,7 @@
 import React from 'react';
 import { DollarSign, CheckCircle, Clock, AlertTriangle, Wallet, Vault, Percent } from 'lucide-react';
 import { useSaldos } from '@/hooks/useSaldos';
+import { useReceitas } from '@/hooks/useReceitas';
 
 interface DespesasStatsProps {
   totalDespesas: number;
@@ -12,6 +13,9 @@ interface DespesasStatsProps {
   despesasPendentesCount: number;
   despesasAtrasadasCount: number;
   filteredTransactionsCount: number;
+  filterEmpresa: string;
+  dateFrom?: string;
+  dateTo?: string;
 }
 
 const DespesasStats: React.FC<DespesasStatsProps> = ({
@@ -23,12 +27,64 @@ const DespesasStats: React.FC<DespesasStatsProps> = ({
   despesasPagasCount,
   despesasPendentesCount,
   despesasAtrasadasCount,
-  filteredTransactionsCount
+  filteredTransactionsCount,
+  filterEmpresa,
+  dateFrom,
+  dateTo
 }) => {
   const { data: saldos, isLoading: saldosLoading } = useSaldos();
+  const { data: receitas, isLoading: receitasLoading } = useReceitas();
   
-  const saldoConta = saldos?.find(s => s.tipo === 'conta')?.valor || 0;
-  const saldoCofre = saldos?.find(s => s.tipo === 'cofre')?.valor || 0;
+  // Calcular saldos filtrados por empresa e período
+  const calculateFilteredSaldos = () => {
+    if (!receitas) return { saldoConta: 0, saldoCofre: 0 };
+    
+    // Se não há filtro de empresa específico, usar saldos globais
+    if (filterEmpresa === 'all') {
+      const saldoConta = saldos?.find(s => s.tipo === 'conta')?.valor || 0;
+      const saldoCofre = saldos?.find(s => s.tipo === 'cofre')?.valor || 0;
+      return { saldoConta, saldoCofre };
+    }
+    
+    // Filtrar receitas por empresa e período
+    let filteredReceitas = receitas.filter(receita => {
+      const matchesEmpresa = receita.empresa === filterEmpresa;
+      
+      // Aplicar filtro de data se fornecido
+      if (dateFrom || dateTo) {
+        const receitaDate = new Date(receita.data);
+        const fromDate = dateFrom ? new Date(dateFrom) : null;
+        const toDate = dateTo ? new Date(dateTo) : null;
+        
+        if (fromDate && receitaDate < fromDate) return false;
+        if (toDate && receitaDate > toDate) return false;
+      } else {
+        // Se não há filtro manual, usar mês atual
+        const now = new Date();
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        const receitaDate = new Date(receita.data);
+        
+        if (receitaDate < firstDay || receitaDate > lastDay) return false;
+      }
+      
+      return matchesEmpresa;
+    });
+    
+    // Calcular saldos por destino
+    const saldoConta = filteredReceitas
+      .filter(r => r.destino === 'conta')
+      .reduce((sum, r) => sum + (r.valor || 0), 0);
+      
+    const saldoCofre = filteredReceitas
+      .filter(r => r.destino === 'cofre')
+      .reduce((sum, r) => sum + (r.valor || 0), 0);
+    
+    return { saldoConta, saldoCofre };
+  };
+  
+  const { saldoConta, saldoCofre } = calculateFilteredSaldos();
+  const isLoading = saldosLoading || receitasLoading;
 
   return (
     <div className="mb-8 space-y-6">
@@ -120,7 +176,7 @@ const DespesasStats: React.FC<DespesasStatsProps> = ({
             <div>
               <h3 className="text-sm font-semibold text-gray-700">Total em Conta</h3>
               <p className="text-2xl font-bold text-blue-600">
-                {saldosLoading ? 'Carregando...' : `R$ ${saldoConta.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                {isLoading ? 'Carregando...' : `R$ ${saldoConta.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
               </p>
               <p className="text-xs text-gray-500">Saldo atual</p>
             </div>
@@ -135,7 +191,7 @@ const DespesasStats: React.FC<DespesasStatsProps> = ({
             <div>
               <h3 className="text-sm font-semibold text-gray-700">Total em Cofre</h3>
               <p className="text-2xl font-bold text-purple-600">
-                {saldosLoading ? 'Carregando...' : `R$ ${saldoCofre.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                {isLoading ? 'Carregando...' : `R$ ${saldoCofre.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
               </p>
               <p className="text-xs text-gray-500">Saldo atual</p>
             </div>

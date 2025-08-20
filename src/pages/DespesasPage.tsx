@@ -206,6 +206,9 @@ const DespesasPage = () => {
             despesasPendentesCount={despesasPendentes.length}
             despesasAtrasadasCount={despesasAtrasadas.length}
             filteredTransactionsCount={filteredTransactions.length}
+            filterEmpresa={filterEmpresa}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
           />
 
           {/* Main Content Card */}
