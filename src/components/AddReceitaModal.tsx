@@ -148,7 +148,7 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Selecione a empresa" />
                   </SelectTrigger>
-                  <SelectContent className="bg-background border shadow-lg z-50">
+                  <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg z-50">
                     <SelectItem value="Churrasco">Companhia do Churrasco</SelectItem>
                     <SelectItem value="Johnny">Johnny Rockets</SelectItem>
                     <SelectItem value="Camerino">Camerino</SelectItem>
@@ -164,7 +164,7 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Selecione a categoria" />
                   </SelectTrigger>
-                  <SelectContent className="bg-background border shadow-lg z-50">
+                  <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg z-50">
                     <SelectItem value="VENDAS">Vendas</SelectItem>
                     <SelectItem value="VENDAS_DIARIAS">Vendas Diárias</SelectItem>
                     <SelectItem value="OUTROS">Outros</SelectItem>
@@ -180,7 +180,7 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Selecione o destino" />
                   </SelectTrigger>
-                  <SelectContent className="bg-background border shadow-lg z-50">
+                  <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg z-50">
                     <SelectItem value="conta">Conta Bancária</SelectItem>
                     <SelectItem value="cofre">Cofre</SelectItem>
                     <SelectItem value="total">Receita Total (Empresas)</SelectItem>
