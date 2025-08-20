@@ -32,6 +32,11 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
   const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
   const [viewingReceipt, setViewingReceipt] = useState<Transaction | null>(null);
   const [markingAsPaidTransaction, setMarkingAsPaidTransaction] = useState<Transaction | null>(null);
+  const [sortConfig, setSortConfig] = useState<{
+    key: keyof Transaction | null;
+    direction: 'asc' | 'desc';
+  }>({ key: null, direction: 'asc' });
+  
   const { toast } = useToast();
   const { user } = useAuth();
   const { isAdmin } = useAdminAccess();
@@ -213,22 +218,9 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
     input.click();
   };
 
-  if (transactions.length === 0) {
-    return (
-      <div className="text-center py-8 text-gray-500">
-        <p>Nenhuma {type === 'receita' ? 'receita' : 'despesa'} encontrada.</p>
-        <p className="text-sm mt-2">Adicione {type === 'receita' ? 'receitas' : 'despesas'} para visualizá-las aqui.</p>
-      </div>
-    );
-  }
 
 
-  // Add sorting functionality
-  const [sortConfig, setSortConfig] = useState<{
-    key: keyof Transaction | null;
-    direction: 'asc' | 'desc';
-  }>({ key: null, direction: 'asc' });
-
+  // Sorting logic (useMemo must be after all other hooks)
   const handleSort = (key: keyof Transaction) => {
     let direction: 'asc' | 'desc' = 'asc';
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -253,6 +245,16 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
       return 0;
     });
   }, [transactions, sortConfig]);
+
+  // EARLY RETURN AFTER ALL HOOKS ARE DECLARED
+  if (transactions.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        <p>Nenhuma {type === 'receita' ? 'receita' : 'despesa'} encontrada.</p>
+        <p className="text-sm mt-2">Adicione {type === 'receita' ? 'receitas' : 'despesas'} para visualizá-las aqui.</p>
+      </div>
+    );
+  }
 
   return (
     <>
