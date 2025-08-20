@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminAccess } from '@/hooks/useAdminAccess';
+import { useUpdateSaldo } from '@/hooks/useSaldos';
 
 interface TransactionTableProps {
   transactions: Transaction[];
@@ -34,6 +35,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
   const { toast } = useToast();
   const { user } = useAuth();
   const { isAdmin } = useAdminAccess();
+  const updateSaldo = useUpdateSaldo();
 
   // Função para formatar data corretamente
   const formatDate = (dateString: string) => {
@@ -111,27 +113,14 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
         throw error;
       }
 
-      // Subtrair o valor do cofre ou conta correspondente
+      // Subtrair o valor do saldo correspondente
       const valorPago = transaction.valor_total || transaction.valor;
-      const categoria = paymentSource === 'cofre' ? 'EM_COFRE' : 'EM_CONTA';
       
-      // Criar uma entrada negativa nas receitas para subtrair o valor
-      const { error: receitaError } = await supabase
-        .from('receitas')
-        .insert({
-          data: today,
-          valor: -valorPago,
-          descricao: `Pagamento: ${transaction.description}`,
-          empresa: transaction.company,
-          categoria: categoria,
-          data_recebimento: today,
-          user_id: user.id
-        });
-
-      if (receitaError) {
-        console.error('Error creating negative receipt:', receitaError);
-        // Continue even if the receipt creation fails
-      }
+      // Update balance using the new saldos system
+      updateSaldo.mutate({
+        tipo: paymentSource,
+        valor: -valorPago // Negative to subtract from balance
+      });
 
       console.log('Transaction updated successfully:', data);
 
@@ -143,6 +132,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
         description: `Despesa marcada como paga em ${formattedDate} e valor deduzido do ${sourceText}!`,
       });
 
+      setMarkingAsPaidTransaction(null);
       onTransactionUpdated();
     } catch (error) {
       console.error('Erro ao marcar como paga:', error);
