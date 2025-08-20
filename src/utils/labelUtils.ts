@@ -22,8 +22,6 @@ export const prettyLabel = (code?: string): string => {
     VENDAS: 'Vendas',
     VENDAS_DIARIAS: 'Vendas Diárias',
     OUTROS: 'Outros',
-    EM_COFRE: 'Em Cofre',
-    EM_CONTA: 'Em Conta',
   };
 
   const key = code.toUpperCase();
