@@ -31,13 +31,7 @@ const CamerinoPage = () => {
   const camerinoReceitas = useMemo(() => {
     return receitas?.filter(r => {
       const empresa = r.empresa?.toLowerCase().trim() || '';
-      const isCamerino = empresa === 'camerino' || empresa.includes('camerino');
-      
-      // Excluir receitas com destino "conta" ou "cofre"
-      const destino = (r as any).destino;
-      const isDestinoProd = destino === 'total' || !destino;
-      
-      return isCamerino && isDestinoProd;
+      return empresa === 'camerino' || empresa.includes('camerino');
     }) || [];
   }, [receitas]);
 

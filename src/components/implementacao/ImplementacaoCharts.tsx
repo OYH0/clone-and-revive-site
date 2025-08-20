@@ -27,13 +27,7 @@ const ImplementacaoCharts: React.FC<ImplementacaoChartsProps> = ({ despesas, rec
   const receitasImplementacao = React.useMemo(() => {
     return todasReceitas?.filter(r => {
       const empresa = r.empresa?.toLowerCase().trim() || '';
-      const isImplementacao = empresa === 'implementação' || empresa === 'implementacao';
-      
-      // Excluir receitas com destino "conta" ou "cofre"
-      const destino = (r as any).destino;
-      const isDestinoProd = destino === 'total' || !destino;
-      
-      return isImplementacao && isDestinoProd;
+      return empresa === 'implementação' || empresa === 'implementacao';
     }) || [];
   }, [todasReceitas]);
 
