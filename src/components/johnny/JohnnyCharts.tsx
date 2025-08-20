@@ -26,13 +26,7 @@ const JohnnyCharts: React.FC<JohnnyChartsProps> = ({ despesas, receitas }) => {
   const receitasJohnny = React.useMemo(() => {
     return todasReceitas?.filter(r => {
       const empresa = r.empresa?.toLowerCase().trim() || '';
-      const isJohnny = empresa.includes('johnny') || empresa === 'johnny rockets' || empresa === 'johnny rocket';
-      
-      // Excluir receitas com destino "conta" ou "cofre"
-      const destino = (r as any).destino;
-      const isDestinoProd = destino === 'total' || !destino;
-      
-      return isJohnny && isDestinoProd;
+      return empresa.includes('johnny') || empresa === 'johnny rockets' || empresa === 'johnny rocket';
     }) || [];
   }, [todasReceitas]);
 

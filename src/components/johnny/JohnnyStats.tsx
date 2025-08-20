@@ -27,8 +27,7 @@ const JohnnyStats: React.FC<JohnnyStatsProps> = ({ despesas, receitas, selectedP
   const receitasVendas = receitas.filter(r => 
     r.categoria !== 'EM_COFRE' && 
     r.categoria !== 'EM_CONTA' && 
-    !r.descricao?.toUpperCase().includes('PAGAMENTO DE DESPESA') &&
-    ((r as any).destino === 'total' || !(r as any).destino) // Excluir receitas de conta/cofre
+    !r.descricao?.toUpperCase().includes('PAGAMENTO DE DESPESA')
   );
   
   // Usar dados filtrados por período para todos os cálculos

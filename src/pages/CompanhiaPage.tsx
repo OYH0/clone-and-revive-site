@@ -36,16 +36,10 @@ const CompanhiaPage = () => {
   
   const companhiaReceitas = receitas?.filter(r => {
     const empresa = r.empresa?.toLowerCase().trim() || '';
-    const isCompanhia = empresa === 'churrasco' || 
+    return empresa === 'churrasco' || 
            empresa === 'companhia do churrasco' || 
            empresa === 'cia do churrasco' ||
            empresa.includes('churrasco');
-    
-    // Excluir receitas com destino "conta" ou "cofre"
-    const destino = (r as any).destino;
-    const isDestinoProd = destino === 'total' || !destino;
-    
-    return isCompanhia && isDestinoProd;
   }) || [];
 
   // Aplicar filtro de período usando a mesma lógica da aba de receitas

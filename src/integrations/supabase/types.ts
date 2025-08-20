@@ -144,7 +144,6 @@ export type Database = {
           data: string
           data_recebimento: string | null
           descricao: string | null
-          destino: string | null
           empresa: string | null
           id: number
           updated_at: string | null
@@ -157,7 +156,6 @@ export type Database = {
           data: string
           data_recebimento?: string | null
           descricao?: string | null
-          destino?: string | null
           empresa?: string | null
           id?: number
           updated_at?: string | null
@@ -170,7 +168,6 @@ export type Database = {
           data?: string
           data_recebimento?: string | null
           descricao?: string | null
-          destino?: string | null
           empresa?: string | null
           id?: number
           updated_at?: string | null

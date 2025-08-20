@@ -12,18 +12,14 @@ export const useSaldos = () => {
   return useQuery({
     queryKey: ['saldos'],
     queryFn: async () => {
-      console.log('=== FETCHING SALDOS ===');
       const { data, error } = await supabase
         .from('saldos')
         .select('*')
         .order('tipo');
       
       if (error) throw error;
-      console.log('Saldos fetched:', data);
       return data as Saldo[];
-    },
-    staleTime: 0, // Sem cache para garantir atualizações imediatas
-    gcTime: 0, // Remover cache para forçar refetch
+    }
   });
 };
 
@@ -33,39 +29,27 @@ export const useUpdateSaldo = () => {
 
   return useMutation({
     mutationFn: async ({ tipo, valor }: { tipo: 'conta' | 'cofre'; valor: number }) => {
-      // Get current saldo or create if doesn't exist
+      // Get current saldo
       const { data: currentSaldo, error: fetchError } = await supabase
         .from('saldos')
         .select('*')
         .eq('tipo', tipo)
-        .maybeSingle();
+        .single();
 
       if (fetchError) throw fetchError;
 
-      const newValor = (currentSaldo?.valor || 0) + valor;
+      // Update with new value
+      const newValor = (currentSaldo.valor || 0) + valor;
       
-      if (currentSaldo) {
-        // Update existing record
-        const { data, error } = await supabase
-          .from('saldos')
-          .update({ valor: newValor })
-          .eq('tipo', tipo)
-          .select()
-          .single();
+      const { data, error } = await supabase
+        .from('saldos')
+        .update({ valor: newValor })
+        .eq('tipo', tipo)
+        .select()
+        .single();
 
-        if (error) throw error;
-        return data;
-      } else {
-        // Create new record
-        const { data, error } = await supabase
-          .from('saldos')
-          .insert({ tipo, valor: newValor })
-          .select()
-          .single();
-
-        if (error) throw error;
-        return data;
-      }
+      if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['saldos'] });

@@ -26,13 +26,7 @@ const CompanhiaCharts: React.FC<CompanhiaChartsProps> = ({ despesas, receitas })
   const receitasCompanhia = React.useMemo(() => {
     return todasReceitas?.filter(r => {
       const empresa = r.empresa?.toLowerCase().trim() || '';
-      const isCompanhia = empresa.includes('churrasco') || empresa === 'companhia do churrasco' || empresa === 'cia do churrasco';
-      
-      // Excluir receitas com destino "conta" ou "cofre"
-      const destino = (r as any).destino;
-      const isDestinoProd = destino === 'total' || !destino;
-      
-      return isCompanhia && isDestinoProd;
+      return empresa.includes('churrasco') || empresa === 'companhia do churrasco' || empresa === 'cia do churrasco';
     }) || [];
   }, [todasReceitas]);
 

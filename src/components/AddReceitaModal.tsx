@@ -34,7 +34,7 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
     descricao: '',
     empresa: '',
     categoria: 'VENDAS',
-    destino: 'total' as 'conta' | 'cofre' | 'total'
+    saldo_destino: 'conta' as 'conta' | 'cofre'
   });
 
   const createReceita = useCreateReceita();
@@ -56,29 +56,16 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
       data_recebimento: formData.data_recebimento || undefined,
       descricao: formData.descricao,
       empresa: formData.empresa,
-      categoria: formData.categoria,
-      destino: formData.destino
+      categoria: formData.categoria
     };
 
     createReceita.mutate(receitaData, {
       onSuccess: () => {
-        console.log('Receita created successfully with destino:', formData.destino);
-        
-        // Update saldo only if destino is conta or cofre
-        if (formData.destino === 'conta' || formData.destino === 'cofre') {
-          console.log('Updating saldo - tipo:', formData.destino, 'valor:', parseFloat(formData.valor));
-          updateSaldo.mutate({
-            tipo: formData.destino,
-            valor: parseFloat(formData.valor)
-          }, {
-            onSuccess: () => {
-              console.log('Saldo updated successfully');
-            },
-            onError: (error) => {
-              console.error('Error updating saldo:', error);
-            }
-          });
-        }
+        // Update saldo after successful receita creation
+        updateSaldo.mutate({
+          tipo: formData.saldo_destino,
+          valor: parseFloat(formData.valor)
+        });
         
         setFormData({
           data: '',
@@ -87,7 +74,7 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
           descricao: '',
           empresa: defaultEmpresa || '',
           categoria: 'VENDAS',
-          destino: 'total'
+          saldo_destino: 'conta'
         });
         onClose();
       }
@@ -104,115 +91,102 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Informações Básicas */}
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="data" className="text-sm font-medium">Data *</Label>
-                <Input
-                  id="data"
-                  type="date"
-                  value={formData.data}
-                  onChange={(e) => setFormData({ ...formData, data: e.target.value })}
-                  className="w-full"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="valor" className="text-sm font-medium">Valor (R$) *</Label>
-                <Input
-                  id="valor"
-                  type="number"
-                  step="0.01"
-                  placeholder="0,00"
-                  value={formData.valor}
-                  onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
-                  className="w-full"
-                  required
-                />
-              </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="data">Data</Label>
+              <Input
+                id="data"
+                type="date"
+                value={formData.data}
+                onChange={(e) => setFormData({ ...formData, data: e.target.value })}
+                required
+              />
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="descricao" className="text-sm font-medium">Descrição *</Label>
-              <Textarea
-                id="descricao"
-                placeholder="Descreva a receita..."
-                value={formData.descricao}
-                onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-                className="w-full min-h-[80px] resize-none"
+            <div>
+              <Label htmlFor="valor">Valor (R$)</Label>
+              <Input
+                id="valor"
+                type="number"
+                step="0.01"
+                placeholder="0,00"
+                value={formData.valor}
+                onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
                 required
               />
             </div>
           </div>
 
-          {/* Classificação */}
-          <div className="space-y-4">
-            <h4 className="text-sm font-medium text-muted-foreground border-b pb-2">Classificação</h4>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="empresa" className="text-sm font-medium">Empresa/Cliente *</Label>
-                <Select onValueChange={(value) => setFormData({ ...formData, empresa: value })} value={formData.empresa}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecione a empresa" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg z-50">
-                    <SelectItem value="Churrasco">Companhia do Churrasco</SelectItem>
-                    <SelectItem value="Johnny">Johnny Rockets</SelectItem>
-                    <SelectItem value="Camerino">Camerino</SelectItem>
-                    <SelectItem value="Implementação">Implementação</SelectItem>
-                    <SelectItem value="Outros">Outros</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="categoria" className="text-sm font-medium">Categoria *</Label>
-                <Select onValueChange={(value) => setFormData({ ...formData, categoria: value })} value={formData.categoria}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecione a categoria" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg z-50">
-                    <SelectItem value="VENDAS">Vendas</SelectItem>
-                    <SelectItem value="VENDAS_DIARIAS">Vendas Diárias</SelectItem>
-                    <SelectItem value="OUTROS">Outros</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="destino" className="text-sm font-medium">Destino do Valor *</Label>
-                <Select onValueChange={(value: 'conta' | 'cofre' | 'total') => setFormData({ ...formData, destino: value })} value={formData.destino}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecione o destino" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg z-50">
-                    <SelectItem value="conta">Conta Bancária</SelectItem>
-                    <SelectItem value="cofre">Cofre</SelectItem>
-                    <SelectItem value="total">Receita Total (Empresas)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="data_recebimento" className="text-sm font-medium">Data de Recebimento</Label>
-                <Input
-                  id="data_recebimento"
-                  type="date"
-                  value={formData.data_recebimento}
-                  onChange={(e) => setFormData({ ...formData, data_recebimento: e.target.value })}
-                  className="w-full"
-                  placeholder="Opcional"
-                />
-              </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="empresa">Empresa/Cliente</Label>
+              <Select onValueChange={(value) => setFormData({ ...formData, empresa: value })} value={formData.empresa}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a empresa" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Churrasco">Companhia do Churrasco</SelectItem>
+                  <SelectItem value="Johnny">Johnny Rockets</SelectItem>
+                  <SelectItem value="Camerino">Camerino</SelectItem>
+                  <SelectItem value="Implementação">Implementação</SelectItem>
+                  <SelectItem value="Outros">Outros</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
-          <DialogFooter className="pt-4 border-t">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="categoria">Categoria</Label>
+              <Select onValueChange={(value) => setFormData({ ...formData, categoria: value })} value={formData.categoria}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="VENDAS">Vendas</SelectItem>
+                  <SelectItem value="VENDAS_DIARIAS">Vendas Diárias</SelectItem>
+                  <SelectItem value="OUTROS">Outros</SelectItem>
+                  <SelectItem value="EM_COFRE">Em Cofre</SelectItem>
+                  <SelectItem value="EM_CONTA">Em Conta</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="saldo_destino">Destino do Valor</Label>
+              <Select onValueChange={(value: 'conta' | 'cofre') => setFormData({ ...formData, saldo_destino: value })} value={formData.saldo_destino}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o destino" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="conta">Conta</SelectItem>
+                  <SelectItem value="cofre">Cofre</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="data_recebimento">Data de Recebimento (opcional)</Label>
+            <Input
+              id="data_recebimento"
+              type="date"
+              value={formData.data_recebimento}
+              onChange={(e) => setFormData({ ...formData, data_recebimento: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="descricao">Descrição</Label>
+            <Textarea
+              id="descricao"
+              placeholder="Descrição da receita..."
+              value={formData.descricao}
+              onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+              required
+            />
+          </div>
+
+          <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
               Cancelar
             </Button>

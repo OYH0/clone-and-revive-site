@@ -92,10 +92,9 @@ const RelatoriosPage = () => {
     
     return empresas.map((empresa, index) => {
       const value = receitas?.filter(r => 
-        (r.empresa === empresa || 
+        r.empresa === empresa || 
         (empresa === 'Churrasco' && r.empresa === 'Companhia do Churrasco') ||
-        (empresa === 'Johnny' && r.empresa === 'Johnny Rockets')) &&
-        (r.destino === 'total' || !r.destino) // Só contar receitas com destino 'total'
+        (empresa === 'Johnny' && r.empresa === 'Johnny Rockets')
       ).reduce((sum, r) => sum + (r.valor || 0), 0) || 0;
       
       return {
