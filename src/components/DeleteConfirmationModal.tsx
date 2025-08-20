@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useDeleteDespesa } from '@/hooks/useDespesas';
 import { useDeleteReceita } from '@/hooks/useReceitas';
+import { useUpdateSaldo } from '@/hooks/useSaldos';
 import { Transaction } from '@/types/transaction';
 import { truncateDescription } from '@/utils/transactionUtils';
 
@@ -32,17 +33,50 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
 }) => {
   const deleteDespesa = useDeleteDespesa();
   const deleteReceita = useDeleteReceita();
+  const updateSaldo = useUpdateSaldo();
 
   const handleDelete = async () => {
     if (!transaction) return;
 
     try {
+      console.log('=== EXCLUINDO TRANSAÇÃO ===');
+      console.log('Tipo:', type);
+      console.log('Status:', transaction.status);
+      console.log('Origem pagamento:', transaction.origem_pagamento);
+      console.log('Valor total:', transaction.valor_total || transaction.valor);
+
+      // PRIMEIRO: Se for uma despesa PAGA com origem de pagamento, reverter o saldo ANTES de excluir
+      if (type === 'despesa' && transaction.status === 'PAGO' && transaction.origem_pagamento) {
+        const valorReverter = transaction.valor_total || transaction.valor;
+        console.log('REVERTENDO SALDO ANTES DE EXCLUIR - Adicionando', valorReverter, 'ao', transaction.origem_pagamento);
+        
+        // Esperar a atualização do saldo ser concluída
+        await new Promise((resolve, reject) => {
+          updateSaldo.mutate({
+            tipo: transaction.origem_pagamento as 'conta' | 'cofre',
+            valor: valorReverter // Valor positivo para adicionar de volta
+          }, {
+            onSuccess: () => {
+              console.log('SALDO REVERTIDO COM SUCESSO');
+              resolve(true);
+            },
+            onError: (error) => {
+              console.error('ERRO AO REVERTER SALDO:', error);
+              reject(error);
+            }
+          });
+        });
+      }
+
+      // SEGUNDO: Agora excluir a transação
+      console.log('EXCLUINDO TRANSAÇÃO DO BANCO...');
       if (type === 'despesa') {
         await deleteDespesa.mutateAsync(transaction.id);
       } else {
         await deleteReceita.mutateAsync(transaction.id);
       }
       
+      console.log('TRANSAÇÃO EXCLUÍDA COM SUCESSO');
       onTransactionDeleted();
       onClose();
     } catch (error) {

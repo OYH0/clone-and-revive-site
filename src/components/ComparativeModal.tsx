@@ -36,16 +36,22 @@ const ComparativeModal: React.FC<ComparativeModalProps> = ({ isOpen, onClose, em
     
     const receitas = todasReceitas?.filter(r => {
       const emp = r.empresa?.toLowerCase().trim() || '';
-      switch (empresaNome.toLowerCase()) {
-        case 'churrasco':
-          return emp.includes('churrasco') || emp === 'companhia do churrasco' || emp === 'cia do churrasco';
-        case 'johnny':
-          return emp === 'johnny' || emp === 'johnny rockets' || emp === 'johnny rocket' || emp.includes('johnny');
-        case 'camerino':
-          return emp === 'camerino' || emp.includes('camerino');
-        default:
-          return emp === empresaNome.toLowerCase();
-      }
+      const isEmpresa = (() => {
+        switch (empresaNome.toLowerCase()) {
+          case 'churrasco':
+            return emp.includes('churrasco') || emp === 'companhia do churrasco' || emp === 'cia do churrasco';
+          case 'johnny':
+            return emp === 'johnny' || emp === 'johnny rockets' || emp === 'johnny rocket' || emp.includes('johnny');
+          case 'camerino':
+            return emp === 'camerino' || emp.includes('camerino');
+          default:
+            return emp === empresaNome.toLowerCase();
+        }
+      })();
+      
+      // Excluir receitas com destino "conta" ou "cofre"
+      const destino = (r as any).destino;
+      return isEmpresa && (destino === 'total' || !destino);
     }) || [];
     
     return { despesas, receitas };

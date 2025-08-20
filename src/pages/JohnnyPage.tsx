@@ -35,10 +35,16 @@ const JohnnyPage = () => {
   
   const johnnyReceitas = receitas?.filter(r => {
     const empresa = r.empresa?.toLowerCase().trim() || '';
-    return empresa === 'johnny' || 
+    const isJohnny = empresa === 'johnny' || 
            empresa === 'johnny rockets' || 
            empresa === 'johnny rocket' ||
            empresa.includes('johnny');
+    
+    // Excluir receitas com destino "conta" ou "cofre"
+    const destino = (r as any).destino;
+    const isDestinoProd = destino === 'total' || !destino;
+    
+    return isJohnny && isDestinoProd;
   }) || [];
 
   // Aplicar filtro de período

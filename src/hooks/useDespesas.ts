@@ -118,6 +118,8 @@ export const useCreateDespesa = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['despesas'] });
+      queryClient.invalidateQueries({ queryKey: ['saldos'] });
+      queryClient.invalidateQueries({ queryKey: ['receitas'] });
       toast({
         title: "Sucesso",
         description: "Despesa criada com sucesso!",
@@ -162,6 +164,8 @@ export const useUpdateDespesa = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['despesas'] });
+      queryClient.invalidateQueries({ queryKey: ['saldos'] });
+      queryClient.invalidateQueries({ queryKey: ['receitas'] });
       toast({
         title: "Sucesso",
         description: "Despesa atualizada com sucesso!",
@@ -202,6 +206,8 @@ export const useDeleteDespesa = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['despesas'] });
+      queryClient.invalidateQueries({ queryKey: ['saldos'] });
+      queryClient.invalidateQueries({ queryKey: ['receitas'] });
       toast({
         title: "Sucesso",
         description: "Despesa excluída com sucesso!",

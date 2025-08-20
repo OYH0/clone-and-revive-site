@@ -10,6 +10,7 @@ import { Transaction } from '@/types/transaction';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUpdateSaldo } from '@/hooks/useSaldos';
 
 interface EditTransactionModalProps {
   isOpen: boolean;
@@ -38,6 +39,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
+  const updateSaldo = useUpdateSaldo();
 
   // Get categories based on selected company
   const getCategoriesForCompany = (empresa: string) => {
@@ -189,6 +191,21 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     setIsLoading(true);
     
     try {
+      console.log('=== EDITANDO DESPESA ===');
+      console.log('Valores originais:', {
+        valor: transaction.valor,
+        valor_juros: transaction.valor_juros,
+        valor_total: transaction.valor_total,
+        status: transaction.status,
+        origem_pagamento: transaction.origem_pagamento
+      });
+      console.log('Novos valores:', {
+        valor: parseFloat(formData.valor),
+        valor_juros: formData.valor_juros ? parseFloat(formData.valor_juros) : 0,
+        status: transaction.status,
+        origem_pagamento: formData.origem_pagamento
+      });
+
       const updateData: any = {
         data: formData.data || null,
         valor: parseFloat(formData.valor),
@@ -198,8 +215,26 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
         subcategoria: formData.subcategoria || null,
         data_vencimento: formData.data_vencimento,
         valor_juros: formData.valor_juros ? parseFloat(formData.valor_juros) : 0,
-        status: transaction.status
+        status: transaction.status,
+        origem_pagamento: formData.origem_pagamento || null
       };
+
+      // Se era paga e agora tem valores diferentes, ajustar saldo
+      if (transaction.status === 'PAGO' && transaction.origem_pagamento) {
+        const valorOriginal = transaction.valor_total || transaction.valor;
+        const valorNovo = updateData.valor + (updateData.valor_juros || 0);
+        const diferenca = valorNovo - valorOriginal;
+        
+        console.log('Diferença de valor:', diferenca);
+        
+        if (diferenca !== 0) {
+          console.log('Ajustando saldo devido à mudança de valor');
+          updateSaldo.mutate({
+            tipo: transaction.origem_pagamento as 'conta' | 'cofre',
+            valor: -diferenca // Negativo para debitar a diferença
+          });
+        }
+      }
 
       console.log('Updating despesa with data:', updateData);
 
