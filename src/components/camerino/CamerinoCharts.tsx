@@ -27,7 +27,13 @@ const CamerinoCharts: React.FC<CamerinoChartsProps> = ({ despesas, receitas }) =
   const receitasCamerino = React.useMemo(() => {
     return todasReceitas?.filter(r => {
       const empresa = r.empresa?.toLowerCase().trim() || '';
-      return empresa.includes('camerino');
+      const isCamerino = empresa.includes('camerino');
+      
+      // Excluir receitas com destino "conta" ou "cofre"
+      const destino = (r as any).destino;
+      const isDestinoProd = destino === 'total' || !destino;
+      
+      return isCamerino && isDestinoProd;
     }) || [];
   }, [todasReceitas]);
 

@@ -54,7 +54,8 @@ const ReceitasPage = () => {
 
   // Calcular estatísticas baseadas nas receitas exibidas (excluindo apenas pagamentos de despesas)
   const receitasExibidas = filteredReceitas.filter(r => 
-    r.descricao !== 'PAGAMENTO DE DESPESA'
+    r.descricao !== 'PAGAMENTO DE DESPESA' &&
+    ((r as any).destino === 'total' || !(r as any).destino) // Excluir receitas de conta/cofre
   );
   
   // Calcular totais apenas das receitas de vendas (para estatísticas)

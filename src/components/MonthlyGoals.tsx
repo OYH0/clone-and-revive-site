@@ -60,10 +60,15 @@ const MonthlyGoals: React.FC<MonthlyGoalsProps> = ({
   const calcularValorAtual = (categoriaReceita: string, mes: number, ano: number) => {
     const receitasDoMes = receitas.filter(r => {
       const receitaDate = new Date(r.data + 'T00:00:00');
-      return r.empresa === empresa && 
-             r.categoria === categoriaReceita &&
-             receitaDate.getMonth() + 1 === mes && 
-             receitaDate.getFullYear() === ano;
+      const isEmpresaMatch = r.empresa === empresa;
+      const isCategoriaMatch = r.categoria === categoriaReceita;
+      const isDateMatch = receitaDate.getMonth() + 1 === mes && receitaDate.getFullYear() === ano;
+      
+      // Excluir receitas com destino "conta" ou "cofre"
+      const destino = (r as any).destino;
+      const isDestinoProd = destino === 'total' || !destino;
+      
+      return isEmpresaMatch && isCategoriaMatch && isDateMatch && isDestinoProd;
     });
     
     return receitasDoMes.reduce((sum, r) => sum + r.valor, 0);
