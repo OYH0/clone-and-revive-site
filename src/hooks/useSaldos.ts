@@ -12,14 +12,18 @@ export const useSaldos = () => {
   return useQuery({
     queryKey: ['saldos'],
     queryFn: async () => {
+      console.log('=== FETCHING SALDOS ===');
       const { data, error } = await supabase
         .from('saldos')
         .select('*')
         .order('tipo');
       
       if (error) throw error;
+      console.log('Saldos fetched:', data);
       return data as Saldo[];
-    }
+    },
+    staleTime: 0, // Sem cache para garantir atualizações imediatas
+    gcTime: 0, // Remover cache para forçar refetch
   });
 };
 

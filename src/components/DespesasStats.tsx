@@ -136,9 +136,17 @@ const DespesasStats: React.FC<DespesasStatsProps> = ({
     console.log('Saldo final conta:', saldoConta, 'Saldo final cofre:', saldoCofre);
     
     return { saldoConta, saldoCofre };
-  }, [receitas, saldos, allTransactions, filterEmpresa, dateFrom, dateTo]);
+  }, [receitas, saldos, allTransactions, filterEmpresa, dateFrom, dateTo, saldosLoading, receitasLoading]);
   
   const isLoading = saldosLoading || receitasLoading;
+  
+  // Forçar recálculo sempre que os dados mudarem
+  React.useEffect(() => {
+    console.log('=== DEPS CHANGED - FORÇANDO RECÁLCULO ===');
+    console.log('Saldos loading:', saldosLoading, 'Receitas loading:', receitasLoading);
+    console.log('Número de receitas:', receitas?.length);
+    console.log('Número de transações:', allTransactions?.length);
+  }, [receitas, saldos, allTransactions, saldosLoading, receitasLoading]);
 
   return (
     <div className="mb-8 space-y-6">
