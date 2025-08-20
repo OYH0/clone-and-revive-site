@@ -43,14 +43,7 @@ const DespesasStats: React.FC<DespesasStatsProps> = ({
     // Verificações de segurança para evitar erros de renderização
     if (!receitas || !allTransactions) return { saldoConta: 0, saldoCofre: 0 };
     
-    // Se não há filtro de empresa específico, usar saldos globais
-    if (filterEmpresa === 'all') {
-      const saldoConta = saldos?.find(s => s.tipo === 'conta')?.valor || 0;
-      const saldoCofre = saldos?.find(s => s.tipo === 'cofre')?.valor || 0;
-      return { saldoConta, saldoCofre };
-    }
-    
-    console.log('=== CALCULANDO SALDOS FILTRADOS ===');
+    console.log('=== CALCULANDO SALDOS ===');
     console.log('Empresa:', filterEmpresa);
     console.log('Período:', dateFrom, 'até', dateTo);
     
@@ -83,7 +76,12 @@ const DespesasStats: React.FC<DespesasStatsProps> = ({
     // Filtrar receitas por empresa e período com verificação de segurança
     const filteredReceitas = receitas?.filter(receita => {
       try {
-        return receita && receita.empresa === filterEmpresa && receita.data && isInPeriod(receita.data);
+        if (!receita || !receita.data) return false;
+        
+        // Se filtro de empresa for 'all', incluir todas as empresas
+        const matchEmpresa = filterEmpresa === 'all' || receita.empresa === filterEmpresa;
+        
+        return matchEmpresa && isInPeriod(receita.data);
       } catch (error) {
         console.warn('Erro ao filtrar receita:', error, receita);
         return false;
@@ -93,12 +91,12 @@ const DespesasStats: React.FC<DespesasStatsProps> = ({
     // Filtrar despesas PAGAS por empresa e período com verificação de segurança
     const filteredDespesasPagas = allTransactions?.filter(despesa => {
       try {
-        return despesa && 
-               despesa.company === filterEmpresa && 
-               despesa.status === 'PAGO' && 
-               despesa.date && 
-               isInPeriod(despesa.date) &&
-               despesa.origem_pagamento;
+        if (!despesa || !despesa.date || despesa.status !== 'PAGO' || !despesa.origem_pagamento) return false;
+        
+        // Se filtro de empresa for 'all', incluir todas as empresas
+        const matchEmpresa = filterEmpresa === 'all' || despesa.company === filterEmpresa;
+        
+        return matchEmpresa && isInPeriod(despesa.date);
       } catch (error) {
         console.warn('Erro ao filtrar despesa:', error, despesa);
         return false;
