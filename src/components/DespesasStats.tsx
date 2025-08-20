@@ -112,8 +112,13 @@ const DespesasStats: React.FC<DespesasStatsProps> = ({
     // ✅ Subtrai despesas PAGAS por origem_pagamento
     filteredDespesasPagas.forEach(d => {
       const valor = Number(d.valor_total || d.valor || 0);
-      if (d.origem_pagamento === "cofre") totalCofre -= valor;
-      if (d.origem_pagamento === "conta") totalConta -= valor;
+      // Se origem_pagamento não está definida, assumir cofre (comportamento legacy)
+      const origem = d.origem_pagamento || "cofre";
+      
+      if (origem === "cofre") totalCofre -= valor;
+      if (origem === "conta") totalConta -= valor;
+      
+      console.log(`Despesa ${d.description}: R$ ${valor} debitada de ${origem}`);
     });
     
     console.log('Total cofre (receitas - despesas):', totalCofre);
