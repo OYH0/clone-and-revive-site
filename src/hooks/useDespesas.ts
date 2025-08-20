@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMemo } from 'react';
+import { ajustarSaldo, calcularDiferencaSaldo } from '@/utils/saldoUtils';
 
 export interface Despesa {
   id: number;
@@ -113,6 +114,12 @@ export const useCreateDespesa = () => {
         throw error;
       }
       
+      // Se a despesa foi paga na criação, ajustar o saldo
+      if (data.status === 'PAGO' && data.origem_pagamento) {
+        const valorTotal = (data.valor_total || data.valor || 0);
+        await ajustarSaldo(data.origem_pagamento as 'conta' | 'cofre', -valorTotal);
+      }
+      
       console.log('Despesa created successfully:', data);
       return data;
     },
@@ -142,10 +149,22 @@ export const useUpdateDespesa = () => {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async ({ id, ...despesa }: Partial<Despesa> & { id: number }) => {
+    mutationFn: async ({ id, originalData, ...despesa }: Partial<Despesa> & { id: number; originalData?: Despesa }) => {
       if (!user) throw new Error('Usuário não autenticado');
       
       console.log('Updating despesa:', id);
+
+      // Buscar dados originais se não fornecidos
+      if (!originalData) {
+        const { data: fetchedData, error: fetchError } = await supabase
+          .from('despesas')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (fetchError) throw fetchError;
+        originalData = fetchedData;
+      }
 
       const { data, error } = await supabase
         .from('despesas')
@@ -157,6 +176,33 @@ export const useUpdateDespesa = () => {
       if (error) {
         console.error('Error updating despesa:', error);
         throw error;
+      }
+
+      // Ajustar saldos conforme necessário
+      const originalPago = originalData.status === 'PAGO';
+      const novoPago = data.status === 'PAGO';
+      
+      if (originalPago && novoPago) {
+        // Ambos pagos: ajustar pela diferença de valor
+        const valorOriginal = originalData.valor_total || originalData.valor || 0;
+        const valorNovo = data.valor_total || data.valor || 0;
+        const diferenca = calcularDiferencaSaldo(valorOriginal, valorNovo);
+        
+        if (diferenca !== 0 && data.origem_pagamento) {
+          await ajustarSaldo(data.origem_pagamento as 'conta' | 'cofre', diferenca);
+        }
+      } else if (!originalPago && novoPago) {
+        // Mudou de não pago para pago: subtrair valor total
+        const valorTotal = data.valor_total || data.valor || 0;
+        if (data.origem_pagamento) {
+          await ajustarSaldo(data.origem_pagamento as 'conta' | 'cofre', -valorTotal);
+        }
+      } else if (originalPago && !novoPago) {
+        // Mudou de pago para não pago: somar valor original de volta
+        const valorOriginal = originalData.valor_total || originalData.valor || 0;
+        if (originalData.origem_pagamento) {
+          await ajustarSaldo(originalData.origem_pagamento as 'conta' | 'cofre', valorOriginal);
+        }
       }
       
       console.log('Despesa updated successfully:', data);
@@ -188,14 +234,21 @@ export const useDeleteDespesa = () => {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (despesa: Despesa) => {
       if (!user) throw new Error('Usuário não autenticado');
       
-      console.log('Deleting despesa:', id);
+      console.log('Deleting despesa:', despesa.id);
+      
+      // Se a despesa estava paga, reverter o valor no saldo
+      if (despesa.status === 'PAGO' && despesa.origem_pagamento) {
+        const valorTotal = despesa.valor_total || despesa.valor || 0;
+        await ajustarSaldo(despesa.origem_pagamento as 'conta' | 'cofre', valorTotal);
+      }
+      
       const { error } = await supabase
         .from('despesas')
         .delete()
-        .eq('id', id);
+        .eq('id', despesa.id);
 
       if (error) {
         console.error('Error deleting despesa:', error);

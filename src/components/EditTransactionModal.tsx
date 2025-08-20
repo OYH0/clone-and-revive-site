@@ -10,7 +10,7 @@ import { Transaction } from '@/types/transaction';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { useUpdateSaldo } from '@/hooks/useSaldos';
+import { useUpdateDespesa } from '@/hooks/useDespesas';
 
 interface EditTransactionModalProps {
   isOpen: boolean;
@@ -39,7 +39,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
-  const updateSaldo = useUpdateSaldo();
+  const updateDespesa = useUpdateDespesa();
 
   // Get categories based on selected company
   const getCategoriesForCompany = (empresa: string) => {
@@ -219,43 +219,14 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
         origem_pagamento: formData.origem_pagamento || null
       };
 
-      // Se era paga e agora tem valores diferentes, ajustar saldo
-      if (transaction.status === 'PAGO' && transaction.origem_pagamento) {
-        const valorOriginal = transaction.valor_total || transaction.valor;
-        const valorNovo = updateData.valor + (updateData.valor_juros || 0);
-        const diferenca = valorNovo - valorOriginal;
-        
-        console.log('Diferença de valor:', diferenca);
-        
-        if (diferenca !== 0) {
-          console.log('Ajustando saldo devido à mudança de valor');
-          updateSaldo.mutate({
-            tipo: transaction.origem_pagamento as 'conta' | 'cofre',
-            valor: -diferenca // Negativo para debitar a diferença
-          });
-        }
-      }
-
       console.log('Updating despesa with data:', updateData);
 
-      const { data: updatedDespesa, error } = await supabase
-        .from('despesas')
-        .update(updateData)
-        .eq('id', transaction.id)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error updating despesa:', error);
-        toast({
-          title: "Erro",
-          description: "Erro ao atualizar transação. Tente novamente.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      console.log('Despesa updated successfully:', updatedDespesa);
+      // Usar o hook de atualização que já gerencia o saldo
+      await updateDespesa.mutateAsync({
+        id: transaction.id,
+        originalData: transaction,
+        ...updateData
+      });
 
       // If categoria changed to RETIRADAS with subcategoria Implementação and it wasn't before
       const wasImplementacao = transaction.category === 'RETIRADAS' && transaction.subcategoria === 'IMPLEMENTACAO';

@@ -15,7 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminAccess } from '@/hooks/useAdminAccess';
-import { useUpdateSaldo } from '@/hooks/useSaldos';
+import { useUpdateDespesa } from '@/hooks/useDespesas';
 
 interface TransactionTableProps {
   transactions: Transaction[];
@@ -35,7 +35,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
   const { toast } = useToast();
   const { user } = useAuth();
   const { isAdmin } = useAdminAccess();
-  const updateSaldo = useUpdateSaldo();
+  const updateDespesa = useUpdateDespesa();
 
   // Função para formatar data corretamente
   const formatDate = (dateString: string) => {
@@ -102,28 +102,31 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
         origem_pagamento: paymentSource // Save the payment source
       };
 
-      // Atualizar a despesa como paga
-      const { error, data } = await supabase
-        .from('despesas')
-        .update(updateData)
-        .eq('id', transaction.id)
-        .select();
+      // Usar o hook de atualização que já gerencia o saldo automaticamente
+      const originalData = {
+        id: transaction.id,
+        data: transaction.date,
+        valor: transaction.valor,
+        empresa: transaction.company,
+        descricao: transaction.description,
+        categoria: transaction.category,
+        subcategoria: transaction.subcategoria,
+        data_vencimento: transaction.data_vencimento,
+        comprovante: transaction.comprovante,
+        status: transaction.status,
+        user_id: transaction.user_id,
+        valor_juros: transaction.valor_juros,
+        valor_total: transaction.valor_total,
+        origem_pagamento: transaction.origem_pagamento
+      };
 
-      if (error) {
-        console.error('Error updating despesa:', error);
-        throw error;
-      }
-
-      // Subtrair o valor do saldo correspondente
-      const valorPago = transaction.valor_total || transaction.valor;
-      
-      // Update balance using the new saldos system
-      updateSaldo.mutate({
-        tipo: paymentSource,
-        valor: -valorPago // Negative to subtract from balance
+      await updateDespesa.mutateAsync({
+        id: transaction.id,
+        originalData,
+        ...updateData
       });
 
-      console.log('Transaction updated successfully:', data);
+      console.log('Transaction updated successfully');
 
       const formattedDate = new Date(today).toLocaleDateString('pt-BR');
       const sourceText = paymentSource === 'cofre' ? 'cofre' : 'conta';
