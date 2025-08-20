@@ -15,6 +15,7 @@ import { useCamerinoAuth } from '@/hooks/useCamerinoAuth';
 import { filterReceitasCurrentMonth } from '@/utils/currentMonthFilter';
 
 const ReceitasPage = () => {
+  // Force recompilation to clear cached references
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
