@@ -34,7 +34,7 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
     descricao: '',
     empresa: '',
     categoria: 'VENDAS',
-    saldo_destino: 'conta' as 'conta' | 'cofre'
+    destino: 'total' as 'conta' | 'cofre' | 'total'
   });
 
   const createReceita = useCreateReceita();
@@ -56,16 +56,19 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
       data_recebimento: formData.data_recebimento || undefined,
       descricao: formData.descricao,
       empresa: formData.empresa,
-      categoria: formData.categoria
+      categoria: formData.categoria,
+      destino: formData.destino
     };
 
     createReceita.mutate(receitaData, {
       onSuccess: () => {
-        // Update saldo after successful receita creation
-        updateSaldo.mutate({
-          tipo: formData.saldo_destino,
-          valor: parseFloat(formData.valor)
-        });
+        // Update saldo only if destino is conta or cofre
+        if (formData.destino === 'conta' || formData.destino === 'cofre') {
+          updateSaldo.mutate({
+            tipo: formData.destino,
+            valor: parseFloat(formData.valor)
+          });
+        }
         
         setFormData({
           data: '',
@@ -74,7 +77,7 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
           descricao: '',
           empresa: defaultEmpresa || '',
           categoria: 'VENDAS',
-          saldo_destino: 'conta'
+          destino: 'total'
         });
         onClose();
       }
@@ -172,14 +175,15 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="saldo_destino" className="text-sm font-medium">Destino do Valor *</Label>
-                <Select onValueChange={(value: 'conta' | 'cofre') => setFormData({ ...formData, saldo_destino: value })} value={formData.saldo_destino}>
+                <Label htmlFor="destino" className="text-sm font-medium">Destino do Valor *</Label>
+                <Select onValueChange={(value: 'conta' | 'cofre' | 'total') => setFormData({ ...formData, destino: value })} value={formData.destino}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Selecione o destino" />
                   </SelectTrigger>
                   <SelectContent className="bg-background border shadow-lg z-50">
                     <SelectItem value="conta">Conta Bancária</SelectItem>
                     <SelectItem value="cofre">Cofre</SelectItem>
+                    <SelectItem value="total">Receita Total (Empresas)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
