@@ -22,8 +22,7 @@ const EditReceitaModal: React.FC<EditReceitaModalProps> = ({ isOpen, onClose, re
     empresa: '',
     categoria: '',
     valor: '',
-    data_recebimento: '',
-    destino: 'total' as 'conta' | 'cofre' | 'total'
+    data_recebimento: ''
   });
 
   const { toast } = useToast();
@@ -37,8 +36,7 @@ const EditReceitaModal: React.FC<EditReceitaModalProps> = ({ isOpen, onClose, re
         empresa: receita.empresa || '',
         categoria: receita.categoria || '',
         valor: receita.valor?.toString() || '',
-        data_recebimento: receita.data_recebimento || '',
-        destino: (receita as any).destino || 'total'
+        data_recebimento: receita.data_recebimento || ''
       });
     }
   }, [receita]);
@@ -66,8 +64,7 @@ const EditReceitaModal: React.FC<EditReceitaModalProps> = ({ isOpen, onClose, re
         empresa: formData.empresa,
         categoria: formData.categoria,
         valor: valor,
-        data_recebimento: formData.data_recebimento || null,
-        destino: formData.destino
+        data_recebimento: formData.data_recebimento || null
       });
 
       onClose();
@@ -170,32 +167,16 @@ const EditReceitaModal: React.FC<EditReceitaModalProps> = ({ isOpen, onClose, re
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="destino" className="text-sm font-medium">Destino do Valor *</Label>
-                <Select value={formData.destino} onValueChange={(value: 'conta' | 'cofre' | 'total') => handleChange('destino', value)}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecione o destino" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border shadow-lg z-50">
-                    <SelectItem value="conta">Conta Bancária</SelectItem>
-                    <SelectItem value="cofre">Cofre</SelectItem>
-                    <SelectItem value="total">Receita Total (Empresas)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="data_recebimento" className="text-sm font-medium">Data de Recebimento</Label>
-                <Input
-                  id="data_recebimento"
-                  type="date"
-                  value={formData.data_recebimento}
-                  onChange={(e) => handleChange('data_recebimento', e.target.value)}
-                  className="w-full"
-                  placeholder="Opcional"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="data_recebimento" className="text-sm font-medium">Data de Recebimento</Label>
+              <Input
+                id="data_recebimento"
+                type="date"
+                value={formData.data_recebimento}
+                onChange={(e) => handleChange('data_recebimento', e.target.value)}
+                className="w-full"
+                placeholder="Opcional"
+              />
             </div>
           </div>
 
