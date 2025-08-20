@@ -29,27 +29,39 @@ export const useUpdateSaldo = () => {
 
   return useMutation({
     mutationFn: async ({ tipo, valor }: { tipo: 'conta' | 'cofre'; valor: number }) => {
-      // Get current saldo
+      // Get current saldo or create if doesn't exist
       const { data: currentSaldo, error: fetchError } = await supabase
         .from('saldos')
         .select('*')
         .eq('tipo', tipo)
-        .single();
+        .maybeSingle();
 
       if (fetchError) throw fetchError;
 
-      // Update with new value
-      const newValor = (currentSaldo.valor || 0) + valor;
+      const newValor = (currentSaldo?.valor || 0) + valor;
       
-      const { data, error } = await supabase
-        .from('saldos')
-        .update({ valor: newValor })
-        .eq('tipo', tipo)
-        .select()
-        .single();
+      if (currentSaldo) {
+        // Update existing record
+        const { data, error } = await supabase
+          .from('saldos')
+          .update({ valor: newValor })
+          .eq('tipo', tipo)
+          .select()
+          .single();
 
-      if (error) throw error;
-      return data;
+        if (error) throw error;
+        return data;
+      } else {
+        // Create new record
+        const { data, error } = await supabase
+          .from('saldos')
+          .insert({ tipo, valor: newValor })
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['saldos'] });
