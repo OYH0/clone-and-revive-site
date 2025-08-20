@@ -189,13 +189,27 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 
       // Se foi marcado como pago na criação e tem origem de pagamento, subtrair do saldo correspondente
       if (formData.data && formData.origem_pagamento) {
+        console.log('=== DESPESA PAGA - DEBITANDO SALDO ===');
+        console.log('Data de pagamento:', formData.data);
+        console.log('Origem do pagamento:', formData.origem_pagamento);
+        console.log('Valor:', formData.valor);
+        console.log('Valor juros:', formData.valor_juros);
+        
         const valorTotal = parseFloat(formData.valor) + (formData.valor_juros ? parseFloat(formData.valor_juros) : 0);
+        console.log('Valor total a ser debitado:', valorTotal);
         
         // Update balance using the new saldos system
         updateSaldo.mutate({
           tipo: formData.origem_pagamento,
           valor: -valorTotal // Negative to subtract from balance
         });
+        
+        console.log('Comando de débito enviado para saldo');
+      } else {
+        console.log('=== SALDO NÃO DEBITADO ===');
+        console.log('Data de pagamento:', formData.data);
+        console.log('Origem do pagamento:', formData.origem_pagamento);
+        console.log('Condições para débito: data preenchida E origem selecionada');
       }
 
       console.log('Inserting despesa with data:', insertData);
