@@ -12,6 +12,7 @@ export interface Receita {
   descricao: string;
   empresa: string;
   categoria: string;
+  destino?: string;
   user_id: string;
   created_at?: string;
   updated_at?: string;
@@ -48,21 +49,21 @@ export const useReceitas = () => {
 
     const receitas = query.data;
     
-    // Separar receitas por categoria
-    const receitasNormais = receitas.filter(r => r.categoria !== 'EM_COFRE' && r.categoria !== 'EM_CONTA');
-    const receitasCofre = receitas.filter(r => r.categoria === 'EM_COFRE');
-    const receitasConta = receitas.filter(r => r.categoria === 'EM_CONTA');
+    // Filtrar receitas por destino
+    const receitasTotal = receitas.filter(r => r.destino === 'total' || !r.destino); // incluir receitas sem destino (default)
+    const receitasCofre = receitas.filter(r => r.destino === 'cofre');
+    const receitasConta = receitas.filter(r => r.destino === 'conta');
     
-    // Calcular totais das receitas normais (excluindo cofre e conta)
-    const totalReceitas = receitasNormais.reduce((sum, r) => sum + (r.valor || 0), 0);
-    const totalRecebidas = receitasNormais
+    // Calcular totais das receitas totais (somente para relatórios)
+    const totalReceitas = receitasTotal.reduce((sum, r) => sum + (r.valor || 0), 0);
+    const totalRecebidas = receitasTotal
       .filter(r => r.data_recebimento)
       .reduce((sum, r) => sum + (r.valor || 0), 0);
-    const totalPendentes = receitasNormais
+    const totalPendentes = receitasTotal
       .filter(r => !r.data_recebimento)
       .reduce((sum, r) => sum + (r.valor || 0), 0);
     
-    // Calcular totais de cofre e conta
+    // Calcular totais de cofre e conta (não entram no total de receitas)
     const totalCofre = receitasCofre.reduce((sum, r) => sum + (r.valor || 0), 0);
     const totalConta = receitasConta.reduce((sum, r) => sum + (r.valor || 0), 0);
 
@@ -74,9 +75,9 @@ export const useReceitas = () => {
         pendentes: totalPendentes,
         totalCofre,
         totalConta,
-        count: receitasNormais.length,
-        recebidasCount: receitasNormais.filter(r => r.data_recebimento).length,
-        pendentesCount: receitasNormais.filter(r => !r.data_recebimento).length,
+        count: receitasTotal.length,
+        recebidasCount: receitasTotal.filter(r => r.data_recebimento).length,
+        pendentesCount: receitasTotal.filter(r => !r.data_recebimento).length,
       }
     };
   }, [query.data]);

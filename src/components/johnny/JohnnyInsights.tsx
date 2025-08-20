@@ -37,10 +37,16 @@ const JohnnyInsights: React.FC<JohnnyInsightsProps> = ({
   
   const johnnyReceitasCompleto = todasReceitas?.filter(r => {
     const empresa = r.empresa?.toLowerCase().trim() || '';
-    return empresa === 'johnny' || 
+    const isJohnny = empresa === 'johnny' || 
            empresa === 'johnny rockets' || 
            empresa === 'johnny rocket' ||
            empresa.includes('johnny');
+    
+    // Excluir receitas com destino "conta" ou "cofre"
+    const destino = (r as any).destino;
+    const isDestinoProd = destino === 'total' || !destino;
+    
+    return isJohnny && isDestinoProd;
   }) || [];
 
   // Para os indicadores (ROI e Break Even), usar dados acumulados totais

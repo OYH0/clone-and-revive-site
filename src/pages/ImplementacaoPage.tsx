@@ -25,7 +25,13 @@ const ImplementacaoPage = () => {
   const implementacaoReceitas = useMemo(() => {
     return allReceitas?.filter(receita => {
       const empresa = receita.empresa?.toLowerCase().trim() || '';
-      return empresa === 'implementação' || empresa === 'implementacao';
+      const isImplementacao = empresa === 'implementação' || empresa === 'implementacao';
+      
+      // Excluir receitas com destino "conta" ou "cofre"
+      const destino = (receita as any).destino;
+      const isDestinoProd = destino === 'total' || !destino;
+      
+      return isImplementacao && isDestinoProd;
     }) || [];
   }, [allReceitas]);
 
