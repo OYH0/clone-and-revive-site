@@ -33,7 +33,8 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
     data_recebimento: '',
     descricao: '',
     empresa: '',
-    categoria: 'VENDAS'
+    categoria: 'VENDAS',
+    saldo_destino: 'conta' as 'conta' | 'cofre'
   });
 
   const createReceita = useCreateReceita();
@@ -62,7 +63,7 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
       onSuccess: () => {
         // Update saldo after successful receita creation
         updateSaldo.mutate({
-          tipo: 'conta',
+          tipo: formData.saldo_destino,
           valor: parseFloat(formData.valor)
         });
         
@@ -72,7 +73,8 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
           data_recebimento: '',
           descricao: '',
           empresa: defaultEmpresa || '',
-          categoria: 'VENDAS'
+          categoria: 'VENDAS',
+          saldo_destino: 'conta'
         });
         onClose();
       }
@@ -133,18 +135,34 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="categoria">Categoria</Label>
-            <Select onValueChange={(value) => setFormData({ ...formData, categoria: value })} value={formData.categoria}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione a categoria" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="VENDAS">Vendas</SelectItem>
-                <SelectItem value="VENDAS_DIARIAS">Vendas Diárias</SelectItem>
-                <SelectItem value="OUTROS">Outros</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="categoria">Categoria</Label>
+              <Select onValueChange={(value) => setFormData({ ...formData, categoria: value })} value={formData.categoria}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="VENDAS">Vendas</SelectItem>
+                  <SelectItem value="VENDAS_DIARIAS">Vendas Diárias</SelectItem>
+                  <SelectItem value="OUTROS">Outros</SelectItem>
+                  <SelectItem value="EM_COFRE">Em Cofre</SelectItem>
+                  <SelectItem value="EM_CONTA">Em Conta</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="saldo_destino">Destino do Valor</Label>
+              <Select onValueChange={(value: 'conta' | 'cofre') => setFormData({ ...formData, saldo_destino: value })} value={formData.saldo_destino}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o destino" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="conta">Conta</SelectItem>
+                  <SelectItem value="cofre">Cofre</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div>
