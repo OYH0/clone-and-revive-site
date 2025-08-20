@@ -106,30 +106,29 @@ const DespesasStats: React.FC<DespesasStatsProps> = ({
     console.log('Receitas filtradas:', filteredReceitas.length);
     console.log('Despesas pagas filtradas:', filteredDespesasPagas.length);
     
-    // Calcular entradas por destino (receitas)
-    const receitasConta = filteredReceitas
-      .filter(r => r && r.destino === 'conta')
-      .reduce((sum, r) => sum + (r.valor || 0), 0);
-      
-    const receitasCofre = filteredReceitas
-      .filter(r => r && r.destino === 'cofre')
-      .reduce((sum, r) => sum + (r.valor || 0), 0);
+    // Inicializar totais
+    let totalCofre = 0;
+    let totalConta = 0;
+
+    // SOMAR receitas por destino
+    filteredReceitas.forEach(r => {
+      if (r.destino === "cofre") totalCofre += Number(r.valor || 0);
+      if (r.destino === "conta") totalConta += Number(r.valor || 0);
+    });
+
+    // SUBTRAIR despesas PAGAS por origem_pagamento
+    filteredDespesasPagas.forEach(d => {
+      const valor = Number(d.valor_total || d.valor || 0);
+      if (d.origem_pagamento === "cofre") totalCofre -= valor;
+      if (d.origem_pagamento === "conta") totalConta -= valor;
+    });
     
-    // Calcular saídas por origem (despesas pagas)
-    const despesasConta = filteredDespesasPagas
-      .filter(d => d && d.origem_pagamento === 'conta')
-      .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
-      
-    const despesasCofre = filteredDespesasPagas
-      .filter(d => d && d.origem_pagamento === 'cofre')
-      .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
+    console.log('Total cofre (receitas - despesas):', totalCofre);
+    console.log('Total conta (receitas - despesas):', totalConta);
     
-    console.log('Receitas conta:', receitasConta, 'Despesas conta:', despesasConta);
-    console.log('Receitas cofre:', receitasCofre, 'Despesas cofre:', despesasCofre);
-    
-    // Saldo = Receitas - Despesas
-    const saldoConta = receitasConta - despesasConta;
-    const saldoCofre = receitasCofre - despesasCofre;
+    // Retornar os saldos calculados
+    const saldoConta = totalConta;
+    const saldoCofre = totalCofre;
     
     console.log('Saldo final conta:', saldoConta, 'Saldo final cofre:', saldoCofre);
     
