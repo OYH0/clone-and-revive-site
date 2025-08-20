@@ -38,12 +38,12 @@ const DespesasStats: React.FC<DespesasStatsProps> = ({
   const { data: saldos, isLoading: saldosLoading } = useSaldos();
   const { data: receitas, isLoading: receitasLoading } = useReceitas();
   
-  // Memoizar o cálculo dos saldos para evitar recálculos desnecessários e erros de renderização
-  const { saldoConta, saldoCofre } = useMemo(() => {
-    // Verificações de segurança para evitar erros de renderização
+  // Função para calcular totais seguindo a lógica fornecida pelo usuário
+  const calcularTotais = useMemo(() => {
+    // Verificações de segurança
     if (!receitas || !allTransactions) return { saldoConta: 0, saldoCofre: 0 };
     
-    console.log('=== CALCULANDO SALDOS ===');
+    console.log('=== CALCULANDO SALDOS (Nova Lógica) ===');
     console.log('Empresa:', filterEmpresa);
     console.log('Período:', dateFrom, 'até', dateTo);
     
@@ -73,14 +73,11 @@ const DespesasStats: React.FC<DespesasStatsProps> = ({
       }
     };
     
-    // Filtrar receitas por empresa e período com verificação de segurança
+    // Filtrar receitas
     const filteredReceitas = receitas?.filter(receita => {
       try {
         if (!receita || !receita.data) return false;
-        
-        // Se filtro de empresa for 'all', incluir todas as empresas
         const matchEmpresa = filterEmpresa === 'all' || receita.empresa === filterEmpresa;
-        
         return matchEmpresa && isInPeriod(receita.data);
       } catch (error) {
         console.warn('Erro ao filtrar receita:', error, receita);
@@ -88,14 +85,11 @@ const DespesasStats: React.FC<DespesasStatsProps> = ({
       }
     }) || [];
     
-    // Filtrar despesas PAGAS por empresa e período com verificação de segurança
+    // Filtrar despesas PAGAS
     const filteredDespesasPagas = allTransactions?.filter(despesa => {
       try {
-        if (!despesa || !despesa.date || despesa.status !== 'PAGO' || !despesa.origem_pagamento) return false;
-        
-        // Se filtro de empresa for 'all', incluir todas as empresas
+        if (!despesa || !despesa.date || despesa.status !== 'PAGO') return false;
         const matchEmpresa = filterEmpresa === 'all' || despesa.company === filterEmpresa;
-        
         return matchEmpresa && isInPeriod(despesa.date);
       } catch (error) {
         console.warn('Erro ao filtrar despesa:', error, despesa);
@@ -106,17 +100,16 @@ const DespesasStats: React.FC<DespesasStatsProps> = ({
     console.log('Receitas filtradas:', filteredReceitas.length);
     console.log('Despesas pagas filtradas:', filteredDespesasPagas.length);
     
-    // Inicializar totais
     let totalCofre = 0;
     let totalConta = 0;
 
-    // SOMAR receitas por destino
+    // ✅ Adiciona receitas por destino
     filteredReceitas.forEach(r => {
       if (r.destino === "cofre") totalCofre += Number(r.valor || 0);
       if (r.destino === "conta") totalConta += Number(r.valor || 0);
     });
 
-    // SUBTRAIR despesas PAGAS por origem_pagamento
+    // ✅ Subtrai despesas PAGAS por origem_pagamento
     filteredDespesasPagas.forEach(d => {
       const valor = Number(d.valor_total || d.valor || 0);
       if (d.origem_pagamento === "cofre") totalCofre -= valor;
@@ -126,14 +119,10 @@ const DespesasStats: React.FC<DespesasStatsProps> = ({
     console.log('Total cofre (receitas - despesas):', totalCofre);
     console.log('Total conta (receitas - despesas):', totalConta);
     
-    // Retornar os saldos calculados
-    const saldoConta = totalConta;
-    const saldoCofre = totalCofre;
-    
-    console.log('Saldo final conta:', saldoConta, 'Saldo final cofre:', saldoCofre);
-    
-    return { saldoConta, saldoCofre };
-  }, [receitas, saldos, allTransactions, filterEmpresa, dateFrom, dateTo, saldosLoading, receitasLoading]);
+    return { saldoConta: totalConta, saldoCofre: totalCofre };
+  }, [receitas, allTransactions, filterEmpresa, dateFrom, dateTo]);
+
+  const { saldoConta, saldoCofre } = calcularTotais;
   
   const isLoading = saldosLoading || receitasLoading;
   
