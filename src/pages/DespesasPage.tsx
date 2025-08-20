@@ -209,6 +209,7 @@ const DespesasPage = () => {
             filterEmpresa={filterEmpresa}
             dateFrom={dateFrom}
             dateTo={dateTo}
+            allTransactions={allTransactions}
           />
 
           {/* Main Content Card */}

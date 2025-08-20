@@ -2,6 +2,7 @@ import React from 'react';
 import { DollarSign, CheckCircle, Clock, AlertTriangle, Wallet, Vault, Percent } from 'lucide-react';
 import { useSaldos } from '@/hooks/useSaldos';
 import { useReceitas } from '@/hooks/useReceitas';
+import { Transaction } from '@/types/transaction';
 
 interface DespesasStatsProps {
   totalDespesas: number;
@@ -16,6 +17,7 @@ interface DespesasStatsProps {
   filterEmpresa: string;
   dateFrom?: string;
   dateTo?: string;
+  allTransactions: Transaction[];
 }
 
 const DespesasStats: React.FC<DespesasStatsProps> = ({
@@ -30,7 +32,8 @@ const DespesasStats: React.FC<DespesasStatsProps> = ({
   filteredTransactionsCount,
   filterEmpresa,
   dateFrom,
-  dateTo
+  dateTo,
+  allTransactions // Adicionar as transações para calcular débitos
 }) => {
   const { data: saldos, isLoading: saldosLoading } = useSaldos();
   const { data: receitas, isLoading: receitasLoading } = useReceitas();
@@ -46,39 +49,74 @@ const DespesasStats: React.FC<DespesasStatsProps> = ({
       return { saldoConta, saldoCofre };
     }
     
-    // Filtrar receitas por empresa e período
-    let filteredReceitas = receitas.filter(receita => {
-      const matchesEmpresa = receita.empresa === filterEmpresa;
-      
-      // Aplicar filtro de data se fornecido
+    console.log('=== CALCULANDO SALDOS FILTRADOS ===');
+    console.log('Empresa:', filterEmpresa);
+    console.log('Período:', dateFrom, 'até', dateTo);
+    
+    // Função para verificar se a data está no período
+    const isInPeriod = (date: string) => {
       if (dateFrom || dateTo) {
-        const receitaDate = new Date(receita.data);
+        const itemDate = new Date(date);
         const fromDate = dateFrom ? new Date(dateFrom) : null;
         const toDate = dateTo ? new Date(dateTo) : null;
         
-        if (fromDate && receitaDate < fromDate) return false;
-        if (toDate && receitaDate > toDate) return false;
+        if (fromDate && itemDate < fromDate) return false;
+        if (toDate && itemDate > toDate) return false;
+        return true;
       } else {
         // Se não há filtro manual, usar mês atual
         const now = new Date();
         const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
         const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-        const receitaDate = new Date(receita.data);
+        const itemDate = new Date(date);
         
-        if (receitaDate < firstDay || receitaDate > lastDay) return false;
+        return itemDate >= firstDay && itemDate <= lastDay;
       }
-      
-      return matchesEmpresa;
+    };
+    
+    // Filtrar receitas por empresa e período
+    const filteredReceitas = receitas.filter(receita => {
+      return receita.empresa === filterEmpresa && isInPeriod(receita.data);
     });
     
-    // Calcular saldos por destino
-    const saldoConta = filteredReceitas
+    // Filtrar despesas PAGAS por empresa e período
+    const filteredDespesasPagas = allTransactions.filter(despesa => {
+      return despesa.company === filterEmpresa && 
+             despesa.status === 'PAGO' && 
+             despesa.date && 
+             isInPeriod(despesa.date) &&
+             despesa.origem_pagamento;
+    });
+    
+    console.log('Receitas filtradas:', filteredReceitas.length);
+    console.log('Despesas pagas filtradas:', filteredDespesasPagas.length);
+    
+    // Calcular entradas por destino (receitas)
+    const receitasConta = filteredReceitas
       .filter(r => r.destino === 'conta')
       .reduce((sum, r) => sum + (r.valor || 0), 0);
       
-    const saldoCofre = filteredReceitas
+    const receitasCofre = filteredReceitas
       .filter(r => r.destino === 'cofre')
       .reduce((sum, r) => sum + (r.valor || 0), 0);
+    
+    // Calcular saídas por origem (despesas pagas)
+    const despesasConta = filteredDespesasPagas
+      .filter(d => d.origem_pagamento === 'conta')
+      .reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
+      
+    const despesasCofre = filteredDespesasPagas
+      .filter(d => d.origem_pagamento === 'cofre')
+      .reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
+    
+    console.log('Receitas conta:', receitasConta, 'Despesas conta:', despesasConta);
+    console.log('Receitas cofre:', receitasCofre, 'Despesas cofre:', despesasCofre);
+    
+    // Saldo = Receitas - Despesas
+    const saldoConta = receitasConta - despesasConta;
+    const saldoCofre = receitasCofre - despesasCofre;
+    
+    console.log('Saldo final conta:', saldoConta, 'Saldo final cofre:', saldoCofre);
     
     return { saldoConta, saldoCofre };
   };
