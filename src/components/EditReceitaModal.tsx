@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Receita, useUpdateReceita } from '@/hooks/useReceitas';
+import { useUpdateSaldo } from '@/hooks/useSaldos';
 
 interface EditReceitaModalProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ const EditReceitaModal: React.FC<EditReceitaModalProps> = ({ isOpen, onClose, re
 
   const { toast } = useToast();
   const updateReceita = useUpdateReceita();
+  const updateSaldo = useUpdateSaldo();
 
   useEffect(() => {
     if (receita) {
@@ -59,6 +61,11 @@ const EditReceitaModal: React.FC<EditReceitaModalProps> = ({ isOpen, onClose, re
         return;
       }
 
+      const oldDestino = (receita as any).destino || 'total';
+      const oldValor = receita.valor;
+      const newDestino = formData.destino;
+      const newValor = valor;
+
       await updateReceita.mutateAsync({
         id: receita.id,
         data: formData.data,
@@ -69,6 +76,25 @@ const EditReceitaModal: React.FC<EditReceitaModalProps> = ({ isOpen, onClose, re
         data_recebimento: formData.data_recebimento || null,
         destino: formData.destino
       });
+
+      // Handle saldo updates if destino or valor changed and involves conta/cofre
+      if (oldDestino !== newDestino || (oldDestino === newDestino && oldValor !== newValor)) {
+        // Revert old value if it was in conta or cofre
+        if (oldDestino === 'conta' || oldDestino === 'cofre') {
+          await updateSaldo.mutateAsync({
+            tipo: oldDestino,
+            valor: -oldValor // Subtract old value
+          });
+        }
+        
+        // Add new value if it's going to conta or cofre
+        if (newDestino === 'conta' || newDestino === 'cofre') {
+          await updateSaldo.mutateAsync({
+            tipo: newDestino,
+            valor: newValor // Add new value
+          });
+        }
+      }
 
       onClose();
     } catch (error) {
@@ -205,9 +231,9 @@ const EditReceitaModal: React.FC<EditReceitaModalProps> = ({ isOpen, onClose, re
             </Button>
             <Button 
               type="submit" 
-              disabled={updateReceita.isPending}
+              disabled={updateReceita.isPending || updateSaldo.isPending}
             >
-              {updateReceita.isPending ? 'Salvando...' : 'Salvar Alterações'}
+              {(updateReceita.isPending || updateSaldo.isPending) ? 'Salvando...' : 'Salvar Alterações'}
             </Button>
           </div>
         </form>
