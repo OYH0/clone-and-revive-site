@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Transaction } from '@/types/transaction';
 import EditTransactionModal from './EditTransactionModal';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
@@ -229,7 +229,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
     setSortConfig({ key, direction });
   };
 
-  const sortedTransactions = React.useMemo(() => {
+  const sortedTransactions = useMemo(() => {
     if (!sortConfig.key) return transactions;
 
     return [...transactions].sort((a, b) => {
