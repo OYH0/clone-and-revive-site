@@ -85,10 +85,15 @@ const DespesasStats: React.FC<DespesasStatsProps> = ({
       }
     }) || [];
     
-    // Filtrar despesas PAGAS
+    // Filtrar despesas PAGAS (apenas a partir de hoje)
+    const hoje = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
     const filteredDespesasPagas = allTransactions?.filter(despesa => {
       try {
         if (!despesa || !despesa.date || despesa.status !== 'PAGO') return false;
+        
+        // Desconsiderar despesas pagas antes de hoje
+        if (despesa.date < hoje) return false;
+        
         const matchEmpresa = filterEmpresa === 'all' || despesa.company === filterEmpresa;
         return matchEmpresa && isInPeriod(despesa.date);
       } catch (error) {
