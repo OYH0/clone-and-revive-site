@@ -184,6 +184,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         data_vencimento: formData.data_vencimento,
         valor_juros: formData.valor_juros ? parseFloat(formData.valor_juros) : 0,
         status: formData.data ? 'PAGO' : null,
+        origem_pagamento: formData.data && formData.origem_pagamento ? formData.origem_pagamento : null,
         user_id: user.id
       };
 
