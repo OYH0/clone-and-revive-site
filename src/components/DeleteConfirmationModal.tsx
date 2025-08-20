@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useDeleteDespesa } from '@/hooks/useDespesas';
 import { useDeleteReceita } from '@/hooks/useReceitas';
+import { useUpdateSaldo } from '@/hooks/useSaldos';
 import { Transaction } from '@/types/transaction';
 import { truncateDescription } from '@/utils/transactionUtils';
 
@@ -32,11 +33,33 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
 }) => {
   const deleteDespesa = useDeleteDespesa();
   const deleteReceita = useDeleteReceita();
+  const updateSaldo = useUpdateSaldo();
 
   const handleDelete = async () => {
     if (!transaction) return;
 
     try {
+      console.log('=== EXCLUINDO TRANSAÇÃO ===');
+      console.log('Tipo:', type);
+      console.log('Status:', transaction.status);
+      console.log('Origem pagamento:', transaction.origem_pagamento);
+      console.log('Valor total:', transaction.valor_total || transaction.valor);
+
+      // Se for uma despesa PAGA com origem de pagamento, reverter o saldo
+      if (type === 'despesa' && transaction.status === 'PAGO' && transaction.origem_pagamento) {
+        const valorReverter = transaction.valor_total || transaction.valor;
+        console.log('Revertendo saldo - Adicionando', valorReverter, 'ao', transaction.origem_pagamento);
+        
+        // Adicionar de volta o valor ao saldo (valor positivo para adicionar)
+        updateSaldo.mutate({
+          tipo: transaction.origem_pagamento as 'conta' | 'cofre',
+          valor: valorReverter
+        });
+      }
+
+      // Para receitas, a lógica será implementada quando necessário
+      // O tipo Transaction atualmente é focado em despesas
+
       if (type === 'despesa') {
         await deleteDespesa.mutateAsync(transaction.id);
       } else {
