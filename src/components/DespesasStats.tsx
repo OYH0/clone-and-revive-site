@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { DollarSign, CheckCircle, Clock, AlertTriangle, Wallet, Vault, Percent } from 'lucide-react';
 import { useSaldos } from '@/hooks/useSaldos';
 import { useReceitas } from '@/hooks/useReceitas';
@@ -38,9 +38,10 @@ const DespesasStats: React.FC<DespesasStatsProps> = ({
   const { data: saldos, isLoading: saldosLoading } = useSaldos();
   const { data: receitas, isLoading: receitasLoading } = useReceitas();
   
-  // Calcular saldos filtrados por empresa e período
-  const calculateFilteredSaldos = () => {
-    if (!receitas) return { saldoConta: 0, saldoCofre: 0 };
+  // Memoizar o cálculo dos saldos para evitar recálculos desnecessários e erros de renderização
+  const { saldoConta, saldoCofre } = useMemo(() => {
+    // Verificações de segurança para evitar erros de renderização
+    if (!receitas || !allTransactions) return { saldoConta: 0, saldoCofre: 0 };
     
     // Se não há filtro de empresa específico, usar saldos globais
     if (filterEmpresa === 'all') {
@@ -55,59 +56,75 @@ const DespesasStats: React.FC<DespesasStatsProps> = ({
     
     // Função para verificar se a data está no período
     const isInPeriod = (date: string) => {
-      if (dateFrom || dateTo) {
-        const itemDate = new Date(date);
-        const fromDate = dateFrom ? new Date(dateFrom) : null;
-        const toDate = dateTo ? new Date(dateTo) : null;
-        
-        if (fromDate && itemDate < fromDate) return false;
-        if (toDate && itemDate > toDate) return false;
-        return true;
-      } else {
-        // Se não há filtro manual, usar mês atual
-        const now = new Date();
-        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-        const itemDate = new Date(date);
-        
-        return itemDate >= firstDay && itemDate <= lastDay;
+      try {
+        if (dateFrom || dateTo) {
+          const itemDate = new Date(date);
+          const fromDate = dateFrom ? new Date(dateFrom) : null;
+          const toDate = dateTo ? new Date(dateTo) : null;
+          
+          if (fromDate && itemDate < fromDate) return false;
+          if (toDate && itemDate > toDate) return false;
+          return true;
+        } else {
+          // Se não há filtro manual, usar mês atual
+          const now = new Date();
+          const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+          const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+          const itemDate = new Date(date);
+          
+          return itemDate >= firstDay && itemDate <= lastDay;
+        }
+      } catch (error) {
+        console.warn('Erro ao verificar período:', error);
+        return false;
       }
     };
     
-    // Filtrar receitas por empresa e período
-    const filteredReceitas = receitas.filter(receita => {
-      return receita.empresa === filterEmpresa && isInPeriod(receita.data);
-    });
+    // Filtrar receitas por empresa e período com verificação de segurança
+    const filteredReceitas = receitas?.filter(receita => {
+      try {
+        return receita && receita.empresa === filterEmpresa && receita.data && isInPeriod(receita.data);
+      } catch (error) {
+        console.warn('Erro ao filtrar receita:', error, receita);
+        return false;
+      }
+    }) || [];
     
-    // Filtrar despesas PAGAS por empresa e período
-    const filteredDespesasPagas = allTransactions.filter(despesa => {
-      return despesa.company === filterEmpresa && 
-             despesa.status === 'PAGO' && 
-             despesa.date && 
-             isInPeriod(despesa.date) &&
-             despesa.origem_pagamento;
-    });
+    // Filtrar despesas PAGAS por empresa e período com verificação de segurança
+    const filteredDespesasPagas = allTransactions?.filter(despesa => {
+      try {
+        return despesa && 
+               despesa.company === filterEmpresa && 
+               despesa.status === 'PAGO' && 
+               despesa.date && 
+               isInPeriod(despesa.date) &&
+               despesa.origem_pagamento;
+      } catch (error) {
+        console.warn('Erro ao filtrar despesa:', error, despesa);
+        return false;
+      }
+    }) || [];
     
     console.log('Receitas filtradas:', filteredReceitas.length);
     console.log('Despesas pagas filtradas:', filteredDespesasPagas.length);
     
     // Calcular entradas por destino (receitas)
     const receitasConta = filteredReceitas
-      .filter(r => r.destino === 'conta')
+      .filter(r => r && r.destino === 'conta')
       .reduce((sum, r) => sum + (r.valor || 0), 0);
       
     const receitasCofre = filteredReceitas
-      .filter(r => r.destino === 'cofre')
+      .filter(r => r && r.destino === 'cofre')
       .reduce((sum, r) => sum + (r.valor || 0), 0);
     
     // Calcular saídas por origem (despesas pagas)
     const despesasConta = filteredDespesasPagas
-      .filter(d => d.origem_pagamento === 'conta')
-      .reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
+      .filter(d => d && d.origem_pagamento === 'conta')
+      .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
       
     const despesasCofre = filteredDespesasPagas
-      .filter(d => d.origem_pagamento === 'cofre')
-      .reduce((sum, d) => sum + (d.valor_total || d.valor), 0);
+      .filter(d => d && d.origem_pagamento === 'cofre')
+      .reduce((sum, d) => sum + (d.valor_total || d.valor || 0), 0);
     
     console.log('Receitas conta:', receitasConta, 'Despesas conta:', despesasConta);
     console.log('Receitas cofre:', receitasCofre, 'Despesas cofre:', despesasCofre);
@@ -119,9 +136,8 @@ const DespesasStats: React.FC<DespesasStatsProps> = ({
     console.log('Saldo final conta:', saldoConta, 'Saldo final cofre:', saldoCofre);
     
     return { saldoConta, saldoCofre };
-  };
+  }, [receitas, saldos, allTransactions, filterEmpresa, dateFrom, dateTo]);
   
-  const { saldoConta, saldoCofre } = calculateFilteredSaldos();
   const isLoading = saldosLoading || receitasLoading;
 
   return (
