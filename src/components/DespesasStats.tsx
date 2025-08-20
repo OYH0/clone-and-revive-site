@@ -1,9 +1,10 @@
 import React from 'react';
-import { DollarSign, CheckCircle, Clock, AlertTriangle, Wallet, Vault } from 'lucide-react';
+import { DollarSign, CheckCircle, Clock, AlertTriangle, Wallet, Vault, Percent } from 'lucide-react';
 import { useSaldos } from '@/hooks/useSaldos';
 
 interface DespesasStatsProps {
   totalDespesas: number;
+  totalJuros: number;
   valorPago: number;
   valorPendente: number;
   valorAtrasado: number;
@@ -15,6 +16,7 @@ interface DespesasStatsProps {
 
 const DespesasStats: React.FC<DespesasStatsProps> = ({
   totalDespesas,
+  totalJuros,
   valorPago,
   valorPendente,
   valorAtrasado,
@@ -31,7 +33,7 @@ const DespesasStats: React.FC<DespesasStatsProps> = ({
   return (
     <div className="mb-8 space-y-6">
       {/* Primeira linha: Stats principais */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/20">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-gradient-to-r from-red-100 to-red-200 rounded-2xl">
@@ -43,6 +45,21 @@ const DespesasStats: React.FC<DespesasStatsProps> = ({
                 R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </p>
               <p className="text-xs text-gray-500">{filteredTransactionsCount} registros</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/20">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-gradient-to-r from-orange-100 to-orange-200 rounded-2xl">
+              <Percent className="h-6 w-6 text-orange-600" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700">Total em Juros</h3>
+              <p className="text-2xl font-bold text-orange-600">
+                R$ {totalJuros.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </p>
+              <p className="text-xs text-gray-500">Juros aplicados</p>
             </div>
           </div>
         </div>

@@ -198,6 +198,7 @@ const DespesasPage = () => {
           {/* Stats Cards */}
           <DespesasStats
             totalDespesas={totalDespesas}
+            totalJuros={totalJuros}
             valorPago={valorPago}
             valorPendente={valorPendente}
             valorAtrasado={valorAtrasado}
