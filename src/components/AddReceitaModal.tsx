@@ -62,11 +62,21 @@ const AddReceitaModal: React.FC<AddReceitaModalProps> = ({
 
     createReceita.mutate(receitaData, {
       onSuccess: () => {
+        console.log('Receita created successfully with destino:', formData.destino);
+        
         // Update saldo only if destino is conta or cofre
         if (formData.destino === 'conta' || formData.destino === 'cofre') {
+          console.log('Updating saldo - tipo:', formData.destino, 'valor:', parseFloat(formData.valor));
           updateSaldo.mutate({
             tipo: formData.destino,
             valor: parseFloat(formData.valor)
+          }, {
+            onSuccess: () => {
+              console.log('Saldo updated successfully');
+            },
+            onError: (error) => {
+              console.error('Error updating saldo:', error);
+            }
           });
         }
         
