@@ -227,38 +227,6 @@ const DespesasStats: React.FC<DespesasStatsProps> = ({
         </div>
       </div>
 
-      {/* Segunda linha: Saldos */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/20">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-gradient-to-r from-blue-100 to-blue-200 rounded-2xl">
-              <Wallet className="h-6 w-6 text-blue-600" />
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-gray-700">Total em Conta</h3>
-              <p className="text-2xl font-bold text-blue-600">
-                {isLoading ? 'Carregando...' : `R$ ${saldoConta.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-              </p>
-              <p className="text-xs text-gray-500">Saldo atual</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/20">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-gradient-to-r from-purple-100 to-purple-200 rounded-2xl">
-              <Vault className="h-6 w-6 text-purple-600" />
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-gray-700">Total em Cofre</h3>
-              <p className="text-2xl font-bold text-purple-600">
-                {isLoading ? 'Carregando...' : `R$ ${saldoCofre.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-              </p>
-              <p className="text-xs text-gray-500">Saldo atual</p>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
