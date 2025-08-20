@@ -98,7 +98,8 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
       const updateData: any = {
         data: today, // Now this represents the payment date
         categoria: transaction.category === 'ATRASADOS' ? 'FIXAS' : transaction.category,
-        status: 'PAGO'
+        status: 'PAGO',
+        origem_pagamento: paymentSource // Save the payment source
       };
 
       // Atualizar a despesa como paga
